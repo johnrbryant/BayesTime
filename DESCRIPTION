@@ -1,0 +1,44 @@
+Package: BayesTime
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Authors@R: 
+    c(person(given = "John",
+             family = "Bryant",
+             role = c("aut", "cre"),
+             email = "john@bayesiandemography.com"),
+      person(given = "Junni",
+             family = "Zhang",
+             role = "aut",
+             email = "junnizhang@163.com"))
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5.0)
+Imports:
+    checkmate,
+    generics,
+    Matrix,
+    matrixStats,
+    methods,
+    stats,
+    tibble,
+    TMB
+Suggests: 
+    covr,
+    dplyr,
+    ggdist,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.2.3
+LinkingTo: 
+    TMB,
+    RcppEigen
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
