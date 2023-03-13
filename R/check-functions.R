@@ -8,8 +8,8 @@
 #' 
 #' @param df The input data frame.
 #' @param measurevar The name of the measurement variable.
-#' @param timevar The name of the time variable.
 #' @param agevar The name of the age variable.
+#' @param timevar The name of the time variable.
 #' @param byvar The names of additional classification variables.
 #' (May have length 0.)
 #'
@@ -18,11 +18,11 @@
 #' @noRd
 check_input_df <- function(df,
                            measurevar,
-                           timevar,
                            agevar,
+                           timevar,
                            byvar) {
     nm_df <- paste0(measurevar, "_df")
-    nms_classif_vars <- c(timevar, agevar, byvar)
+    nms_classif_vars <- c(agevar, timevar, byvar)
     ## is data frame with no missing values,
     ## at least 1 row, and at least 3 columns
     checkmate::assert_data_frame(df,
@@ -36,13 +36,6 @@ check_input_df <- function(df,
         stop("'", nm_df, "' does not have a variable called \"",
              vname, "\"")
     }
-    ## check time var
-    timevar_val <- df[[timevar]]
-    val <- checkmate::check_integerish(timevar,
-                                       any.missing = FALSE)
-    if (!isTRUE(val))
-        stop("problem with variable '", timevar, "' in data frame '",
-             nm_df, "' : ", val)
     ## check age var
     agevar_val <- df[[agevar]]
     if (is.numeric(agevar_val)) {
@@ -64,6 +57,13 @@ check_input_df <- function(df,
     else
         stop("variable '", agevar, "' in data frame '", nm_df,
              "' has class \"", class(agevar_val), "\"")
+    ## check time var
+    timevar_val <- df[[timevar]]
+    val <- checkmate::check_integerish(timevar,
+                                       any.missing = FALSE)
+    if (!isTRUE(val))
+        stop("problem with variable '", timevar, "' in data frame '",
+             nm_df, "' : ", val)
     ## check measure var
     measurevar_val <- df[[measurevar]]
     val <- checkmate::check_numeric(measurevar_val,
