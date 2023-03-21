@@ -73,21 +73,20 @@ Type objective_function<Type>::operator() ()
 
   vector<Type> time_effect(T);
   if (mod_time == "AR1") {
-    Type phi_prior = consts_time[0];
-    Type phi_min = consts_time[1];
-    Type phi_range = consts_time[2];
-    Type alpha_mean = consts_time[3];
-    Type alpha_sd = consts_time[4];
-    Type scale_sd = consts_time[5];
+    Type phi_min = consts_time[0];
+    Type phi_max = consts_time[1];
+    Type alpha_mean = consts_time[2];
+    Type alpha_sd = consts_time[3];
+    Type scale_sd = consts_time[4];
     Type logit_phi = par_time[0];
     Type alpha = par_time[1];
     Type log_sd = par_time[2];
     time_effect = par_time.tail(T - 3);
     // phi
     Type phi_raw = exp(logit_phi) / (1 + exp(logit_phi));
-    ans -= dbeta(phi_raw, phi_prior, phi_prior, true)
+    ans -= dbeta(phi_raw, Type(2), Type(2), true)
       + log(phi_raw) + log(1 - phi_raw); // Jabobian
-    Type phi = phi_min + phi_raw * phi_range;
+    Type phi = phi_min + phi_raw * (phi_max - phi_min);
     // alpha
     ans -= dnorm(alpha, alpha_mean, alpha_sd, true);
     // sd
