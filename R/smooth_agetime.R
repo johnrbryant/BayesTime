@@ -19,7 +19,7 @@
 #' @param model_time The prior model for the time dimension. Current choices:
 #' `"AR1"`, `"LocalTrend"`.
 #'
-#' @returns An object of class `"BayesTime_smooth_agetime"`.
+#' @returns An object of class `"BayesRates_smooth_agetime"`.
 #'
 #' @seealso [rates_age()], [rates_total()]
 #'

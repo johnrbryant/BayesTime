@@ -30,8 +30,8 @@ Type objective_function<Type>::operator() ()
 
   DATA_MATRIX(events);
   DATA_MATRIX(exposure);
-  DATA_STRING(mod_age);
-  DATA_STRING(mod_time);
+  DATA_STRING(nm_priormod_age);
+  DATA_STRING(nm_priormod_time);
   DATA_MATRIX(X_age);
   DATA_VECTOR(consts_age);
   DATA_VECTOR(consts_time);
@@ -54,7 +54,7 @@ Type objective_function<Type>::operator() ()
   // prior model for age
   
   vector<Type> age_effect(A);
-  if ((mod_age == "Spline") || (mod_age == "RW2")) {
+  if ((nm_priormod_age == "spline") || (nm_priormod_age == "rw2")) {
     // spline and RW2 identical apart from X_age matrix
     // (which is identity matrix for RW2)
     Type log_sd_age = par_age[0];
@@ -65,14 +65,14 @@ Type objective_function<Type>::operator() ()
     age_effect = X_age * coef_age;
   }
   else {
-    error("invalid value for 'mod_age'");
+    error("invalid value for 'nm_priormod_age'");
   }
 
   
   // prior model for time
 
   vector<Type> time_effect(T);
-  if (mod_time == "AR1") {
+  if (nm_priormod_time == "ar1") {
     Type phi_min = consts_time[0];
     Type phi_max = consts_time[1];
     Type alpha_mean = consts_time[2];
@@ -98,7 +98,7 @@ Type objective_function<Type>::operator() ()
     for (int t = 1; t < T; t++)
       ans -= dnorm(time_effect[t], phi * time_effect[t - 1] + (1 - phi) * alpha, sd, true);
   }
-  else if (mod_time == "LocalTrend") {
+  else if (nm_priormod_time == "localtrend") {
     Type scale_sd_trend = consts_time[0];
     Type scale_sd_level = consts_time[1];
     Type scale_sd_effect = consts_time[2];
@@ -127,7 +127,7 @@ Type objective_function<Type>::operator() ()
     }
   }
   else {
-    error("invalid value for 'mod_time'");
+    error("invalid value for 'nm_priormod_time'");
   }
 
   
