@@ -1,6 +1,6 @@
-Package: BayesTime
+Package: BayesRates
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Bayesian Smoothing of Demographic Rates
 Version: 0.1.0
 Authors@R: 
     c(person(given = "John",
@@ -11,8 +11,8 @@ Authors@R:
              family = "Zhang",
              role = "aut",
              email = "junnizhang@163.com"))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Bayesian smoothing of demographic rates over age and time.
+    Calculations are done internally using TMB.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

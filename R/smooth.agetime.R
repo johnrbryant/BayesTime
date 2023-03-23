@@ -14,7 +14,7 @@
 #' @param byvar The names of classification variables in `nevent_df`
 #' and `py_df`, other than age and time (eg `"sex"` or `"region"`).
 #' Optional.
-#' @param model_age: The prior model for the age dimension.
+#' @param model_age The prior model for the age dimension.
 #' Current choices: `"Spline"`, `"RW2"` (second-order random walk).
 #' @param model_time The prior model for the time dimension. Current choices:
 #' `"AR1"`, `"LocalTrend"`.
@@ -24,13 +24,13 @@
 #' @seealso [rates_age()], [rates_total()]
 #'
 #' @export
-smooth_agetime <- function(nevent_df,
+smooth.agetime <- function(nevent_df,
                            py_df,
                            agevar = "age",
                            timevar = "time",
                            byvar = character(),
-                           model_age = c("Spline", "RW2"),
-                           model_time = c("AR1", "LocalTrend")) {
+                           model_age = RW2(),
+                           model_time = Spline()) {
     ## check variable names
     checkmate::assert_string(agevar, min.chars = 1L)
     checkmate::assert_string(timevar, min.chars = 1L)
@@ -59,8 +59,12 @@ smooth_agetime <- function(nevent_df,
                        py_df = py_df,
                        nms_classif_vars = nms_classif_vars)
     ## check 'model_age' and 'model_time'
-    model_age <- match.arg(model_age)
-    model_time <- match.arg(model_time)
+    checkmate::assert_class(model_age,
+                            classes = c("BayesRates_model_spline",
+                                        "BayesRates_model_rw2"))
+    checkmate::assert_class(model_time,
+                            classes = c("BayesRates_model_ar1",
+                                        "BayesRates_model_localtrend"))
     ## construct datasets required for fitting
     df <- merge(nevent_df[c(nms_classif_vars, "nevent")],
                 py_df[c(nms_classif_vars, "py")],

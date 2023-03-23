@@ -1,5 +1,5 @@
 
-smooth_agetime_inner <- function(nevent, py, priormod_age, priormod_time) {
+smooth_agetime_inner <- function(nevent, py, model_age, model_time) {
     ## data
     events <- stats::xtabs(count ~ age + sex + year,
                            data = nevent,
@@ -7,42 +7,43 @@ smooth_agetime_inner <- function(nevent, py, priormod_age, priormod_time) {
     exposure <- stats::xtabs(count ~ age + sex + year,
                              data = py,
                              addNA = TRUE)
-    nm_priormod_age <- get_nm_priormod(priormod_age)
-    nm_priormod_time <- get_nm_priormod(priormod_time)
-    X_age <- get_X(priormod_age)
-    consts_age <- get_consts(priormod_age)
-    consts_time <- get_consts(priormod_time)
+    n_age <- nrow(nevent)
+    n_time <- ncol(nevent)
+    nm_model_age <- get_nm(model_age)
+    nm_model_time <- get_nm(model_time)
+    X_age <- get_X_age(model = model_age,
+                       n_age = n_age)
+    consts_age <- get_consts(model_age)
+    consts_time <- get_consts(model_time)
     data <- list(events = events,
                  exposure = exposure,
-                 nm_priormod_age = nm_priormod_age
-                 nm_priomod_time = nm_priormod_time,
+                 nm_model_age = nm_model_age,
+                 nm_priomod_time = nm_model_time,
                  X_age = X_age,
                  consts_age = consts_age,
                  consts_time = consts_time)
     ## parameters
-    n_age <- nrow(nevent)
-    n_time <- ncol(nevent)
-    n_hyper_age <- get_n_hyper(priormod_age)
-    n_hyper_time <- get_n_hyper(priormod_time)
-    par_age <- rep.int(0, times = n_age + n_hyper_age - 2L) ## need n_age-2 for random walk
-    par_time <- rep.int(0, times = n_time + n_hyper_time)
+    par_age <- get_par(model = model_age, n_effect = n_age)
+    par_time <- get_par(model = model_time, n_effect = n_time)
     parameters = list(intercept = 0,
-                      par_age = par_age,n
+                      par_age = par_age,
                       par_time = par_time)
     ## optimisation
     f <- TMB::MakeADFun(data = data,
                         parameters = parameters,
-                        DLL = "mod")
+                        DLL = "BayesRates",
+                        hessian = TRUE)
     stats::nlminb(start = f$par,
                   objective = f$fn,
-                  gradient = f$gr)
+                  gradient = f$gr,
+                  hessian = f$he)
     rep <- TMB::sdreport(f,
                          bias.correct = TRUE,
                          getJointPrecision = TRUE)
     ans <- new_BayesRates_out(rep = rep,
                              nevent = nevent,
                              py = py,
-                             priormod_age = priormod_age,
-                             priormod_time = priormod_time)
+                             model_age = model_age,
+                             model_time = model_time)
     ans
 }

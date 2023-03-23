@@ -1,4 +1,22 @@
 
+## HAS_TESTS
+#' Check that a scalar is greater than 0
+#'
+#' @param x Scalar
+#' @param nm Name to be used in error messages
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_gt_zero <- function(x, nm) {
+    if (x <= 0)
+        stop(gettextf("'%s' is less than or equal to %d",
+                      nm,
+                      0L),
+             call. = FALSE)
+    invisible(TRUE)
+}
+
 
 ## NO_TESTS
 #' Check a data frame of events or exposures
@@ -33,57 +51,84 @@ check_input_df <- function(df,
     ## has all required variables
     for (vname in c(measurevar, nms_classif_vars)) {
         if (!(vname %in% nms_df))
-        stop("'", nm_df, "' does not have a variable called \"",
-             vname, "\"")
+            stop(gettextf("'%s' does not have a variable called \"%s\"",
+                          nm_df,
+                          vname),
+                 call. = FALSE)
     }
     ## check age var
     agevar_val <- df[[agevar]]
     if (is.numeric(agevar_val)) {
-        val <- checkmate::check_integerish(timevar,
-                                           any.missing = FALSE)
-        if (!isTRUE(val))
-            stop("problem with variable '", agevar, "' in data frame '",
-                 nm_df, "' : ", val)
-        complete_levels <- seq(from = min(val), to = max(val))
-        if (!setequal(val, complete_levels))
-            stop("variable '", agevar, "' in data frame '", nm_df,
-                 "' does not have complete set of levels")
+        check_age <- checkmate::check_integerish(agevar_val,
+                                                 any.missing = FALSE,
+                                                 .var.name = agevar)
+        if (!isTRUE(check_age))
+            stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
+                          agevar,
+                          nm_df,
+                          check_age),
+                 call. = FALSE)
+        complete_levels <- seq(from = min(agevar_val), to = max(agevar_val))
+        if (!setequal(agevar_val, complete_levels))
+            stop(gettextf(paste("variable '%s' in data frame '%s' does not have",
+                                "a complete set of levels"),
+                          agevar,
+                          nm_df),
+                 call. = FALSE)
     }
     else if (is.character(agevar_val) || is.factor(agevar_val)) {
-        if (anyNA(agevar_vl))
-            stop("variable '", agevar, "' in data frame '", nm_df,
-                 "' has NAs")
+        if (anyNA(agevar_val))
+            stop(gettextf("variable '%s'in data frame '%s' has NAs",
+                          agevar,
+                          nm_df),
+                 call. = FALSE)
     }
     else
-        stop("variable '", agevar, "' in data frame '", nm_df,
-             "' has class \"", class(agevar_val), "\"")
+        stop(gettextf("variable '%s' in data frame '%s' has class \"%s\"",
+                      agevar,
+                      nm_df,
+                      class(agevar_val)),
+             call. = FALSE)
     ## check time var
     timevar_val <- df[[timevar]]
-    val <- checkmate::check_integerish(timevar,
-                                       any.missing = FALSE)
-    if (!isTRUE(val))
-        stop("problem with variable '", timevar, "' in data frame '",
-             nm_df, "' : ", val)
+    check_time <- checkmate::check_integerish(timevar,
+                                              any.missing = FALSE,
+                                              .var.name = timevar)
+    if (!isTRUE(check_time))
+        stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
+                      timevar,
+                      nm_df,
+                      check_time),
+             call. = FALSE)
     ## check measure var
     measurevar_val <- df[[measurevar]]
-    val <- checkmate::check_numeric(measurevar_val,
-                                    any.missing = FALSE,
-                                    lower = 0,
-                                    finite = TRUE)
-    if (!isTRUE(val))
-        stop("problem with variable '", measurevar, "' in data frame '",
-             nm_df, "' : ", val)
+    check_measure <- checkmate::check_numeric(measurevar_val,
+                                              any.missing = FALSE,
+                                              lower = 0,
+                                              finite = TRUE,
+                                              .var.name = measurevar)
+    if (!isTRUE(check_measure))
+        stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
+                      measurevar,
+                      nm_df,
+                      check_measure),
+             call. = FALSE)
     ## no duplicates of classification variables
     classif_vars <- df[nms_classif_vars]
     if (any(duplicated(classif_vars)))
-        stop("'", nm_df, "' has duplicate values for classifying variables [",
-             paste(nms_classif_vars, collapse = ", "), "]")
+        stop(gettextf("data frame '%s' has duplicate values for classifying variables [%s]",
+                      nm_df,
+                      paste(nms_classif_vars, collapse = ", ")),
+             call. = FALSE)
     ## complete set of classification variables
-    n_row_expected <- prod(vapply(classif_vars, function(x) length(unique(x)), 1L))
+    get_n_levels <- function(x) length(unique(x))
+    n_row_expected <- prod(vapply(classif_vars, get_n_levels, 1L))
     n_row_obtained <- nrow(df)
-    if (nrow_obtained != nrow_expected)
-        stop("'", nm_df, "' missing combinations of classifying variables [",
-             paste(nms_classif_vars, collapse = ", "), "]")
+    if (n_row_obtained != n_row_expected)
+        stop(gettextf("data frame '%s' missing combinations of classifying variables [%s]",
+                      nm_df,
+                      paste(nms_classif_vars, collapse = ", ")),
+             call. = FALSE)
     ## return TRUE
     invisible(TRUE)
 }
