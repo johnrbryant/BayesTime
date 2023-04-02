@@ -31,7 +31,9 @@ get_consts.BayesRates_model_ar1 <- function(model) {
 get_consts.BayesRates_model_localtrend <- function(model) {
     c(scale_effect = model$scale_effect,
       scale_level = model$scale_level,
-      scale_trend = model$scale_trend)      
+      scale_trend = model$scale_trend,
+      coef_min = model$coef_min,
+      coef_max = model$coef_max)
 }
 
 ## HAS_TESTS
@@ -83,13 +85,16 @@ get_par.BayesRates_model_localtrend <- function(model, n_effect) {
     par_log_sd <- c(log_sd_effect = 0,
                     log_sd_level = 0,
                     log_sd_trend = 0)
+    logit <- function(x) log(x / (1 - x))
+    coef_mid <- 0.5 * (model$coef_min + model$coef_max)
+    par_logit_phi <- c(logit_phi = logit(coef_mid))
     par_effect <- rep(0, times = n_effect)
     names(par_effect) <- paste0("effect_", seq_len(n_effect))
     par_level <- rep(0, times = n_effect)
     names(par_level) <- paste0("level_", seq_len(n_effect))
     par_trend <- rep(0, times = n_effect - 1L)
     names(par_trend) <- paste0("trend_", seq_len(n_effect - 1L))
-    c(par_log_sd, par_effect, par_level, par_trend)
+    c(par_log_sd, par_logit_phi, par_effect, par_level, par_trend)
 }
 
 ## HAS_TESTS

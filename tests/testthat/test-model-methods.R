@@ -16,7 +16,9 @@ test_that("'get_consts' works with localtrend", {
     expect_identical(get_consts(model),
                      c(scale_effect = 1,
                        scale_level = 1,
-                       scale_trend = 1))
+                       scale_trend = 1,
+                       coef_min = 0.8,
+                       coef_max = 0.98))
 })
 
 test_that("'get_consts' works with spline", {
@@ -50,6 +52,7 @@ test_that("'get_par' works with localtrend", {
                      c(log_sd_effect = 0,
                        log_sd_level = 0,
                        log_sd_trend = 0,
+                       logit_phi = log(0.89 / 0.11),
                        effect_1 = 0, effect_2 = 0, effect_3 = 0,
                        level_1 = 0, level_2 = 0, level_3 = 0,
                        trend_1 = 0, trend_2 = 0))

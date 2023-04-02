@@ -2,9 +2,15 @@
 % Please edit documentation in R/model-constructors.R
 \name{LocalTrend}
 \alias{LocalTrend}
-\title{Specify a local trend model for a time effect}
+\title{Specify a damped local trend model for a time effect}
 \usage{
-LocalTrend(scale_effect = 1, scale_level = 1, scale_trend = 1)
+LocalTrend(
+  scale_effect = 1,
+  scale_level = 1,
+  scale_trend = 1,
+  coef_min = 0.8,
+  coef_max = 0.98
+)
 }
 \arguments{
 \item{scale_effect}{Scale
@@ -15,6 +21,10 @@ for error for level term. Defaults to 1.}
 
 \item{scale_trend}{Scale for prior
 for error for trend term. Defaults to 1.}
+
+\item{coef_min, coef_max}{Lower and upper limits
+for the autocorrelation coefficient.
+Defaults are 0.80 and 0.98.}
 }
 \value{
 An object of class \code{BayesRates_model_localtrend}.
@@ -32,13 +42,14 @@ The model for the time effect, on the log scale, is
 
 \deqn{\beta_t = \alpha_{t-1} + \epsilon_t^{(\beta)}}
 \deqn{\alpha_t = \alpha_{t-1} + \delta_{t-1} + \epsilon_t^{(\alpha)}}
-\deqn{\delta_t = \delta_{t-1} + \epsilon_t^{(\delta)}}
+\deqn{\delta_t = \phi \delta_{t-1} + \epsilon_t^{(\delta)}}
 
 where
 \itemize{
 \item \eqn{\beta_t} is the time effect
 \item \eqn{\alpha} is a 'level' term
 \item \eqn{\delta} is a 'trend' term
+\item \eqn{\phi} is an autocorrelation coefficient
 \item \eqn{\epsilon^{(\beta)}} is normally-distributed error term
 with mean 0 and standard deviation \eqn{\sigma^{(\beta)}}
 \item \eqn{\epsilon^{(\alpha)}} is normally-distributed error term
@@ -46,6 +57,13 @@ with mean 0 and standard deviation \eqn{\sigma^{(\alpha)}}
 \item \eqn{\epsilon^{(\delta)}} is normally-distributed error term
 with mean 0 and standard deviation \eqn{\sigma^{(\delta)}}
 }
+
+Parameter \eqn{\phi} has prior
+
+\deqn{(\phi - m_0)/(m_1 - m_0) \sim \text{Beta}(2, 2)}
+
+with values for \eqn{m_0} and \eqn{m_1} being supplied
+by the user.
 
 Parameter \eqn{\sigma^{(\beta)}} has prior
 

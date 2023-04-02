@@ -99,7 +99,7 @@ AR1 <- function(coef_min = 0.8,
 
 
 ## HAS_TESTS
-#' Specify a local trend model for a time effect
+#' Specify a damped local trend model for a time effect
 #'
 #' Specify a local trend model for a time effect.
 #' The model assumes that the time effect follows
@@ -112,18 +112,26 @@ AR1 <- function(coef_min = 0.8,
 #'
 #' \deqn{\beta_t = \alpha_{t-1} + \epsilon_t^{(\beta)}}
 #' \deqn{\alpha_t = \alpha_{t-1} + \delta_{t-1} + \epsilon_t^{(\alpha)}}
-#' \deqn{\delta_t = \delta_{t-1} + \epsilon_t^{(\delta)}}
+#' \deqn{\delta_t = \phi \delta_{t-1} + \epsilon_t^{(\delta)}}
 #'
 #' where
 #' - \eqn{\beta_t} is the time effect
 #' - \eqn{\alpha} is a 'level' term
 #' - \eqn{\delta} is a 'trend' term
+#' - \eqn{\phi} is an autocorrelation coefficient
 #' - \eqn{\epsilon^{(\beta)}} is normally-distributed error term
 #' with mean 0 and standard deviation \eqn{\sigma^{(\beta)}}
 #' - \eqn{\epsilon^{(\alpha)}} is normally-distributed error term
 #' with mean 0 and standard deviation \eqn{\sigma^{(\alpha)}}
 #' - \eqn{\epsilon^{(\delta)}} is normally-distributed error term
 #' with mean 0 and standard deviation \eqn{\sigma^{(\delta)}}
+#'
+#' Parameter \eqn{\phi} has prior
+#'
+#' \deqn{(\phi - m_0)/(m_1 - m_0) \sim \text{Beta}(2, 2)}
+#'
+#' with values for \eqn{m_0} and \eqn{m_1} being supplied
+#' by the user.
 #'
 #' Parameter \eqn{\sigma^{(\beta)}} has prior
 #'
@@ -146,6 +154,9 @@ AR1 <- function(coef_min = 0.8,
 #' for error for level term. Defaults to 1.
 #' @param scale_trend Scale for prior
 #' for error for trend term. Defaults to 1.
+#' @param coef_min,coef_max Lower and upper limits
+#' for the autocorrelation coefficient.
+#' Defaults are 0.80 and 0.98.
 #'
 #' @returns An object of class `BayesRates_model_localtrend`.
 #'
@@ -163,16 +174,29 @@ AR1 <- function(coef_min = 0.8,
 #' @export
 LocalTrend <- function(scale_effect = 1,
                        scale_level = 1,
-                       scale_trend = 1) {
+                       scale_trend = 1,
+                       coef_min = 0.8,
+                       coef_max = 0.98) {
     checkmate::assert_number(scale_effect, lower = 0, finite = TRUE)
     checkmate::assert_number(scale_level, lower = 0, finite = TRUE)
     checkmate::assert_number(scale_trend, lower = 0, finite = TRUE)
     check_gt_zero(scale_effect, nm = "scale_effect")
     check_gt_zero(scale_level, nm = "scale_level")
     check_gt_zero(scale_trend, nm = "scale_trend")
+    checkmate::assert_number(coef_min, lower = 0, upper = 1)
+    checkmate::assert_number(coef_max, lower = 0, upper = 1)
+    if (coef_max <= coef_min)
+        stop(gettextf("'%s' [%s] is less than or equal to '%s' [%s]",
+                      "coef_max",
+                      coef_max,
+                      "coef_min",
+                      coef_min),
+             call. = FALSE)
     new_BayesRates_model_localtrend(scale_effect = scale_effect,
                                     scale_level = scale_level,
-                                    scale_trend = scale_trend)
+                                    scale_trend = scale_trend,
+                                    coef_min = coef_min,
+                                    coef_max = coef_max)
 }
 
 
@@ -324,16 +348,22 @@ new_BayesRates_model_ar1 <- function(coef_min,
 #' @param scale_effect Double greater than 0
 #' @param scale_level Double greater than 0
 #' @param scale_trend Double greater than 0
+#' @param coef_min Double between 0 and 1
+#' @param coef_max Double between 0 and 1
 #'
 #' @returns Object of class "BayesRates_model_local_trend
 #'
 #' @noRd
 new_BayesRates_model_localtrend <- function(scale_effect,
                                             scale_level,
-                                            scale_trend) {
+                                            scale_trend,
+                                            coef_min,
+                                            coef_max) {
     ans <- list(scale_effect = scale_effect,
                 scale_level = scale_level,
-                scale_trend = scale_trend)
+                scale_trend = scale_trend,
+                coef_min = coef_min,
+                coef_max = coef_max)
     class(ans) <- c("BayesRates_model_localtrend", "BayesRates_model")
     ans
 }

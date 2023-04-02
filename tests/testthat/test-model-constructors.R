@@ -19,13 +19,15 @@ test_that("'AR1' raises correct error with invalid inputs", {
 test_that("'LocalTrend' works with valid inputs", {
     ans <- LocalTrend()
     expect_s3_class(ans, "BayesRates_model_localtrend")
-    ans <- LocalTrend(scale_trend = 0.33)
+    ans <- LocalTrend(scale_trend = 0.33, coef_min = 0.95)
     expect_s3_class(ans, "BayesRates_model_localtrend")
 })
 
 test_that("'LocalTrend' raises correct error with invalid inputs", {
     expect_error(LocalTrend(scale_trend = 0),
                  "'scale_trend' is less than or equal to 0")
+    expect_error(LocalTrend(coef_min = 0.99),
+                 "'coef_max' \\[0.98\\] is less than or equal to 'coef_min' \\[0.99\\]")
 })
 
 
@@ -73,7 +75,9 @@ test_that("'new_*' functions work with valid inputs", {
                     c("BayesRates_model_ar1", "BayesRates_model"))
     expect_s3_class(new_BayesRates_model_localtrend(scale_effect = 0.1,
                                                     scale_level = 0.1,
-                                                    scale_trend = 0.1),
+                                                    scale_trend = 0.1,
+                                                    coef_min = 0.5,
+                                                    coef_max = 1),
                     c("BayesRates_model_localtrend", "BayesRates_model"))
     expect_s3_class(new_BayesRates_model_rw2(scale = 0.1),
                     c("BayesRates_model_rw2", "BayesRates_model"))
