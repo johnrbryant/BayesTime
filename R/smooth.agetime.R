@@ -18,6 +18,8 @@
 #' Current choices: `"Spline"`, `"RW2"` (second-order random walk).
 #' @param model_time The prior model for the time dimension. Current choices:
 #' `"AR1"`, `"LocalTrend"`.
+#' @param n_draw Number of draws from posterior distribution
+#' to use in output. Defaults to 1000.
 #'
 #' @returns An object of class `"BayesRates_smooth_agetime"`.
 #'
@@ -30,7 +32,8 @@ smooth.agetime <- function(nevent_df,
                            timevar = "time",
                            byvar = character(),
                            model_age = RW2(),
-                           model_time = Spline()) {
+                           model_time = Spline(),
+                           n_draw = 1000L) {
     ## check variable names
     checkmate::assert_string(agevar, min.chars = 1L)
     checkmate::assert_string(timevar, min.chars = 1L)
@@ -55,9 +58,6 @@ smooth.agetime <- function(nevent_df,
                    agevar = agevar,
                    timevar = timevar,
                    byvar = byvar)
-    check_same_classif(nevent_df = nevent_df,
-                       py_df = py_df,
-                       nms_classif_vars = nms_classif_vars)
     ## check 'model_age' and 'model_time'
     checkmate::assert_class(model_age,
                             classes = c("BayesRates_model_spline",
@@ -65,32 +65,46 @@ smooth.agetime <- function(nevent_df,
     checkmate::assert_class(model_time,
                             classes = c("BayesRates_model_ar1",
                                         "BayesRates_model_localtrend"))
+    ## check 'n_draw'
+    n_draw <- checkmate::assert_int(n_draw,
+                                    lower = 1L,
+                                    coerce = TRUE)
     ## construct datasets required for fitting
-    df <- merge(nevent_df[c(nms_classif_vars, "nevent")],
-                py_df[c(nms_classif_vars, "py")],
-                by = nms_classif_vars)
+    nevent_df <- stats::aggregate(nevent["nevent"],
+                                  nevent[nms_classif_vars],
+                                  sum)
+    py_df <- stats::aggregate(py["py"],
+                              py[nms_classif_vars],
+                              sum)
+    df <- merge(nevent_df, py_df, by = nms_classif_vars)
     df[[agevar]] <- format_agevar(df[[agevar]])
-    df[[timevar]] <- format_timevar(df[[timevar]])
     has_byvar <- length(byvar) > 0L
     if (has_byvar)
-        l <- split(df, df[byvar])
+        data <- split(df, df[byvar])
     else
-        l <- list(df)
-    make_nevent <- function(x)
-        stats::xtabs(nevent ~ age + time, data = x, addNA = TRUE)
-    make_py <- function(x)
-        stats::xtabs(py ~ age + time, data = x, addNA = TRUE)
-    nevent <- lapply(l, make_nevent)
-    py <- lapply(l, make_py)
+        data <- list(df)
+    nevent <- .mapply(make_agetime_matrix,
+                      dots = data,
+                      MoreArgs = list(measurevar = "nevent",
+                                      agevar = agevar,
+                                      timevar = timevar))
+    py <- .mapply(make_agetime_matrix,
+                  dots = data,
+                  MoreArgs = list(measurevar = "py",
+                                  agevar = agevar,
+                                  timevar = timevar))
     ## do fitting
-    smoothed <- .mapply(smooth_agetime_inner,
-                        dots = list(nevent = nevent,
-                                    py = py),
-                        MoreArgs = list(model_age = model_age,
-                                        model_time = model_time))
+    fitted <- .mapply(smooth_agetime_inner,
+                      dots = list(nevent = nevent,
+                                  py = py),
+                      MoreArgs = list(model_age = model_age,
+                                      model_time = model_time))
+    ## generate draws from posterior distribution
+    post_sample <- lapply(fitted, post_sample, n_draw = n_draw)
+    ## REWRITE FROM HERE
     ## assemble data frame with results
     if (has_byvar) {
-        ans <- lapply(l, function(x) x[1L, byvar, drop = FALSE])
+        ans <- lapply(data, function(x) x[1L, byvar, drop = FALSE])
         ans <- do.call(rbind, ans)
     }
     else

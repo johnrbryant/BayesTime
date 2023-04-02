@@ -1,4 +1,32 @@
 
+## HAS_TESTS
+#' Coerce age variable to correct format
+#'
+#' Leave age variable untouched if it
+#' is numeric or a factor, and coerce to
+#' a factor (with levels ordered by appearance)
+#' if it is character.
+#'
+#' @param x The age variable
+#' @param nm Name of age variable
+#'
+#' @returns Vector with same length as 'x'
+#'
+#' @noRd
+format_agevar <- function(x, nm) {
+    if (is.numeric(x))
+        x
+    else if (is.factor(x))
+        x
+    else if (is.character(x))
+        factor(x, levels = unique(x))
+    else
+        stop(gettextf("'%s' has class \"%s\"",
+                      nm,
+                      class(x)),
+             call. = FALSE)
+}
+    
 
 ## HAS_TESTS
 #' Matrix to add up elements of vector
@@ -33,6 +61,25 @@ make_center_matrix <- function(n) {
     j <- rep(s, each = n)
     x <- ifelse(i == j, (n - 1) / n, -1 / n)
     Matrix::sparseMatrix(i = i, j = j, x = x)
+}
+
+
+## HAS_TESTS
+#' Make matrix holding event or person-year data by age by time
+#'
+#' @param data Data frame with age, time, and measurement variables
+#' @param measurevar Name of measurement variable
+#' @param agevar Name of age variable
+#' @param timevar Name of time variable
+#'
+#' @returns An array
+#'
+#' @noRd
+make_agetime_matrix <- function(data, measurevar, agevar, timevar) {
+    formula <- sprintf("%s ~ %s + %s", measurevar, agevar, timevar)
+    formula <- as.formula(formula)
+    ans <- stats::xtabs(formula, data = data, addNA = TRUE)
+    array(ans, dim = dim(ans), dimnames = dimnames(ans))
 }
 
 

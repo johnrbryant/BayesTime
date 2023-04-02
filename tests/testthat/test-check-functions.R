@@ -13,4 +13,124 @@ test_that("'check_gt_zero' returns TRUE with valid value", {
                  "'y' is less than or equal to 0")
 })
 
+
+## 'check_input_df' -----------------------------------------------------------
+
+test_that("'check_input_df' returns TRUE with valid value - no duplicates", {
+    df <- expand.grid(age = 0:2, sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 3
+    expect_true(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = "sex"))
+})
+
+test_that("'check_input_df' returns TRUE with valid value - with duplicates", {
+    df <- expand.grid(age = 0:2, sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 3
+    expect_true(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()))
+})
+
+test_that("'check_input_df' throws correct error when variable missing", {
+    df <- expand.grid(age = c(0, 1, 2.5), sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$wrong <- 3
+    expect_error(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()),
+                 "data frame 'count_df' does not have a variable called \"count\"")
+})
+
+test_that("'check_input_df' throws correct error when age var numeric with fractions", {
+    df <- expand.grid(age = c(0, 1, 2.5), sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 3
+    expect_error(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()),
+                 "problem with variable 'age' in data frame 'count_df' :")
+})
+
+test_that("'check_input_df' throws correct error when age var numeric with fractions", {
+    df <- expand.grid(age = c(0, 1, 3), sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 3
+    expect_error(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()),
+                 "variable 'age' in data frame 'count_df' does not have a complete set of levels")
+})
+
+test_that("'check_input_df' throws correct error when non-numeric age var has NAs", {
+    df <- expand.grid(age = factor(c(0, 1, NA)), sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 3
+    expect_error(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()),
+                 "variable 'age' in data frame 'count_df' has NAs")
+})
+
+test_that("'check_input_df' throws correct error when age is list", {
+    df <- expand.grid(age = factor(c(0, 1, NA)), sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 3
+    df$age <- rep(list(1:3), times = 4)
+    expect_error(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()),
+                 "variable 'age' in data frame 'count_df' has class \"list\"")
+})
+
+test_that("'check_input_df' throws correct error when time var not integerish", {
+    df <- expand.grid(age = 0:2, sex = c("F", "M"), time = c(2000, 2001.5),
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 3
+    expect_error(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()),
+                 "problem with variable 'time' in data frame 'count_df' :")
+})
+
+test_that("'check_input_df' throws correct error when measure var negative", {
+    df <- expand.grid(age = 0:2, sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- -1
+    expect_error(check_input_df(df = df,
+                               measurevar = "count",
+                               agevar = "age",
+                               timevar = "time",
+                               byvar = character()),
+                 "problem with variable 'count' in data frame 'count_df' :")
+})
+
+
+
+
+
+
+
+
+                      
+
+
     

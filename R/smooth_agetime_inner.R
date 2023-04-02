@@ -1,24 +1,17 @@
 
 smooth_agetime_inner <- function(nevent, py, model_age, model_time) {
-    ## data
-    events <- stats::xtabs(count ~ age + sex + year,
-                           data = nevent,
-                           addNA = TRUE)
-    exposure <- stats::xtabs(count ~ age + sex + year,
-                             data = py,
-                             addNA = TRUE)
     n_age <- nrow(nevent)
     n_time <- ncol(nevent)
-    nm_model_age <- get_nm(model_age)
-    nm_model_time <- get_nm(model_time)
+    class_model_age <- class(model_age)[[1L]]
+    class_model_time <- class(model_time)[[1L]]
     X_age <- get_X_age(model = model_age,
                        n_age = n_age)
     consts_age <- get_consts(model_age)
     consts_time <- get_consts(model_time)
     data <- list(events = events,
                  exposure = exposure,
-                 nm_model_age = nm_model_age,
-                 nm_priomod_time = nm_model_time,
+                 class_model_age = class_model_age,
+                 class_model_time = class_model_time,
                  X_age = X_age,
                  consts_age = consts_age,
                  consts_time = consts_time)
@@ -37,6 +30,7 @@ smooth_agetime_inner <- function(nevent, py, model_age, model_time) {
                   objective = f$fn,
                   gradient = f$gr,
                   hessian = f$he)
+    ## extract results
     rep <- TMB::sdreport(f,
                          bias.correct = TRUE,
                          getJointPrecision = TRUE)

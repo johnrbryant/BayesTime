@@ -18,7 +18,7 @@ check_gt_zero <- function(x, nm) {
 }
 
 
-## NO_TESTS
+## HAS_TESTS
 #' Check a data frame of events or exposures
 #'
 #' We assume that the name of the data frame
@@ -51,7 +51,7 @@ check_input_df <- function(df,
     ## has all required variables
     for (vname in c(measurevar, nms_classif_vars)) {
         if (!(vname %in% nms_df))
-            stop(gettextf("'%s' does not have a variable called \"%s\"",
+            stop(gettextf("data frame '%s' does not have a variable called \"%s\"",
                           nm_df,
                           vname),
                  call. = FALSE)
@@ -59,9 +59,7 @@ check_input_df <- function(df,
     ## check age var
     agevar_val <- df[[agevar]]
     if (is.numeric(agevar_val)) {
-        check_age <- checkmate::check_integerish(agevar_val,
-                                                 any.missing = FALSE,
-                                                 .var.name = agevar)
+        check_age <- checkmate::check_integerish(agevar_val, any.missing = FALSE)
         if (!isTRUE(check_age))
             stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
                           agevar,
@@ -78,7 +76,7 @@ check_input_df <- function(df,
     }
     else if (is.character(agevar_val) || is.factor(agevar_val)) {
         if (anyNA(agevar_val))
-            stop(gettextf("variable '%s'in data frame '%s' has NAs",
+            stop(gettextf("variable '%s' in data frame '%s' has NAs",
                           agevar,
                           nm_df),
                  call. = FALSE)
@@ -91,9 +89,7 @@ check_input_df <- function(df,
              call. = FALSE)
     ## check time var
     timevar_val <- df[[timevar]]
-    check_time <- checkmate::check_integerish(timevar,
-                                              any.missing = FALSE,
-                                              .var.name = timevar)
+    check_time <- checkmate::check_integerish(timevar_val, any.missing = FALSE)
     if (!isTRUE(check_time))
         stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
                       timevar,
@@ -105,29 +101,12 @@ check_input_df <- function(df,
     check_measure <- checkmate::check_numeric(measurevar_val,
                                               any.missing = FALSE,
                                               lower = 0,
-                                              finite = TRUE,
-                                              .var.name = measurevar)
+                                              finite = TRUE)
     if (!isTRUE(check_measure))
         stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
                       measurevar,
                       nm_df,
                       check_measure),
-             call. = FALSE)
-    ## no duplicates of classification variables
-    classif_vars <- df[nms_classif_vars]
-    if (any(duplicated(classif_vars)))
-        stop(gettextf("data frame '%s' has duplicate values for classifying variables [%s]",
-                      nm_df,
-                      paste(nms_classif_vars, collapse = ", ")),
-             call. = FALSE)
-    ## complete set of classification variables
-    get_n_levels <- function(x) length(unique(x))
-    n_row_expected <- prod(vapply(classif_vars, get_n_levels, 1L))
-    n_row_obtained <- nrow(df)
-    if (n_row_obtained != n_row_expected)
-        stop(gettextf("data frame '%s' missing combinations of classifying variables [%s]",
-                      nm_df,
-                      paste(nms_classif_vars, collapse = ", ")),
              call. = FALSE)
     ## return TRUE
     invisible(TRUE)

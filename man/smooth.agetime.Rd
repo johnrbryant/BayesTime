@@ -11,7 +11,8 @@ smooth.agetime(
   timevar = "time",
   byvar = character(),
   model_age = RW2(),
-  model_time = Spline()
+  model_time = Spline(),
+  n_draw = 1000L
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ Current choices: \code{"Spline"}, \code{"RW2"} (second-order random walk).}
 
 \item{model_time}{The prior model for the time dimension. Current choices:
 \code{"AR1"}, \code{"LocalTrend"}.}
+
+\item{n_draw}{Number of draws from posterior distribution
+to use in output. Defaults to 1000.}
 }
 \value{
 An object of class \code{"BayesRates_smooth_agetime"}.

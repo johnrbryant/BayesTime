@@ -16,6 +16,7 @@ get_consts <- function(model) {
   UseMethod("get_consts")
 }
 
+## HAS_TESTS
 #' @export
 get_consts.BayesRates_model_ar1 <- function(model) {
     c(coef_min = model$coef_min,
@@ -25,6 +26,7 @@ get_consts.BayesRates_model_ar1 <- function(model) {
       scale = model$scale)      
 }
 
+## HAS_TESTS
 #' @export
 get_consts.BayesRates_model_localtrend <- function(model) {
     c(scale_effect = model$scale_effect,
@@ -32,14 +34,16 @@ get_consts.BayesRates_model_localtrend <- function(model) {
       scale_trend = model$scale_trend)      
 }
 
+## HAS_TESTS
 #' @export
 get_consts.BayesRates_model_rw2 <- function(model) {
     c(scale = model$scale)
 }
 
+## HAS_TESTS
 #' @export
 get_consts.BayesRates_model_spline <- function(model) {
-    c(scale = model$scale)
+    c(df = model$df, scale = model$scale)
 }
 
 
@@ -60,18 +64,22 @@ get_par <- function(model, n_effect) {
     UseMethod("get_par")
 }
 
+## HAS_TESTS
 #' @export
 get_par.BayesRates_model_ar1 <- function(model, n_effect) {
-    par_hyper <- c(logit_phi = 0,
-                   alpha = model$alpha_mean,
+    logit <- function(x) log(x / (1 - x))
+    coef_mid <- 0.5 * (model$coef_min + model$coef_max)
+    par_hyper <- c(logit_phi = logit(coef_mid),
+                   alpha = model$mean,
                    log_sd = 0)
     par_effect <- rep(0, times = n_effect)
     names(par_effect) <- paste0("effect_", seq_len(n_effect))
     c(par_hyper, par_effect)
 }
 
+## HAS_TESTS
 #' @export
-get_par.BayesRates_model_lineartrend <- function(model, n_effect) {
+get_par.BayesRates_model_localtrend <- function(model, n_effect) {
     par_log_sd <- c(log_sd_effect = 0,
                     log_sd_level = 0,
                     log_sd_trend = 0)
@@ -79,11 +87,12 @@ get_par.BayesRates_model_lineartrend <- function(model, n_effect) {
     names(par_effect) <- paste0("effect_", seq_len(n_effect))
     par_level <- rep(0, times = n_effect)
     names(par_level) <- paste0("level_", seq_len(n_effect))
-    par_trend <- rep(0, times = n_effect)
+    par_trend <- rep(0, times = n_effect - 1L)
     names(par_trend) <- paste0("trend_", seq_len(n_effect - 1L))
     c(par_log_sd, par_effect, par_level, par_trend)
 }
 
+## HAS_TESTS
 #' @export
 get_par.BayesRates_model_rw2 <- function(model, n_effect) {
     par_log_cd <- c(log_sd = 0)
@@ -92,47 +101,13 @@ get_par.BayesRates_model_rw2 <- function(model, n_effect) {
     c(par_log_cd, par_coef)
 }
 
-
+## HAS_TESTS
 #' @export
 get_par.BayesRates_model_spline <- function(model, n_effect) {
-    par_log_cd <- c(log_sd_age = 0)
-    par_coef <- rep(0, times = n_effect - 2L) ## loose 2 df due to RW prior
+    par_log_cd <- c(log_sd = 0)
+    par_coef <- rep(0, times = n_effect - 2L) ## lose 2 df due to RW prior
     names(par_coef) <- paste0("coef_", seq_len(n_effect - 2L))
     c(par_log_cd, par_coef)
-}
-
-
-## 'get_nm' -------------------------------------------------------------------
-
-#' Get the name for the prior that is used within TMB
-#'
-#' @param model An object of class "BayesRates_model"
-#'
-#' @returns A string
-#'
-#' @noRd
-get_nm <- function(model) {
-  UseMethod("get_nm")
-}
-
-#' @export
-get_nm.BayesRates_model_ar1 <- function(model) {
-  "ar1"
-}
-
-#' @export
-get_nm.BayesRates_model_lineartrend <- function(model) {
-  "lineartrend"
-}
-
-#' @export
-get_nm.BayesRates_model_rw2 <- function(model) {
-  "rw2"
-}
-
-#' @export
-get_nm.BayesRates_model_spline <- function(model) {
-  "spline"
 }
 
 
@@ -150,8 +125,16 @@ get_X_age <- function(model, n_age) {
   UseMethod("get_X_age")
 }
 
+## HAS_TESTS
+#' @export
+get_X_age.BayesRates_model_rw2 <- function(model, n_age) {
+    make_rw2_matrix(n_age)
+}
 
-get_X_age.BayesRates_model_spline <- function(model, n_age, df) {
+
+
+get_X_age.BayesRates_model_spline <- function(model, n_age) {
+    df <- model$df
     X1 <- make_rw2_matrix(n_age)
     X2 <- make_spline_matrix(n = n_age, df = df)
     X2 %*% X1
