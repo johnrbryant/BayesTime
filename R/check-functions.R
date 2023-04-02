@@ -132,9 +132,4 @@ check_input_df <- function(df,
     ## return TRUE
     invisible(TRUE)
 }
-                                    
-                              
-    
-
-
-                                 
+                                
