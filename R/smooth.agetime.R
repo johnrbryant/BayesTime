@@ -23,8 +23,6 @@
 #'
 #' @returns An object of class `"BayesRates_smooth_agetime"`.
 #'
-#' @seealso [rates_age()], [rates_total()]
-#'
 #' @export
 smooth.agetime <- function(nevent_df,
                            py_df,
@@ -94,13 +92,17 @@ smooth.agetime <- function(nevent_df,
                                   agevar = agevar,
                                   timevar = timevar))
     ## do fitting
-    fitted <- .mapply(smooth_agetime_inner,
+    fitted <- .mapply(make_fitted,
                       dots = list(nevent = nevent,
                                   py = py),
                       MoreArgs = list(model_age = model_age,
                                       model_time = model_time))
     ## generate draws from posterior distribution
-    post_sample <- lapply(fitted, post_sample, n_draw = n_draw)
+    post_draws <- lapply(fitted,
+                         make_post_draws,
+                         n_draw = n_draw,
+                         agevar = agevar,
+                         timevar = timevar)
     ## REWRITE FROM HERE
     ## assemble data frame with results
     if (has_byvar) {

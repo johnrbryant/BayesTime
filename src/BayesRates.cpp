@@ -102,39 +102,38 @@ Type objective_function<Type>::operator() ()
       ans -= dnorm(time_effect[t], phi * time_effect[t - 1] + (1 - phi) * alpha, sd, true);
   }
   else if (class_model_time == "BayesRates_model_localtrend") {
-    Type scale_sd_effect = consts_time[0];
+    Type scale_sd_trend = consts_time[0];
     Type scale_sd_level = consts_time[1];
-    Type scale_sd_trend = consts_time[2];
+    Type scale_sd_effect = consts_time[2];
     Type phi_min = consts_time[3];
     Type phi_max = consts_time[4];
-    Type log_sd_effect = par_time[0];
+    Type log_sd_trend = par_time[0];
     Type log_sd_level = par_time[1];
-    Type log_sd_trend = par_time[2];
+    Type log_sd_effect = par_time[2];
     Type logit_phi = par_time[3];
-    time_effect = par_time.segment(4, T);
-    vector<Type> level = par_time.segment(T + 4, T);
-    vector<Type> trend = par_time.segment(2 * T + 4, T - 1);
-    Type sd_effect = exp(log_sd_effect);
-    Type sd_level = exp(log_sd_level);
+    vector<Type> trend = par_time.segment(4, T - 1);
+    vector<Type> level = par_time.segment(T + 3, T);
+    time_effect = par_time.segment(2 * T + 3, T);
     Type sd_trend = exp(log_sd_trend);
-    ans -= dnorm(sd_effect, Type(0), scale_sd_effect, true)
-      + log_sd_effect;
-    ans -= dnorm(sd_level, Type(0), scale_sd_level, true)
-      + log_sd_level;
+    Type sd_level = exp(log_sd_level);
+    Type sd_effect = exp(log_sd_effect);
     ans -= dnorm(sd_trend, Type(0), scale_sd_trend, true)
       + log_sd_trend;
+    ans -= dnorm(sd_level, Type(0), scale_sd_level, true)
+      + log_sd_level;
+    ans -= dnorm(sd_effect, Type(0), scale_sd_effect, true)
+      + log_sd_effect;
     Type phi_raw = exp(logit_phi) / (1 + exp(logit_phi));
     ans -= dbeta(phi_raw, Type(2), Type(2), true)
       + log(phi_raw) + log(1 - phi_raw); // Jabobian
     Type phi = phi_min + phi_raw * (phi_max - phi_min);
-    ans -= dnorm(time_effect[0], Type(0), Type(1), true);
-    ans -= dnorm(level[0], Type(0), Type(1), true);
-    ans -= dnorm(trend[0], Type(0), Type(1), true);
-    ans -= dnorm(time_effect, level, sd_effect, true).sum();
-    for (int t = 1; t < T; t++)
-      ans -= dnorm(level[t], level[t - 1] + trend[t - 1], sd_level, true);
+    ans -= dnorm(trend[0], Type(0), Type(1), true); // TODO - CHANGE TO EQUILIBRIUM VALUE??
     for (int t = 1; t < T - 1L; t++)
       ans -= dnorm(trend[t], phi * trend[t - 1], sd_trend, true);
+    ans -= dnorm(level[0], Type(0), Type(1), true);
+    for (int t = 1; t < T; t++)
+      ans -= dnorm(level[t], level[t - 1] + trend[t - 1], sd_level, true);
+    ans -= dnorm(time_effect, level, sd_effect, true).sum();
   }
   else {
     error("invalid value for 'class_model_time'");

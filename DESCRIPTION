@@ -20,9 +20,8 @@ Depends:
     R (>= 3.5.0)
 Imports:
     checkmate,
-    generics,
+    MASS,
     Matrix,
-    matrixStats,
     methods,
     stats,
     tibble,
