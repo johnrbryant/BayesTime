@@ -20,23 +20,29 @@ library(dplyr)
 library(ggplot2)
 ```
 
-```{r}
-nevent_df <- BayesRates::nz_divorces %>%
-  rename(nevent = divorces)
-```
-
 
 ```{r}
-py_df <- BayesRates::nz_population %>%
-  rename(py = population) %>%
-  mutate(time = as.integer(time))
-```
-
-```{r}
-ans <- smooth.agetime(nevent_df = nevent_df,
-                      py_df = py_df,
+ans <- smooth.agetime(nevent_df = nz_divorces,
+                      py_df = nz_population,
                       model_age = RW2(),
                       model_time = AR1(),
                       byvar = "sex")
 ```
+
+
+```{r}
+ans_df <- augment(ans)
+```
+
+```{r, fig.width = 7, fig.height = 7}
+ggplot(ans_df, aes(x = time)) +
+  facet_wrap(vars(age)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted, color = sex)) +
+  geom_point(aes(y = .observed, color = sex),
+             size = 0.25)
+```
+
+
 

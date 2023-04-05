@@ -15,19 +15,21 @@ levels_time <- 1992:2021
 age_max <- 65
 
 nz_population <- read_csv("DPE403905_20230322_103055_56.csv",
-                    skip = 5, ## skip values for 1991, which have NAs
-                    n_max = 31,
-                    na = "..",
-                    col_types = col_types,
-                    col_names = col_names) %>%
+                          skip = 5, ## skip values for 1991, which have NAs
+                          n_max = 31,
+                          na = "..",
+                          col_types = col_types,
+                          col_names = col_names) %>%
     pivot_longer(cols = -time,
                  names_to = c("sex", "age"),
                  names_sep = "\\.") %>%
     filter(time %in% levels_time) %>%
+    mutate(time = as.integer(time)) %>%
     mutate(age = clean_age(age),
            age = collapse_age(age, type_to = "five"),
            age = set_age_open(age, lower = 65)) %>%
-    count(age, sex, time, wt = value, name = "population")
+    filter(!(age %in% c("0-4", "5-9", "10-14"))) %>%
+    count(age, sex, time, wt = value, name = "py")
 
 save(nz_population, file = "../data/nz_population.rda", compress = "bzip2")
 

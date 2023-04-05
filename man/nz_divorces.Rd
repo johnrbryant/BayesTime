@@ -11,7 +11,7 @@ following variables:
 \item \code{age}: Age, in 5-year age groups, 15-19 to 65+
 \item \code{sex}: \code{"Female"} or \code{"Male"}
 \item \code{time}: Calendar year
-\item \code{divorces}: Numbers of divorces during year.
+\item \code{nevent}: Numbers of divorces during year.
 }
 }
 \source{

@@ -436,7 +436,7 @@ merge_byvar_with_post <- function(post_draws, data, byvar) {
         ans
     }
     else
-        post_draws
+        post_draws[[1L]]
 }
 
 

@@ -11,7 +11,7 @@ smooth.agetime(
   timevar = "time",
   byvar = character(),
   model_age = RW2(),
-  model_time = Spline(),
+  model_time = AR1(),
   n_draw = 1000L
 )
 }
@@ -34,10 +34,10 @@ Defaults to \code{"time"}.}
 and \code{py_df}, other than age and time (eg \code{"sex"} or \code{"region"}).
 Optional.}
 
-\item{model_age}{The prior model for the age dimension.
+\item{model_age}{The prior model for the age effect.
 Current choices: \code{"Spline"}, \code{"RW2"} (second-order random walk).}
 
-\item{model_time}{The prior model for the time dimension. Current choices:
+\item{model_time}{The prior model for the time effect. Current choices:
 \code{"AR1"}, \code{"LocalTrend"}.}
 
 \item{n_draw}{Number of draws from posterior distribution
@@ -48,7 +48,4 @@ An object of class \code{"BayesRates_smooth_agetime"}.
 }
 \description{
 Smooth rates over age and time
-}
-\seealso{
-\code{\link[=rates_age]{rates_age()}}, \code{\link[=rates_total]{rates_total()}}
 }
