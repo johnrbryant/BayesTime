@@ -130,7 +130,7 @@ Type objective_function<Type>::operator() ()
     ans -= dnorm(trend[0], Type(0), Type(1), true); // TODO - CHANGE TO EQUILIBRIUM VALUE??
     for (int t = 1; t < T - 1L; t++)
       ans -= dnorm(trend[t], phi * trend[t - 1], sd_trend, true);
-    ans -= dnorm(level[0], Type(0), Type(1), true);
+    ans -= dnorm(level[0], Type(0), Type(0.001), true);
     for (int t = 1; t < T; t++)
       ans -= dnorm(level[t], level[t - 1] + trend[t - 1], sd_level, true);
     ans -= dnorm(time_effect, level, sd_effect, true).sum();

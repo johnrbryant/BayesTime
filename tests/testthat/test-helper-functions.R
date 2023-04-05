@@ -192,14 +192,17 @@ test_that("'make_fitted' works with RW2 age model and LocalTrend time model", {
 
 test_that("'make_post_draws' works", {
     set.seed(0)
-    nevent <- matrix(rpois(50, lambda = rep(1:10, each = 5)),
+    nevent <- matrix(rpois(100, lambda = rep(1:20, each = 50)),
                      nrow = 5,
-                     ncol = 10,
-                     dimnames = list(age = 0:4, time = 2001:2010))
-    py <- matrix(100,
+                     ncol = 20,
+                     dimnames = list(AGE = 0:4, TIME = 2001:2020))
+    nevent_df <- as.data.frame.table(nevent, stringsAsFactors = FALSE)
+    nevent_df$AGE <- factor(nevent_df$AGE)
+    nevent_df$TIME <- as.integer(nevent_df$TIME)
+    py <- matrix(1000,
                  nrow = 5,
-                 ncol = 10,
-                 dimnames = list(age = 0:4, time = 2001:2010))
+                 ncol = 20,
+                 dimnames = list(AGE = 0:4, TIME = 2001:2020))
     model_age <- RW2()
     model_time <- AR1()
     fitted <- make_fitted(nevent = nevent,
@@ -208,13 +211,16 @@ test_that("'make_post_draws' works", {
                           model_time = model_time)
     ans <- make_post_draws(fitted = fitted,
                            n_draw = 10,
+                           nevent_df = nevent_df,
                            agevar = "AGE",
                            timevar = "TIME")
     expect_identical(names(ans),
                      c("rates", "intercept", "age_effect",
                        "time_effect", "age_hyper", "time_hyper"))
-    nrow <- sapply(ans, nrow)
-    expect_true(all(nrow == nrow[1]))
+    nd <- sapply(ans, function(x) length(unique(x$draw)))
+    expect_true(all(nd == nd[1]))
+    draw_is_int <- sapply(ans, function(x) is.integer(x$draw))
+    expect_true(all(draw_is_int))
 })
 
 
@@ -243,4 +249,175 @@ test_that("'make_spline_matrix' works", {
     expect_equal(sum(as.matrix(m)[1,]), 0)
     expect_true(all(rowSums(as.matrix(m)[-1,]) > 0))
 })
+
+
+## 'merge_byvar_with_post' ----------------------------------------------------
+
+test_that("'merge_byvar_with_post' works", {
+    set.seed(0)
+    nevent <- matrix(rpois(100, lambda = rep(1:20, each = 50)),
+                     nrow = 5,
+                     ncol = 20,
+                     dimnames = list(AGE = 0:4, TIME = 2001:2020))
+    nevent_df <- as.data.frame.table(nevent, stringsAsFactors = FALSE)
+    nevent_df$AGE <- factor(nevent_df$AGE)
+    nevent_df$TIME <- as.integer(nevent_df$TIME)
+    py <- matrix(1000,
+                 nrow = 5,
+                 ncol = 20,
+                 dimnames = list(AGE = 0:4, TIME = 2001:2020))
+    model_age <- RW2()
+    model_time <- AR1()
+    fitted <- make_fitted(nevent = nevent,
+                          py = py,
+                          model_age = model_age,
+                          model_time = model_time)
+    post <- make_post_draws(fitted = fitted,
+                            n_draw = 10,
+                            nevent_df = nevent_df,
+                            agevar = "AGE",
+                            timevar = "TIME")
+    post <- list(post, post)
+    data <- list(data.frame(sex = "Female"),
+                 data.frame(sex = "Male"))
+    ans <- merge_byvar_with_post(post_draws = post,
+                                 data = data,
+                                 byvar = "sex")
+    expect_identical(names(ans),
+                     c("rates",
+                       "intercept",
+                       "age_effect",
+                       "time_effect",
+                       "age_hyper",
+                       "time_hyper"))
+    expect_true(all(sapply(ans, tibble::is_tibble)))
+})
+
+
+
+## 'reformat_array' -----------------------------------------------------------
+
+test_that("'reformat_array' works with valid input", {
+    x <- matrix(1:4, nr = 2, dimnames = list(draw = 1:2, time = 2001:2002))
+    ans_obtained <- reformat_array(x)
+    ans_expected <- tibble(draw = c(1:2, 1:2),
+                           time = as.character(c(2001, 2001, 2002, 2002)),
+                           value = 1:4)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'reformat_age_effect' ------------------------------------------------------
+
+test_that("'reformat_age_effect' works with valid input", {
+    x <- matrix(1:4,
+                nr = 2,
+                dimnames = list(draw = 1:2, age = 0:1))
+    df <- data.frame(age = factor(c("0", "1", "2")))
+    ans_obtained <- reformat_age_effect(x, df = df, agevar = "age")
+    ans_expected <- tibble(draw = rep(1:2, times = 2),
+                           age = factor(c("0", "0", "1", "1"), levels = 0:2),
+                           value = 1:4)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'reformat_intercept' -------------------------------------------------------
+
+test_that("'reformat_intercept' works with valid input", {
+    x <- matrix(11:14,
+                nr = 4,
+                dimnames = list(draw = 1:4,  "(Intercept)" = "(Intercept)"))
+    ans_obtained <- reformat_intercept(x)
+    ans_expected <- tibble(draw = 1:4,
+                           value = 11:14)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'reformat_rates' -----------------------------------------------------------
+
+test_that("'reformat_rates' works with valid input", {
+    x <- array(1:8,
+               dim = c(2, 2, 2),
+               dimnames = list(draw = 1:2, age = 0:1, time = 2001:2002))
+    df <- data.frame(age = factor(c("0", "1", "2")),
+                     time = c(2002, 2001, 2000))
+    ans_obtained <- reformat_rates(x, df = df, agevar = "age", timevar = "time")
+    ans_expected <- tibble(draw = rep(1:2, times = 4),
+                           age = factor(rep(c("0", "0", "1", "1"), times = 2), levels = 0:2),
+                           time = rep(c(2001, 2002), each = 4),
+                           value = 1:8)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'reformat_time_effect' -----------------------------------------------------
+
+test_that("'reformat_time_effect' works with valid input", {
+    x <- matrix(1:4,
+                nr = 2,
+                dimnames = list(draw = 1:2, time = 0:1))
+    df <- data.frame(time = c(1, 0))
+    ans_obtained <- reformat_time_effect(x, df = df, timevar = "time")
+    ans_expected <- tibble(draw = rep(1:2, times = 2),
+                           time = c(0, 0, 1, 1),
+                           value = 1:4)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'reformat_var_age' ---------------------------------------------------------
+
+test_that("'reformat_var_age' works with valid input", {
+    expect_identical(reformat_var_age(var_current = c(0, 1),
+                                      var_target = 0:1,
+                                      agevar = "Age"),
+                     0:1)
+    expect_identical(reformat_var_age(var_current = c(0, 1),
+                                      var_target = c(1, 0, 2),
+                                      agevar = "Age"),
+                     c(0, 1))
+    expect_identical(reformat_var_age(var_current = c(0, 1),
+                                      var_target = factor(c(1, 0, 2), levels = 2:0),
+                                      agevar = "Age"),
+                     factor(c(0, 1), levels = 2:0))
+    expect_identical(reformat_var_age(var_current = 0:1,
+                                      var_target = "2",
+                                      agevar = "Age"),
+                     c("0", "1"))
+})
+
+test_that("'reformat_var_age' throws correct error with invalid input", {
+    expect_error(reformat_var_age(var_current = 0:1,
+                                  var_target = NULL,
+                                  agevar = "Age"),
+                 "'Age' has class \"NULL\"")
+})
+
+
+## 'reformat_var_time' ---------------------------------------------------------
+
+test_that("'reformat_var_time' works with valid input", {
+    expect_identical(reformat_var_time(var_current = c(0, 1),
+                                       var_target = 0:1,
+                                       timevar = "Time"),
+                     0:1)
+    expect_identical(reformat_var_time(var_current = c(0, 1),
+                                       var_target = c(1, 0, 2),
+                                       timevar = "Time"),
+                     c(0, 1))
+})
+
+test_that("'reformat_var_time' throws correct error with invalid input", {
+    expect_error(reformat_var_time(var_current = 0:1,
+                                   var_target = "a",
+                                  timevar = "Time"),
+                 "'Time' has class \"character\"")
+})
+
+
+    
+    
+
 

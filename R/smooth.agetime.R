@@ -14,9 +14,9 @@
 #' @param byvar The names of classification variables in `nevent_df`
 #' and `py_df`, other than age and time (eg `"sex"` or `"region"`).
 #' Optional.
-#' @param model_age The prior model for the age dimension.
+#' @param model_age The prior model for the age effect.
 #' Current choices: `"Spline"`, `"RW2"` (second-order random walk).
-#' @param model_time The prior model for the time dimension. Current choices:
+#' @param model_time The prior model for the time effect. Current choices:
 #' `"AR1"`, `"LocalTrend"`.
 #' @param n_draw Number of draws from posterior distribution
 #' to use in output. Defaults to 1000.
@@ -30,7 +30,7 @@ smooth.agetime <- function(nevent_df,
                            timevar = "time",
                            byvar = character(),
                            model_age = RW2(),
-                           model_time = Spline(),
+                           model_time = AR1(),
                            n_draw = 1000L) {
     ## check variable names
     checkmate::assert_string(agevar, min.chars = 1L)
@@ -57,40 +57,46 @@ smooth.agetime <- function(nevent_df,
                    timevar = timevar,
                    byvar = byvar)
     ## check 'model_age' and 'model_time'
-    checkmate::assert_class(model_age,
-                            classes = c("BayesRates_model_spline",
-                                        "BayesRates_model_rw2"))
-    checkmate::assert_class(model_time,
-                            classes = c("BayesRates_model_ar1",
-                                        "BayesRates_model_localtrend"))
+    if (!inherits(model_age,
+                  c("BayesRates_model_spline", "BayesRates_model_rw2")))
+        stop(gettextf("'%s' has class \"%s\"",
+                      "model_age",
+                      class(model_age)),
+             call. = FALSE)
+    if (!inherits(model_time,
+                  c("BayesRates_model_ar1", "BayesRates_model_localtrend")))
+        stop(gettextf("'%s' has class \"%s\"",
+                      "model_time",
+                      class(model_time)),
+             call. = FALSE)
     ## check 'n_draw'
     n_draw <- checkmate::assert_int(n_draw,
                                     lower = 1L,
                                     coerce = TRUE)
     ## construct datasets required for fitting
-    nevent_df <- stats::aggregate(nevent["nevent"],
-                                  nevent[nms_classif_vars],
+    nevent_ag <- stats::aggregate(nevent_df["nevent"],
+                                  nevent_df[nms_classif_vars],
                                   sum)
-    py_df <- stats::aggregate(py["py"],
-                              py[nms_classif_vars],
+    py_ag <- stats::aggregate(py_df["py"],
+                              py_df[nms_classif_vars],
                               sum)
-    df <- merge(nevent_df, py_df, by = nms_classif_vars)
+    df <- merge(nevent_ag, py_ag, by = nms_classif_vars)
     df[[agevar]] <- format_agevar(df[[agevar]])
     has_byvar <- length(byvar) > 0L
     if (has_byvar)
         data <- split(df, df[byvar])
     else
         data <- list(df)
-    nevent <- .mapply(make_agetime_matrix,
-                      dots = data,
-                      MoreArgs = list(measurevar = "nevent",
-                                      agevar = agevar,
-                                      timevar = timevar))
-    py <- .mapply(make_agetime_matrix,
-                  dots = data,
-                  MoreArgs = list(measurevar = "py",
-                                  agevar = agevar,
-                                  timevar = timevar))
+    nevent <- lapply(data,
+                     make_agetime_matrix,
+                     measurevar = "nevent",
+                     agevar = agevar,
+                     timevar = timevar)
+    py <- lapply(data,
+                 make_agetime_matrix,
+                 measurevar = "py",
+                 agevar = agevar,
+                 timevar = timevar)
     ## do fitting
     fitted <- .mapply(make_fitted,
                       dots = list(nevent = nevent,
@@ -101,17 +107,21 @@ smooth.agetime <- function(nevent_df,
     post_draws <- lapply(fitted,
                          make_post_draws,
                          n_draw = n_draw,
+                         nevent_df = nevent_df,
                          agevar = agevar,
                          timevar = timevar)
-    ## REWRITE FROM HERE
-    ## assemble data frame with results
-    if (has_byvar) {
-        ans <- lapply(data, function(x) x[1L, byvar, drop = FALSE])
-        ans <- do.call(rbind, ans)
-    }
-    else
-        ans <- data.frame()
-    ans$smoothed <- smoothed
-    ## return
+    ## merge with byvar and combine
+    post_draws <- merge_byvar_with_post(post_draws = post_draws,
+                                        data = data,
+                                        byvar = byvar)
+    ## make resultsobject
+    ans <- new_BayesRates_results(nevent_df = nevent_df,
+                                  py_df = py_df,
+                                  agevar = agevar,
+                                  timevar = timevar,
+                                  byvar = byvar,
+                                  model_age = model_age,
+                                  model_time = model_time,
+                                  post_draws = post_draws)
     ans
 }
