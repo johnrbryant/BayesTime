@@ -45,4 +45,23 @@ ggplot(ans_df, aes(x = time)) +
 ```
 
 
+```{r}
+age_effect <- components(ans, what = "age_effect") %>%
+  mutate(age = poputils::age_mid(age))
+ggplot(age_effect, aes(x = age)) +
+  facet_wrap(vars(sex)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted))
+```
 
+
+
+```{r}
+time_effect <- components(ans, what = "time_effect") 
+ggplot(time_effect, aes(x = time)) +
+  facet_wrap(vars(sex)) + 
+  geom_ribbon(aes(ymin = .lower, ymax = .upper),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted))
+```

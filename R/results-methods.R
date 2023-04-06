@@ -11,7 +11,7 @@
 generics::augment
 
 ## HAS_TESTS
-#' Data and values from a fitted model
+#' Data and values from a results object
 #'
 #' @param x A `"BayesRates_results"` object created
 #' by calling function [smooth.agetime()].
@@ -34,30 +34,69 @@ generics::augment
 #' augment(results)
 #' @export
 augment.BayesRates_results <- function(x, ...) {
+    width <- 0.95
     nevent_df <- x$nevent_df
     py_df <- x$py_df
-    rates <- x$post_draws$rates
-    agevar <- x$agevar
-    timevar <- x$timevar
-    byvar <- x$byvar
-    nms_classif_vars <- c(byvar, timevar, agevar)
-    nms_ord <- c(nms_classif_vars, "draw")
-    ord <- do.call(order, args = rates[nms_ord])
-    rates <- rates[ord, ]
-    n_draw <- max(rates$draw)
-    m <- matrix(rates$value, nrow = n_draw)
-    q <- matrixStats::colQuantiles(m, probs = c(0.025, 0.5, 0.975))
-    rates <- unique(rates[nms_classif_vars])
-    rates <- rates[rev(nms_classif_vars)]
-    rates$.fitted <- q[, 2L]
-    rates$.lower <- q[, 1L]
-    rates$.upper <- q[, 3L]
-    ans <- merge(nevent_df, py_df)
-    ans <- merge(ans, rates)
+    rates <- components(x, what = "rates", width = width)
+    ans <- Reduce(merge, list(nevent_df, py_df, rates))
     ans$.observed <- with(ans, nevent / py)
     ans
 }
 
+
+## 'components' ---------------------------------------------------------------
+
+#' @importFrom generics components
+#' @export
+generics::components
+
+## NO_TESTS
+#' Extract components from a results object
+#'
+#' Extract components from an object
+#' of class `"BayesRates_results"`.
+#'
+#' The components that can be extracted are:
+#' - `"rates"` Rates disaggregated by variables specified
+#' in `agevar`, `timevar`, and `byvar` arguments.
+#' - `"age_effect"` Age main effect.
+#' - `"time_effect"` Time main effect.
+#' - `"age_hyper"` Hyper-parametrs for age main effect.
+#' - `"time_hyper"` Hyper-parametrs for time main effect.
+#'
+#' @param object A results object.
+#' @param what Component to be extracted.
+#' @param ... Not currently used.
+#'
+#' @returns A [tibble][tibble::tibble-package].
+#'
+#' @seealso [augment()]
+#'
+#' @examples
+#' results <- smooth.agetime(nevent_df = nz_divorces,
+#'                           py_df = nz_population,
+#'                           model_age = RW2(),
+#'                           model_time = AR1())
+#' components(results, what = "age_effect")
+#' components(results, what = "time_effect")
+#' @export
+components.BayesRates_results <- function(object, what, quantiles = TRUE, ...) {
+    post_draws <- object$post_draws
+    nms <- names(post_draws)
+    if (!(what %in% nms)) {
+        stop(gettextf("\"%s\" is not a valid choice of component : valid choices are %s",
+                      what,
+                      paste(sprintf("\"%s\"", nms), collapse = ", ")),
+             call. = FALSE)
+    }
+    ans <- post_draws[[what]]
+    if (quantiles)
+        ans <- make_credible_intervals(ans,
+                                       measurevar = "value",
+                                       width = 0.95)
+    ans
+}
+    
 
 ## 'print' --------------------------------------------------------------------
 

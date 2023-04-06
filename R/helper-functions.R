@@ -126,6 +126,56 @@ make_center_matrix <- function(n) {
 
 
 ## HAS_TESTS
+#' Create credible intervals from draws for a measure variable
+#'
+#' Modify a data frame so it replaces "draw" and measurevar
+#' columns with columns ".fitted", ".lower", and ".upper"
+#' (and shrink the number of rows by a factor equal
+#' to the number of draws).
+#'
+#' Uses matrixStats::colQuantiles for speed.
+#'
+#' @param x A data frame
+#' @param measurevar Name of the measurement variable
+#' @param width With of credible intervals
+#'
+#' @returns A data frame
+#'
+#' @noRd
+make_credible_intervals <- function(x, measurevar, width) {
+    probs <- make_probs(width)
+    nms <- names(x)
+    nms_classif <- setdiff(nms, c(measurevar, "draw"))
+    n_classif <- length(nms_classif)
+    if (n_classif > 0L) {
+        nms_ord <- c(nms_classif, "draw")
+        x_ord <- x[nms_ord]
+        if (any(duplicated(x_ord)))
+            stop(gettextf("duplicate combinations of variables %s",
+                          paste(sprintf("'%s'", nms_ord), collapse = ", ")),
+                 call. = FALSE)
+        ord <- do.call(order, args = x_ord)
+        x <- x[ord, , drop = FALSE]
+        n_draw <- max(x$draw)
+        m <- matrix(x[[measurevar]], nrow = n_draw)
+        q <- matrixStats::colQuantiles(m, probs = probs)
+        ans <- unique(x[nms_classif])
+        ans$.fitted <- q[, 2L]
+        ans$.lower <- q[, 1L]
+        ans$.upper <- q[, 3L]
+        ans <- tibble::tibble(ans)
+    }
+    else {
+        q <- quantile(x[[measurevar]], probs = probs)
+        ans <- tibble::tibble(.fitted = q[[2L]],
+                              .lower = q[[1L]],
+                              .upper = q[[3L]])
+    }
+    ans
+}
+
+
+## HAS_TESTS
 #' Construct draws of age effect from draws
 #' of joint posterior of all unknowns
 #'
@@ -367,6 +417,22 @@ make_post_draws <- function(fitted, n_draw, nevent_df, agevar, timevar) {
          time_hyper = time_hyper)
 }
 
+
+
+#' Given an interval width, make the 'probs' argument
+#' to be supplied to quantiles function
+#'
+#' @param width A number between 0 and 1.
+#'
+#' @returns A numeric vector of length 3.
+#'
+#' @noRd
+make_probs <- function(width) {
+    checkmate::assert_number(width, lower = 0, upper = 1)
+    alpha <- 1 - width
+    c(0.5 * alpha, 0.5, 1 - 0.5 * alpha)
+}
+        
 
 ## HAS_TESTS
 #' Matrix to create second order random walk

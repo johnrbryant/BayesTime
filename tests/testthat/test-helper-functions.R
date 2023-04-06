@@ -69,6 +69,40 @@ test_that("'make_agetime_matrix' works", {
 })
 
 
+## 'make_credible_intervals' --------------------------------------------------
+
+test_that("'make_credible_intervals' works - 'x' has classif vars", {
+    set.seed(0)
+    x <- expand.grid(age = 0:4,
+                     time = 2001:2003,
+                     sex = c("F", "M"),
+                     draw = 1:20,
+                     KEEP.OUT.ATTRS = FALSE)
+    x$value <- rnorm(n = nrow(x))
+    ans <- make_credible_intervals(x, measurevar = "value", width = 0.9)
+    lower <- aggregate(x$value, x[c("age", "time", "sex")], quantile, prob = 0.05)
+    lower <- merge(ans, lower)
+    expect_equal(lower$.lower, lower$x)
+    mid <- aggregate(x$value, x[c("age", "time", "sex")], quantile, prob = 0.5)
+    mid <- merge(ans, mid)
+    expect_equal(mid$.fitted, mid$x)
+    upper <- aggregate(x$value, x[c("age", "time", "sex")], quantile, prob = 0.95)
+    upper <- merge(ans, upper)
+    expect_equal(upper$.upper, upper$x)
+})
+
+test_that("'make_credible_intervals' works - 'x' does not have classif vars", {
+    set.seed(0)
+    x <- data.frame(draw = 1:100,
+                    value = rnorm(100))
+    ans_obtained <- make_credible_intervals(x, measurevar = "value", width = 0.9)
+    ans_expected <- tibble(.fitted = median(x$value),
+                           .lower = as.numeric(quantile(x$value, 0.05)),
+                           .upper = as.numeric(quantile(x$value, 0.95)))
+    expect_equal(ans_obtained, ans_expected)
+})
+
+
 ## 'make_center_matrix' -------------------------------------------------------
 
 test_that("'make_center_matrix' works", {
@@ -221,6 +255,20 @@ test_that("'make_post_draws' works", {
     expect_true(all(nd == nd[1]))
     draw_is_int <- sapply(ans, function(x) is.integer(x$draw))
     expect_true(all(draw_is_int))
+})
+
+
+## 'make_probs' ---------------------------------------------------------------
+
+test_that("'make_probs' works", {
+    expect_equal(make_probs(0.95),
+                 c(0.025, 0.5, 0.975))
+    expect_equal(make_probs(0),
+                 c(0.5, 0.5, 0.5))
+    expect_equal(make_probs(1L),
+                 c(0, 0.5, 1))
+    expect_error(make_probs(1.1))
+    expect_error(make_probs(-1))
 })
 
 

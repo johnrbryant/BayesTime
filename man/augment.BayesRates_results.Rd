@@ -2,7 +2,7 @@
 % Please edit documentation in R/results-methods.R
 \name{augment.BayesRates_results}
 \alias{augment.BayesRates_results}
-\title{Data and values from a fitted model}
+\title{Data and values from a results object}
 \usage{
 \method{augment}{BayesRates_results}(x, ...)
 }
@@ -25,7 +25,7 @@ plus four new columns:
 }
 }
 \description{
-Data and values from a fitted model
+Data and values from a results object
 }
 \examples{
 results <- smooth.agetime(nevent_df = nz_divorces,
