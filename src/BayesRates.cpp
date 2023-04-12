@@ -112,8 +112,8 @@ Type objective_function<Type>::operator() ()
     Type log_sd_effect = par_time[2];
     Type logit_phi = par_time[3];
     vector<Type> trend = par_time.segment(4, T - 1);
-    vector<Type> level = par_time.segment(T + 3, T);
-    time_effect = par_time.segment(2 * T + 3, T);
+    vector<Type> level = par_time.segment(T + 3, T - 1);
+    time_effect = par_time.segment(2 * T + 2, T);
     Type sd_trend = exp(log_sd_trend);
     Type sd_level = exp(log_sd_level);
     Type sd_effect = exp(log_sd_effect);
@@ -130,10 +130,12 @@ Type objective_function<Type>::operator() ()
     ans -= dnorm(trend[0], Type(0), Type(1), true); // TODO - CHANGE TO EQUILIBRIUM VALUE??
     for (int t = 1; t < T - 1L; t++)
       ans -= dnorm(trend[t], phi * trend[t - 1], sd_trend, true);
-    ans -= dnorm(level[0], Type(0), Type(0.001), true);
+    ans -= dnorm(level[0], trend[0], sd_level, true); // first element of 'level' is 0
+    for (int t = 1; t < T - 1; t++)
+      ans -= dnorm(level[t], level[t - 1] + trend[t], sd_level, true);
+    ans -= dnorm(time_effect[0], Type(0), sd_effect, true);
     for (int t = 1; t < T; t++)
-      ans -= dnorm(level[t], level[t - 1] + trend[t - 1], sd_level, true);
-    ans -= dnorm(time_effect, level, sd_effect, true).sum();
+      ans -= dnorm(time_effect[t], level[t - 1], sd_effect, true);
   }
   else {
     error("invalid value for 'class_model_time'");

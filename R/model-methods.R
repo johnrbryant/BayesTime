@@ -97,8 +97,8 @@ get_par.BayesRates_model_localtrend <- function(model, labels) {
     par_logit_phi <- c(logit_phi = logit(coef_mid))
     par_trend <- rep(0, times = n_effect - 1L)
     names(par_trend) <- paste0("trend.", labels[-n_effect])
-    par_level <- rep(0, times = n_effect)
-    names(par_level) <- paste0("level.", labels)
+    par_level <- rep(0, times = n_effect - 1L)
+    names(par_level) <- paste0("level.", labels[-1L])
     par_effect <- rep(0, times = n_effect)
     names(par_effect) <- paste0("effect.", labels)
     c(par_log_sd, par_logit_phi, par_trend, par_level, par_effect)
@@ -158,8 +158,8 @@ get_transforms_hyper.BayesRates_model_localtrend <- function(model, labels) {
     n_effect <- length(labels)
     trend <- rep(list(function(x) x), times = n_effect - 1L)
     names(trend) <- paste0("trend.", labels[-n_effect])
-    level <- rep(list(function(x) x), times = n_effect)
-    names(level) <- paste0("level.", labels)
+    level <- rep(list(function(x) x), times = n_effect - 1L)
+    names(level) <- paste0("level.", labels[-1L])
     c(list(sd_trend = exp,
            sd_level = exp,
            sd_effect = exp,

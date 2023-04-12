@@ -12,6 +12,7 @@ test_that("'smooth.agetime' works with valid data - no 'by' variables", {
     py_df$py <- 100
     ans <- smooth.agetime(nevent_df = nevent_df,
                           py_df = py_df,
+                          model_time = LocalTrend(),
                           n_draw = 10)
     expect_s3_class(ans, "BayesRates_results")
 })

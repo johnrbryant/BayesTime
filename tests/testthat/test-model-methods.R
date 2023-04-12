@@ -56,7 +56,7 @@ test_that("'get_par' works with localtrend", {
                        log_sd_effect = 0,
                        logit_phi = log(0.89 / 0.11),
                        "trend.0-4" = 0, "trend.5-9" = 0,
-                       "level.0-4" = 0, "level.5-9" = 0, "level.10-14" = 0,
+                       "level.5-9" = 0, "level.10-14" = 0,
                        "effect.0-4" = 0, "effect.5-9" = 0, "effect.10-14" = 0))
 })
 
@@ -98,11 +98,11 @@ test_that("'get_transforms_hyper' works with localtrend", {
     expect_identical(names(ans), c("sd_trend", "sd_level", "sd_effect",
                                    "coef",
                                    "trend.0-4", "trend.5-9",
-                                   "level.0-4", "level.5-9", "level.10-14"))
+                                   "level.5-9", "level.10-14"))
     for (i in 1:3)
         expect_equal(ans[[i]](0.2), exp(0.2))
     expect_equal(ans[[4]](0.3), invlogit(0.3) * 0.18 + 0.8)
-    for (i in 5:9)
+    for (i in 5:8)
         expect_equal(ans[[i]](0.93), 0.93)
 })
 
