@@ -12,11 +12,11 @@
 #' @param timevar Name of the time variable.
 #' @param byvar Names of classification variables,
 #' other than age and time.
-#' @param model_age Prior model for age effect.
+#' @param spec_age Prior model for age effect.
 #' Current choices: `"Spline"`, `"RW2"`.
-#' @param model_time Prior model for time effect. Current choices:
+#' @param spec_time Prior model for time effect. Current choices:
 #' `"AR1"`, `"LocalTrend"`.
-#' @param post_draws List of tibbles with draws from
+#' @param draws_post List of tibbles with draws from
 #' posterior distribution.
 #'
 #' @returns An object of class "BayesRates_results".
@@ -27,17 +27,17 @@ new_BayesRates_results <- function(nevent_df,
                                    agevar,
                                    timevar,
                                    byvar,
-                                   model_age,
-                                   model_time,
-                                   post_draws) {
+                                   spec_age,
+                                   spec_time,
+                                   draws_post) {
     ans <- list(nevent_df = nevent_df,
                 py_df = py_df,
                 agevar = agevar,
                 timevar = timevar,
                 byvar = byvar,
-                model_age = model_age,
-                model_time = model_time,
-                post_draws = post_draws)
+                spec_age = spec_age,
+                spec_time = spec_time,
+                draws_post = draws_post)
     class(ans) <- "BayesRates_results"
     ans
 }

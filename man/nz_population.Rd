@@ -5,10 +5,9 @@
 \alias{nz_population}
 \title{Adult population of New Zealand}
 \format{
-A data frame with 660 rows and the
-following variables:
+A data frame with the following variables:
 \itemize{
-\item \code{age}: Age, in 5-year age groups, 15-19 to 65+
+\item \code{age}: Age, in 5-year age groups, 20-24 to 65+
 \item \code{sex}: \code{"Female"} or \code{"Male"}
 \item \code{time}: Calendar year
 \item \code{py}: Person-years lived
@@ -26,7 +25,7 @@ Data downloaded on 26 March 2023.
 nz_population
 }
 \description{
-Person-years lived by population aged 15+ by age, sex,
+Person-years lived by population aged 20+ by age, sex,
 and calendar year, in New Zealand, 1992-2021
 }
 \keyword{datasets}

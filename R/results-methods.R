@@ -29,8 +29,8 @@ generics::augment
 #' @examples
 #' results <- smooth.agetime(nevent_df = nz_divorces,
 #'                           py_df = nz_population,
-#'                           model_age = RW2(),
-#'                           model_time = AR1())
+#'                           spec_age = RW2(),
+#'                           spec_time = AR1())
 #' augment(results)
 #' @export
 augment.BayesRates_results <- function(x, ...) {
@@ -75,24 +75,24 @@ generics::components
 #' @examples
 #' results <- smooth.agetime(nevent_df = nz_divorces,
 #'                           py_df = nz_population,
-#'                           model_age = RW2(),
-#'                           model_time = AR1())
+#'                           spec_age = RW2(),
+#'                           spec_time = AR1())
 #' components(results, what = "age_effect")
 #' components(results, what = "time_effect")
 #' @export
 components.BayesRates_results <- function(object, what, quantiles = TRUE, ...) {
-    post_draws <- object$post_draws
-    nms <- names(post_draws)
+    draws_post <- object$draws_post
+    nms <- names(draws_post)
     if (!(what %in% nms)) {
         stop(gettextf("\"%s\" is not a valid choice of component : valid choices are %s",
                       what,
                       paste(sprintf("\"%s\"", nms), collapse = ", ")),
              call. = FALSE)
     }
-    ans <- post_draws[[what]]
+    ans <- draws_post[[what]]
     if (quantiles)
         ans <- make_credible_intervals(ans,
-                                       measurevar = "value",
+                                       measurevar = ".value",
                                        width = 0.95)
     ans
 }

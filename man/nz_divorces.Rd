@@ -5,10 +5,9 @@
 \alias{nz_divorces}
 \title{Divorces in New Zealand}
 \format{
-A data frame with 660 rows and the
-following variables:
+A data frame with the following variables:
 \itemize{
-\item \code{age}: Age, in 5-year age groups, 15-19 to 65+
+\item \code{age}: Age, in 5-year age groups, 20-24 to 65+
 \item \code{sex}: \code{"Female"} or \code{"Male"}
 \item \code{time}: Calendar year
 \item \code{nevent}: Numbers of divorces during year.

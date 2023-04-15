@@ -1,42 +1,33 @@
 
 ## HAS_TESTS
 #' Combine posterior samples for intercept, age effect,
-#' and time effect to obtain a posterior sample for
-#' log rates
+#' and time effect, and then exponentiate,
+#' to obtain a posterior sample for rates
 #'
-#' In 'age_effect', 'time_effect', and the return
-#' value, each row holds one draw.
-#'
-#' @param intercept Vector containing posterior sample
+#' @param intercept Data frame containing posterior sample
 #' for intercept
-#' @param age_effect Matrix containing posterior sample
+#' @param age_effect Data frame containing posterior sample
 #' for age effect
-#' @param time_effect Matrix containing posterior sample
-#' for time effect
+#' @param time_effect Data frame containing posterior sample
+#' for time effect or age-time interaction
 #'
-#' @returns An array with dimensions 'draw', agevar, and timevar
+#' @returns A tibble with columns 'draw', agevar, timevar, '.value'
 #'
 #' @noRd
-combine_draws_effects <- function(intercept, age_effect, time_effect) {
-    n_draw <- length(intercept)
-    n_age <- ncol(age_effect)
-    n_time <- ncol(time_effect)
-    dn_age <- dimnames(age_effect)[2L]
-    dn_time <- dimnames(time_effect)[2L]
-    agevar <- names(dn_age)
-    timevar <- names(dn_time)
-    age_labels <- dn_age[[1L]]
-    time_labels <- dn_time[[1L]]
-    intercept <- rep(intercept, times = n_age * n_time)
-    age_effect <- rep(age_effect, times = n_time)
-    time_effect <- apply(time_effect, 2L, rep, times = n_age)
-    ans <- intercept + age_effect + time_effect
-    ans <- array(ans,
-                 dim = c(n_draw, n_age, n_time),
-                 dimnames = list(seq_len(n_draw),
-                                 age_labels,
-                                 time_labels))
-    names(dimnames(ans)) <- c("draw", agevar, timevar)
+combine_draws_effects <- function(intercept,
+                                  age_effect,
+                                  time_effect) {
+    names(intercept)[match(".value", names(intercept))] <- ".intercept"
+    names(age_effect)[match(".value", names(age_effect))] <- ".age_effect"
+    names(time_effect)[match(".value", names(time_effect))] <- ".time_effect"
+    ans <- merge(intercept, age_effect)
+    ans <- merge(ans, time_effect)
+    ans$.value <- with(ans, exp(.intercept + .age_effect + .time_effect))
+    ans <- ans[-match(c(".intercept", ".age_effect", ".time_effect"), names(ans))]
+    nms_ord <- setdiff(names(ans), ".value")
+    ord <- do.call(order, ans[nms_ord])
+    ans <- ans[ord, , drop = FALSE]
+    ans <- tibble(ans)
     ans
 }
 
@@ -61,7 +52,7 @@ format_agevar <- function(x, nm) {
     else if (is.factor(x))
         x
     else if (is.character(x))
-        factor(x, levels = unique(x))
+         factor(x, levels = unique(x))
     else
         stop(gettextf("'%s' has class \"%s\"",
                       nm,
@@ -182,24 +173,31 @@ make_credible_intervals <- function(x, measurevar, width) {
 #' @param draws_all A matrix with draws from the joint
 #' distribution. Each row is one draw.
 #' @param offset Index of first column of age effect
-#' @param model Prior model for age effect.
-#' Object of class "BayesRate_model"
+#' @param X_age Matrix mapping free parameters to age effect.
+#' Object of class "BayesRate_spec"
 #' @param agevar Name of age variable
 #'
-#' @returns A matrix with same number of rows
-#' as 'draws_all'.
+#' @returns A tibble with columns 'draw', X_age, 'age_effect'
 #'
 #' @noRd
 make_draws_age_effect <- function(draws_all, offset, X_age, agevar) {
     n_draw <- nrow(draws_all)
     X_age <- as.matrix(X_age)
     n_freepar <- ncol(X_age)
+    n_age <- nrow(X_age)
+    labels_age <- rownames(X_age)
     s <- seq.int(from = offset, length.out = n_freepar)
-    ans <- draws_all[ , s, drop = FALSE]
-    ans <- ans %*% t(X_age)
-    rownames(ans) <- seq_len(n_draw)
-    colnames(ans) <- rownames(X_age)
-    names(dimnames(ans)) <- c("draw", agevar)
+    draw <- rep(seq_len(n_draw), times = n_age)
+    age <- rep(labels_age, each = n_draw)
+    .value <- draws_all[ , s, drop = FALSE]
+    .value <- .value %*% t(X_age)
+    .value <- as.numeric(.value)
+    ans <- tibble::tibble(draw = draw,
+                          age = age,
+                          .value = .value)
+    names(ans)[[2L]] <- agevar
+    ans[[agevar]] <- format_agevar(x = ans[[agevar]],
+                                   nm = agevar)
     ans
 }
 
@@ -211,25 +209,27 @@ make_draws_age_effect <- function(draws_all, offset, X_age, agevar) {
 #' @param draws_all A matrix with draws from the joint
 #' distribution. Each row is one draw.
 #' @param offset Index of first column of hyperparameters
-#' @param model Prior model for age or time effect.
-#' Object of class "BayesRate_model".
+#' @param spec Prior model for age or time effect.
+#' Object of class "BayesRate_spec".
 #'
 #' @returns A matrix with same number of rows
 #' as 'draws_all'.
 #'
 #' @noRd
-make_draws_hyper <- function(draws_all, offset, model) {
+make_draws_hyper <- function(draws_all, offset, spec) {
     n_draw <- nrow(draws_all)
-    transforms <- get_transforms_hyper(model)
+    transforms <- get_transforms_hyper(spec)
     n_hyper <- length(transforms)
+    draw <- rep(seq_len(n_draw), times = n_hyper)
+    hyper <- rep(names(transforms), each = n_draw)
     s <- seq.int(from = offset, length.out = n_hyper)
-    ans <- draws_all[ , s, drop = FALSE]
+    .value <- draws_all[ , s, drop = FALSE]
     for (i in seq_len(n_hyper))
-        ans[, i] <- transforms[[i]](ans[, i])
-    colnames(ans) <- names(transforms)
-    rownames(ans) <- seq_len(n_draw)
-    names(dimnames(ans)) <- c("draw", "hyper")
-    ans
+        .value[, i] <- transforms[[i]](.value[, i])
+    .value <- as.numeric(.value)
+    tibble::tibble(draw = draw,
+                   hyper = hyper,
+                   .value = .value)
 }
 
 
@@ -240,117 +240,19 @@ make_draws_hyper <- function(draws_all, offset, model) {
 #' @param draws_all A matrix with draws from the joint
 #' distribution. Each row is one draw.
 #'
-#' @returns A matrix with one column and with
-#' same number of rows as 'draws_all'.
+#' @returns A tibble with columns 'draw' and 'intercept'
 #'
 #' @noRd
 make_draws_intercept <- function(draws_all) {
     n_draw <- nrow(draws_all)
-    ans <- draws_all[, 1L, drop = FALSE]
-    colnames(ans) <- "(Intercept)"
-    rownames(ans) <- seq_len(n_draw)
-    names(dimnames(ans)) <- c("draw", "(Intercept)")
-    ans
+    draw <- seq_len(n_draw)
+    .value <- draws_all[, 1L]
+    tibble::tibble(draw = draw, 
+                   .value = .value)
 }
 
 
 ## HAS_TESTS
-#' Construct draws of time effect from draws
-#' of joint posterior of all unknowns
-#'
-#' @param draws_all A matrix with draws from the joint
-#' distribution. Each row is one draw.
-#' @param offset Index of first column of age effect
-#' @param nevent Matrix of events by age by time.
-#' @param timevar Name of time variable
-#'
-#' @returns A matrix with same number of rows
-#' as 'draws_all'.
-#'
-#' @noRd
-make_draws_time_effect <- function(draws_all, offset, timevar) {
-    n_draw <- nrow(draws_all)
-    n_col <- ncol(draws_all)
-    s <- seq.int(from = offset, to = n_col)
-    ans <- draws_all[ , s, drop = FALSE]
-    rownames(ans) <- seq_len(n_draw)
-    colnames(ans) <- sub("^effect\\.", "", colnames(ans))
-    names(dimnames(ans)) <- c("draw", timevar)
-    ans
-}
-
-
-
-#' Fit model
-#'
-#' Workhorse function for `smooth.agetime()`.
-#' Given matrices of events and
-#' person-years at risk, plus prior
-#' models for age and time, approximate the
-#' posterior distribution.
-#'
-#' @param nevent A matrix of counts of events by age by time
-#' @param py A matrix of person-years of exposure, by age and time
-#' @param model_age An object of class `"BayesRates_model"`
-#' describing the prior model for age effects
-#' @param model_time An object of class `"BayesRates_model"`
-#' describing the prior model for time effects
-#' 
-#' @returns Named list with elements
-#' "mean", "var", "model_age",
-#' "model_time", and "X_age".
-#'
-#' @noRd
-make_fitted <- function(nevent, py, model_age, model_time) {
-    labels_age <- rownames(nevent)
-    labels_time <- colnames(nevent)
-    labels_age <- rownames(nevent)
-    class_model_age <- class(model_age)[[1L]]
-    class_model_time <- class(model_time)[[1L]]
-    X_age <- get_X_age(model = model_age,
-                       labels_age)
-    consts_age <- get_consts(model_age)
-    consts_time <- get_consts(model_time)
-    data <- list(nevent = nevent,
-                 py = py,
-                 class_model_age = class_model_age,
-                 class_model_time = class_model_time,
-                 X_age = X_age,
-                 consts_age = consts_age,
-                 consts_time = consts_time)
-    ## parameters
-    par_age <- get_par(model = model_age, labels = labels_age)
-    par_time <- get_par(model = model_time, labels = labels_time)
-    parameters = list(intercept = 0,
-                      par_age = par_age,
-                      par_time = par_time)
-    ## optimisation
-    f <- TMB::MakeADFun(data = data,
-                        parameters = parameters,
-                        DLL = "BayesRates",
-                        ## hessian = TRUE,
-                        silent = TRUE)
-    suppressWarnings(
-        stats::nlminb(start = f$par,
-                  objective = f$fn,
-                  gradient = f$gr,
-                  hessian = f$he)
-    )
-    ## record results
-    rep <- TMB::sdreport(f, getReportCovariance = TRUE)
-    mean <- rep$par.fixed
-    var <- rep$cov.fixed
-    nms <- c("intercept", names(par_age), names(par_time))
-    names(mean) <- nms
-    dimnames(var) <- list(nms, nms)
-    list(mean = mean,
-         var = var,
-         model_age = model_age,
-         model_time = model_time,
-         X_age = X_age)
-}
-
-
 #' Extract posterior draws from fitted model
 #'
 #' @param fitted A named list. Output from
@@ -364,51 +266,41 @@ make_fitted <- function(nevent, py, model_age, model_time) {
 #' @returns A named list of tibbles.
 #'
 #' @noRd
-make_post_draws <- function(fitted, n_draw, nevent_df, agevar, timevar) {
+make_draws_post <- function(fitted, n_draw, nevent_df, agevar, timevar) {
     mean <- fitted$mean
-    var <- fitted$var
-    model_age <- fitted$model_age
-    model_time <- fitted$model_time
+    prec <- fitted$prec
+    spec_age <- fitted$spec_age
+    spec_time <- fitted$spec_time
     X_age <- fitted$X_age
-    draws_all <- MASS::mvrnorm(n = n_draw,
-                               mu = mean,
-                               Sigma = var,
-                               tol = Inf)
+    X_time <- fitted$X_time
+    draws_all <- rmvn(n = n_draw,
+                      mean = mean,
+                      prec = prec)
     intercept <- make_draws_intercept(draws_all)
-    offset <- 1L + ncol(intercept)
+    offset <- 2L
     age_hyper <- make_draws_hyper(draws_all = draws_all,
                                   offset = offset,
-                                  model = model_age)
-    offset <- offset + ncol(age_hyper)
+                                  spec = spec_age)
+    offset <- offset + n_hyper(spec_age)
+    time_hyper <- make_draws_hyper(draws_all = draws_all,
+                                   offset = offset,
+                                   spec = spec_time)
+    offset <- offset + n_hyper(spec_time)
     age_effect <- make_draws_age_effect(draws_all = draws_all,
                                         offset = offset,
                                         X_age = X_age,
                                         agevar = agevar)
-    offset <- offset + ncol(age_effect)
-    time_hyper <- make_draws_hyper(draws_all = draws_all,
-                                   offset = offset,
-                                   model = model_time)
-    offset <- offset + ncol(time_hyper)
+    offset <- offset + ncol(as.matrix(X_age))
     time_effect <- make_draws_time_effect(draws_all = draws_all,
                                           offset = offset,
-                                          timevar = timevar)
-    log_rates <- combine_draws_effects(intercept = intercept,
-                                       age_effect = age_effect,
-                                       time_effect = time_effect)
-    rates <- exp(log_rates)
-    rates <- reformat_rates(x = rates,
-                            df = nevent_df,
-                            agevar = agevar,
-                            timevar = timevar)
-    intercept <- reformat_intercept(intercept)
-    age_effect <- reformat_age_effect(x = age_effect,
-                                      df = nevent_df,
-                                      agevar = agevar)
-    time_effect <- reformat_time_effect(x = time_effect,
-                                        df = nevent_df,
-                                        timevar = timevar)
-    age_hyper <- reformat_array(age_hyper)
-    time_hyper <- reformat_array(time_hyper)
+                                          spec_time = spec_time,
+                                          agevar = agevar,
+                                          timevar = timevar,
+                                          X_age = X_age,
+                                          X_time = X_time)
+    rates <- combine_draws_effects(intercept = intercept,
+                                   age_effect = age_effect,
+                                   time_effect = time_effect)
     list(rates = rates,
          intercept = intercept,
          age_effect = age_effect,
@@ -417,6 +309,163 @@ make_post_draws <- function(fitted, n_draw, nevent_df, agevar, timevar) {
          time_hyper = time_hyper)
 }
 
+
+## HAS_TESTS
+#' Construct draws of time effect or age-time interaction
+#' from draws of joint posterior of all unknowns
+#'
+#' @param draws_all A matrix with draws from the joint
+#' distribution. Each row is one draw.
+#' @param offset Index of first column of age effect
+#' @param spec_time Object of class "BayesRates_spec"
+#' specifying the time or age-time effect
+#' @param agevar Name of age variable
+#' @param timevar Name of time variable
+#' @param X_age Matrix mapping free parameters to age effect
+#' @param X_time Matrix mapping free parameters to time effect
+#'
+#' @returns A tibble with the following columns:
+#' - If 'spec_time' specifies a time main effect:
+#' 'draw', timevar, '.value'
+#' - If 'spec_time' specifies an age-time interaction:
+#' 'draw', agevar, timevar, '.value'
+#'
+#' @noRd
+make_draws_time_effect <- function(draws_all,
+                                   offset,
+                                   spec_time,
+                                   agevar,
+                                   timevar,
+                                   X_age,
+                                   X_time) {
+    n_draw <- nrow(draws_all)
+    X_time <- as.matrix(X_time)
+    n_time <- nrow(X_time)
+    n_parfree_time <- ncol(X_time)
+    labels_time <- rownames(X_time)
+    is_interaction <- is_interaction(spec_time)
+    if (is_interaction) {
+        X_age <- as.matrix(X_age)
+        n_age <- nrow(X_age)
+        labels_age <- rownames(X_age)
+        s <- seq.int(from = offset,
+                     length.out = n_age * n_parfree_time)
+        draw <- rep(seq_len(n_draw), times = n_age * n_time)
+        age <- rep(rep(labels_age, each = n_draw), times = n_time)
+        time <- rep(labels_time, each = n_draw * n_age)
+        .value <- draws_all[, s, drop = FALSE]
+        .value <- matrix(.value,
+                        nrow = n_draw * n_age,
+                        ncol = n_parfree_time)
+        .value <- .value %*% t(X_time)
+        .value <- as.numeric(.value)
+        ans <- tibble(draw = draw,
+                      age = age,
+                      time = time,
+                      .value = .value)
+        names(ans)[[2L]] <- agevar
+        names(ans)[[3L]] <- timevar
+        ans[[agevar]] <- format_agevar(x = ans[[agevar]],
+                                       nm = agevar)
+    }
+    else {
+        s <- seq.int(from = offset,
+                     length.out = n_parfree_time)
+        draw <- rep(seq_len(n_draw), times = n_time)
+        time <- rep(labels_time, each = n_draw)
+        .value <- draws_all[ , s, drop = FALSE]
+        .value <- .value %*% t(X_time)
+        .value <- as.numeric(.value)
+        ans <- tibble(draw = draw,
+                      time = time,
+                      .value = .value)
+        names(ans)[[2L]] <- timevar
+    }
+    ans
+}
+
+
+#' Fit model
+#'
+#' Workhorse function for `smooth.agetime()`.
+#' Given matrices of events and
+#' person-years at risk, plus prior
+#' models for age and time, approximate the
+#' posterior distribution.
+#'
+#' @param nevent A matrix of counts of events by age by time
+#' @param py A matrix of person-years of exposure, by age and time
+#' @param spec_age An object of class `"BayesRates_spec"`
+#' describing the prior model for age effects
+#' @param spec_time An object of class `"BayesRates_spec"`
+#' describing the prior model for time effects
+#' 
+#' @returns Named list with elements
+#' "mean", "var", "spec_age",
+#' "spec_time", and "X_age".
+#'
+#' @noRd
+make_fitted <- function(nevent, py, spec_age, spec_time) {
+    labels_age <- rownames(nevent)
+    labels_time <- colnames(nevent)
+    n_age <- length(labels_age)
+    n_time <- length(labels_time)
+    ## assemble data
+    class_spec_age <- sub("^BayesRates_", "", class(spec_age)[[1L]])
+    class_spec_time <- sub("^BayesRates_", "", class(spec_time)[[1L]])
+    X_age <- make_X_age(spec = spec_age,
+                        labels_age = labels_age)
+    X_time <- make_X_time(spec = spec_time,
+                          labels_time = labels_time)
+    scale_age <- get_scale(spec_age)
+    scale_time <- get_scale(spec_time)
+    data <- list(nevent = nevent,
+                 py = py,
+                 class_spec_age = class_spec_age,
+                 class_spec_time = class_spec_time,
+                 X_age = X_age,
+                 X_time = X_time,
+                 scale_age = scale_age,
+                 scale_time = scale_time)
+    ## assemble parameters
+    parfree_age <- make_parfree_age(spec = spec_age,
+                                    labels_age = labels_age)
+    parfree_time <- make_parfree_time(spec = spec_time,
+                                      labels_age = labels_age,
+                                      labels_time = labels_time)
+    parameters = list(intercept = -1,
+                      log_sd_age = 0,
+                      log_sd_time = 0,
+                      logit_rho_time = 0.8,
+                      parfree_age = parfree_age,
+                      parfree_time = parfree_time)
+    map <- make_map(spec_time)
+    ## optimisation
+    f <- TMB::MakeADFun(data = data,
+                        parameters = parameters,
+                        DLL = "BayesRates",
+                        map = map,
+                        random = c("parfree_age", "parfree_time"),
+                        silent = TRUE)
+    suppressWarnings(
+        convergence <- stats::nlminb(start = f$par,
+                                     objective = f$fn,
+                                     gradient = f$gr)
+    )
+    ## record results
+    sdreport <- TMB::sdreport(f,
+                              bias.correct = TRUE,
+                              getJointPrecision = TRUE)
+    mean <- c(sdreport$par.fixed, sdreport$par.random)
+    prec <- sdreport$jointPrecision
+    list(mean = mean,
+         prec = prec,
+         spec_age = spec_age,
+         spec_time = spec_time,
+         X_age = X_age,
+         X_time = X_time,
+         convergence = convergence)
+}
 
 
 #' Given an interval width, make the 'probs' argument
@@ -432,7 +481,22 @@ make_probs <- function(width) {
     alpha <- 1 - width
     c(0.5 * alpha, 0.5, 1 - 0.5 * alpha)
 }
-        
+
+
+## HAS_TESTS
+#' Matrix to first order random walk
+#'
+#' @param n Number of elements of random walk vector.
+#'
+#' @returns Vector of length n
+#'
+#' @noRd
+make_rw_matrix <- function(n) {
+    m1 <- make_accum_matrix(n)        ## n x n-1
+    m2 <- make_center_matrix(n)       ## n x n
+    m2 %*% m1                         ## n x n-2
+}
+
 
 ## HAS_TESTS
 #' Matrix to create second order random walk
@@ -475,7 +539,7 @@ make_spline_matrix <- function(n, df) {
 ## HAS_TESTS
 #' Merge 'by' variables into posterior draws and rbind results
 #'
-#' @param post_draws List of lists. Each element of the inner
+#' @param draws_post List of lists. Each element of the inner
 #' list is a set of posterior samples for a particular combination
 #' of 'by' variables.
 #' @param data List of data frames used as input for fitting.
@@ -484,16 +548,16 @@ make_spline_matrix <- function(n, df) {
 #' @return A list of tibbles.
 #'
 #' @noRd
-merge_byvar_with_post <- function(post_draws, data, byvar) {
+merge_byvar_with_post <- function(draws_post, data, byvar) {
     has_by <- length(byvar) > 0L
     if (has_by) {
         by <- lapply(data, function(x) unique(x[byvar])) ## split in same way as 'data' arg
         n_by <- length(by)
-        nms_elements <- names(post_draws[[1L]])
+        nms_elements <- names(draws_post[[1L]])
         n_element <- length(nms_elements)
         ans <- .mapply(merge,
                        dots = list(x = rep(by, each = n_element),
-                                   y = unlist(post_draws, recursive = FALSE)),
+                                   y = unlist(draws_post, recursive = FALSE)),
                        MoreArgs = list())
         ans <- matrix(ans, nrow = n_by, ncol = n_element, byrow = TRUE)
         ans <- apply(ans, 2L, function(args) do.call(rbind, args), simplify = FALSE)
@@ -502,114 +566,10 @@ merge_byvar_with_post <- function(post_draws, data, byvar) {
         ans
     }
     else
-        post_draws[[1L]]
+        draws_post[[1L]]
 }
 
-
-## HAS_TESTS
-#' Reformat array containing draws from posterior distribution
-#'
-#' Convert array to tibble with measure variable "value",
-#' and with integer values for 'draw'.
-#'
-#' @param x An array (including matrices)
-#'
-#' @returns A tibble
-#'
-#' @noRd
-reformat_array <- function(x) {
-    x <- as.data.frame.table(x,
-                             responseName = "value",
-                             stringsAsFactors = FALSE)
-    x[["draw"]] <- as.integer(x[["draw"]])
-    x <- tibble::tibble(x)
-    x
-}
-
-
-## HAS_TESTS
-#' Reformat array containing draws from posterior distribution
-#' for age effect
-#'
-#' @param x A matrix with draw and age dimensions
-#' @param df A data frame with age variable in the required
-#' format
-#' @param agevar Name of the age variable
-#'
-#' @returns A tibble
-#'
-#' @noRd
-reformat_age_effect <- function(x, df, agevar) {
-    x <- reformat_array(x)
-    x[[agevar]] <- reformat_var_age(var_current = x[[agevar]],
-                                    var_target = df[[agevar]],
-                                    agevar = agevar)
-    x
-}
-
-
-## HAS_TESTS
-#' Reformat array containing draws from posterior distribution
-#' for intercept
-#'
-#' @param x A matrix with draw dimension
-#'
-#' @returns A tibble
-#'
-#' @noRd
-reformat_intercept <- function(x) {
-    x <- reformat_array(x)
-    x <- x[c("draw", "value")]
-    x
-}
-
-
-## HAS_TESTS
-#' Reformat array containing draws from posterior distribution
-#' for rates
-#'
-#' @param x An array with draw, age, and time dimensions
-#' @param df A data frame with variables in the required
-#' format
-#' @param agevar Name of the age variable
-#' @param timevar Name of the time variable
-#'
-#' @returns A tibble
-#'
-#' @noRd
-reformat_rates <- function(x, df, agevar, timevar) {
-    x <- reformat_array(x)
-    x[[agevar]] <- reformat_var_age(var_current = x[[agevar]],
-                                    var_target = df[[agevar]],
-                                    agevar = agevar)
-    x[[timevar]] <- reformat_var_time(var_current = x[[timevar]],
-                                      var_target = df[[timevar]],
-                                      timevar = timevar)
-    x
-}
-
-
-## HAS_TESTS
-#' Reformat array containing draws from posterior distribution
-#' for time effect
-#'
-#' @param x A matrix with draw and time dimensions
-#' @param df A data frame with time variable in the required
-#' format
-#' @param timevar Name of the time variable
-#'
-#' @returns A tibble
-#'
-#' @noRd
-reformat_time_effect <- function(x, df, timevar) {
-    x <- reformat_array(x)
-    x[[timevar]] <- reformat_var_time(var_current = x[[timevar]],
-                                      var_target = df[[timevar]],
-                                      timevar = timevar)
-    x
-}
-
-
+    
 ## HAS_TESTS    
 #' Reformat age variable so it has same class as target
 #'
@@ -657,4 +617,29 @@ reformat_var_time <- function(var_current, var_target, timevar) {
                       timevar,
                       class(var_target)),
              call. = FALSE)
+}
+
+
+## HAS_TESTS
+#' Draw from a multivariate normal distribution
+#'
+#' Code based partly on MASS::mvrnorm.
+#' 
+#' @param n Number of draws
+#' @param mean Mean of MVN distribution
+#' @param prec Precision of MVN distribution
+#'
+#' @returns Matrix with length(mean)
+#' rows and n columns.
+#'
+#' @noRd
+rmvn <- function(n, mean, prec) {
+    n_val <- length(mean)
+    ch <- chol(prec)
+    I <- diag(n_val)
+    sd <- backsolve(ch, I)
+    Z <- matrix(stats::rnorm(n = n_val * n),
+                nrow = n_val,
+                ncol = n)
+    t(mean + sd %*% Z)
 }

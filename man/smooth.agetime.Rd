@@ -10,8 +10,8 @@ smooth.agetime(
   agevar = "age",
   timevar = "time",
   byvar = character(),
-  model_age = RW2(),
-  model_time = AR1(),
+  spec_age = RW2(),
+  spec_time = TimeFixed(),
   n_draw = 1000L
 )
 }
@@ -34,11 +34,11 @@ Defaults to \code{"time"}.}
 and \code{py_df}, other than age and time (eg \code{"sex"} or \code{"region"}).
 Optional.}
 
-\item{model_age}{The prior model for the age effect.
-Current choices: \code{"Spline"}, \code{"RW2"} (second-order random walk).}
+\item{spec_age}{The prior model for the age effect.
+Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}}
 
-\item{model_time}{The prior model for the time effect. Current choices:
-\code{"AR1"}, \code{"LocalTrend"}.}
+\item{spec_time}{The prior model for the time effect. Current choices:
+\code{\link[=TimeFixed]{TimeFixed()}} and \code{\link[=TimeVarying]{TimeVarying()}}}
 
 \item{n_draw}{Number of draws from posterior distribution
 to use in output. Defaults to 1000.}

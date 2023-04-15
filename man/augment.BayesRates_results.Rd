@@ -30,7 +30,7 @@ Data and values from a results object
 \examples{
 results <- smooth.agetime(nevent_df = nz_divorces,
                           py_df = nz_population,
-                          model_age = RW2(),
-                          model_time = AR1())
+                          spec_age = RW2(),
+                          spec_time = AR1())
 augment(results)
 }

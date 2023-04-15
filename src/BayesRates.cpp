@@ -4,21 +4,7 @@
 #include "init.h"
 
 using namespace Eigen;
-
-
-// Helper functions -----------------------------------------------------------
-
-// based partly on hyperhttps://discourse.mc-stan.org/t/straightforward-implementation-of-a-difference-penalty/28516/4
-template <class Type>
-Type logdens_rw2(vector<Type> x, Type sd) {
-  int n = x.size();
-  Type ans = 0;
-  for (int i = 2; i < n; i++) {
-    ans += dnorm(x[i], 2 * x[i - 1] - x[i - 2], sd, true);
-  }
-  return ans;
-}
-
+using namespace density;
 
 // Objective function ---------------------------------------------------------
 
@@ -30,124 +16,96 @@ Type objective_function<Type>::operator() ()
 
   DATA_MATRIX(nevent);
   DATA_MATRIX(py);
-  DATA_STRING(class_model_age);
-  DATA_STRING(class_model_time);
+  DATA_STRING(class_spec_age);
+  DATA_STRING(class_spec_time);
   DATA_SPARSE_MATRIX(X_age);
-  DATA_VECTOR(consts_age);
-  DATA_VECTOR(consts_time);
+  DATA_SPARSE_MATRIX(X_time);
+  DATA_SCALAR(scale_age);
+  DATA_SCALAR(scale_time);
 
   PARAMETER(intercept);
-  PARAMETER_VECTOR(par_age);
-  PARAMETER_VECTOR(par_time);
-
+  PARAMETER(log_sd_age);
+  PARAMETER(log_sd_time);
+  PARAMETER(logit_rho_time);
+  PARAMETER_VECTOR(parfree_age);
+  PARAMETER_MATRIX(parfree_time);
 
   // derived quantities -------------------------------------------------------
 
-  int A = nevent.rows();
-  int T = nevent.cols();
-
+  int A = nevent.rows();      // number of age groups
+  int T = nevent.cols();      // number of periods
   
   // log posterior ------------------------------------------------------------
   
   Type ans = 0;
 
-  // prior model for age
+  // contribution to log-posterior from free parameters for age
   
-  vector<Type> age_effect(A);
-  if ((class_model_age == "BayesRates_model_spline")
-      || (class_model_age == "BayesRates_model_rw2")) {
+  if ((class_spec_age == "spec_spline") || (class_spec_age == "spec_rw2")) {
     // spline and RW2 identical apart from X_age matrix
     // (which is identity matrix for RW2)
-    Type scale = consts_age[0];
-    Type log_sd = par_age[0];
-    vector<Type> coef = par_age.tail(A - 2); // lose 2 df due to RW2 prior
-    Type sd = exp(log_sd);
-    ans -= dnorm(sd, Type(0), scale, true)
-      + log_sd; // Jacobian
-    ans -= logdens_rw2(coef, sd);
-    age_effect = X_age * coef;
+    Type sd_age = exp(log_sd_age);
+    ans -= dnorm(sd_age, Type(0), scale_age, true) + log_sd_age;
+    ans -= dnorm(parfree_age, Type(0), sd_age, true).sum();
   }
   else {
-    error("invalid value for 'class_model_age'");
+    error("invalid value for 'class_spec_age'");
   }
 
-  
-  // prior model for time
+  // contribution to log-posterior from free parameters for age-time
 
-  vector<Type> time_effect(T);
-  if (class_model_time == "BayesRates_model_ar1") {
-    Type phi_min = consts_time[0];
-    Type phi_max = consts_time[1];
-    Type alpha_mean = consts_time[2];
-    Type alpha_sd = consts_time[3];
-    Type scale_sd = consts_time[4];
-    Type logit_phi = par_time[0];
-    Type alpha = par_time[1];
-    Type log_sd = par_time[2];
-    time_effect = par_time.tail(T);
-    // phi
-    Type phi_raw = exp(logit_phi) / (1 + exp(logit_phi));
-    ans -= dbeta(phi_raw, Type(2), Type(2), true)
-      + log(phi_raw) + log(1 - phi_raw); // Jabobian
-    Type phi = phi_min + phi_raw * (phi_max - phi_min);
-    // alpha
-    ans -= dnorm(alpha, alpha_mean, alpha_sd, true);
-    // sd
-    Type sd = exp(log_sd);
-    ans -= dnorm(sd, Type(0), scale_sd, true)
-      + log_sd; // Jacobian
-    // time effect
-    ans -= dnorm(time_effect[0], (1 - phi) * alpha, sd, true);
-    for (int t = 1; t < T; t++)
-      ans -= dnorm(time_effect[t], phi * time_effect[t - 1] + (1 - phi) * alpha, sd, true);
+  Type sd_time = exp(log_sd_time);
+  ans -= dnorm(sd_time, Type(0), scale_time, true) + log_sd_time;
+  if (class_spec_time == "spec_timefixed") {
+    for (int t = 0; t < T - 1; t++)
+      ans -= dnorm(parfree_time(0, t), Type(0), sd_time, true);
   }
-  else if (class_model_time == "BayesRates_model_localtrend") {
-    Type scale_sd_trend = consts_time[0];
-    Type scale_sd_level = consts_time[1];
-    Type scale_sd_effect = consts_time[2];
-    Type phi_min = consts_time[3];
-    Type phi_max = consts_time[4];
-    Type log_sd_trend = par_time[0];
-    Type log_sd_level = par_time[1];
-    Type log_sd_effect = par_time[2];
-    Type logit_phi = par_time[3];
-    vector<Type> trend = par_time.segment(4, T - 1);
-    vector<Type> level = par_time.segment(T + 3, T - 1);
-    time_effect = par_time.segment(2 * T + 2, T);
-    Type sd_trend = exp(log_sd_trend);
-    Type sd_level = exp(log_sd_level);
-    Type sd_effect = exp(log_sd_effect);
-    ans -= dnorm(sd_trend, Type(0), scale_sd_trend, true)
-      + log_sd_trend;
-    ans -= dnorm(sd_level, Type(0), scale_sd_level, true)
-      + log_sd_level;
-    ans -= dnorm(sd_effect, Type(0), scale_sd_effect, true)
-      + log_sd_effect;
-    Type phi_raw = exp(logit_phi) / (1 + exp(logit_phi));
-    ans -= dbeta(phi_raw, Type(2), Type(2), true)
-      + log(phi_raw) + log(1 - phi_raw); // Jabobian
-    Type phi = phi_min + phi_raw * (phi_max - phi_min);
-    ans -= dnorm(trend[0], Type(0), Type(1), true); // TODO - CHANGE TO EQUILIBRIUM VALUE??
-    for (int t = 1; t < T - 1L; t++)
-      ans -= dnorm(trend[t], phi * trend[t - 1], sd_trend, true);
-    ans -= dnorm(level[0], trend[0], sd_level, true); // first element of 'level' is 0
-    for (int t = 1; t < T - 1; t++)
-      ans -= dnorm(level[t], level[t - 1] + trend[t], sd_level, true);
-    ans -= dnorm(time_effect[0], Type(0), sd_effect, true);
-    for (int t = 1; t < T; t++)
-      ans -= dnorm(time_effect[t], level[t - 1], sd_effect, true);
+  else if (class_spec_time == "spec_timevarying") {
+    Type rho = exp(logit_rho_time) / (1 + exp(logit_rho_time));
+    ans -= dbeta(rho, Type(2), Type(2), true) + log(rho) + log(1 - rho);
+    matrix<Type> V(A, A);
+    for (int a1 = 0; a1 < A; a1++)
+      for (int a2 = 0; a2 < A; a2++)
+	V(a1, a2) = pow(rho, Type(abs(a1 - a2))) * sd_time * sd_time;
+    MVNORM_t<Type> neg_log_density(V);
+    for (int t = 0; t < T - 1; t++)
+      ans += neg_log_density(parfree_time.col(t));
   }
   else {
-    error("invalid value for 'class_model_time'");
+    error("invalid value for 'class_spec_time'");
   }
-
   
+  // form age term
+
+  vector<Type> age_term = X_age * parfree_age;
+
+  // form age-time term  
+  
+  matrix<Type> agetime_term(A, T);
+  if (class_spec_time == "spec_timefixed") {
+    vector<Type> row_parfree = parfree_time.row(0);
+    vector<Type> row_term = X_time * row_parfree;
+    for (int a = 0; a < A; a++) {
+      agetime_term.row(a) = row_term;
+    }
+  }
+  else if (class_spec_time == "spec_timevarying") {
+    for (int a = 0; a < A; a++) {
+      vector<Type> row_parfree = parfree_time.row(a);
+      vector<Type> row_term = X_time * row_parfree;
+      agetime_term.row(a) = row_term;
+    }
+  }
+  else {
+    error("invalid value for 'class_spec_time'");
+  }    
+
   // likelihood
 
   for (int a = 0; a < A; a++) {
     for (int t = 0; t < T; t++) {
-      Type mu = intercept + age_effect[a] + time_effect[t];
-      ans -= dpois(nevent(a,t), py(a,t) * exp(mu), true);
+      Type mu = intercept + age_term[a] + agetime_term(a, t);
+      ans -= dpois(nevent(a, t), py(a, t) * exp(mu), true);
     }
   }
 

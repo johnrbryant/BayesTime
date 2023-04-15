@@ -4,7 +4,8 @@ library(dplyr, warn.conflicts = FALSE)
 library(tidyr)
 library(poputils)
 
-levels_time <- 1992:2021
+levels_time_keep <- 1992:2021
+levels_age_keep <- age_labels(type = "five", min = 20, max = 65, open = TRUE)
 
 ## recode age group 16-19 to 15-19
 age_labels <- age_labels(type = "five", min = 15, max = 65, open = TRUE)
@@ -23,9 +24,11 @@ nz_divorces <- read_csv("VSM480501_20230322_102557_40.csv",
     pivot_longer(cols = -time,
                  names_to = c("sex", "age"),
                  names_sep = "\\.") %>%
-    filter(time %in% levels_time) %>%
+    filter(time %in% levels_time_keep) %>%
     mutate(time = as.integer(time)) %>%
     mutate(age = clean_age(age)) %>%
+    filter(age %in% levels_age_keep) %>%
+    droplevels() %>%
     count(age, sex, time, wt = value, name = "nevent")
 
 save(nz_divorces, file = "../data/divorces.rda", compress = "bzip2")

@@ -4,9 +4,8 @@
 #' Counts of divorces by age, sex,
 #' and calendar year, in New Zealand, 1992-2021
 #'
-#' @format A data frame with 660 rows and the
-#' following variables:
-#' - `age`: Age, in 5-year age groups, 15-19 to 65+
+#' @format A data frame with the following variables:
+#' - `age`: Age, in 5-year age groups, 20-24 to 65+
 #' - `sex`: `"Female"` or `"Male"`
 #' - `time`: Calendar year
 #' - `nevent`: Numbers of divorces during year.
@@ -21,12 +20,11 @@
 
 #' Adult population of New Zealand
 #'
-#' Person-years lived by population aged 15+ by age, sex,
+#' Person-years lived by population aged 20+ by age, sex,
 #' and calendar year, in New Zealand, 1992-2021
 #'
-#' @format A data frame with 660 rows and the
-#' following variables:
-#' - `age`: Age, in 5-year age groups, 15-19 to 65+
+#' @format A data frame with the following variables:
+#' - `age`: Age, in 5-year age groups, 20-24 to 65+
 #' - `sex`: `"Female"` or `"Male"`
 #' - `time`: Calendar year
 #' - `py`: Person-years lived

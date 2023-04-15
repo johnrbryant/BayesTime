@@ -1,27 +1,48 @@
 
 ## 'combine_draws_effects' ----------------------------------------------------
 
-test_that("'combine_draws_effects' works with valid input", {
-    intercept <- rnorm(20)
-    age_effect <- matrix(rnorm(80),
-                         nr = 20,
-                         dimnames = list(draw = 1:20,
-                                         Age = c("0-4", "5-9", "10-14", "15-19")))
-    time_effect <- matrix(rnorm(100),
-                          nr = 20,
-                          dimnames = list(draw = 1:20,
-                                          Time = 2001:2005))
+test_that("'combine_draws_effects' works with valid input - time main effect", {
+    set.seed(0)
+    intercept <- tibble(draw = 1:20,
+                            .value = rnorm(20))
+    age_effect <- tibble(draw = rep(1:20, times = 4),
+                             Age = rep(c("0-4", "5-9", "10-14", "15-19"), each = 20),
+                             .value = rnorm(80))
+    time_effect <- tibble(draw = rep(1:20, times = 5),
+                              Time = rep(2001:2005, each = 20),
+                              .value = rnorm(100))
     ans_obtained <- combine_draws_effects(intercept = intercept,
-                                         age_effect = age_effect,
-                                         time_effect = time_effect)
-    ans_expected <- array(intercept + age_effect,
-                          c(20, 4, 5),
-                          dimnames = list(draw = 1:20,
-                                          Age = c("0-4", "5-9", "10-14", "15-19"),
-                                          Time = 2001:2005))
-    for (i in 1:5) {
-        ans_expected[,,i] <- ans_expected[,,i] + time_effect[,i]
-    }
+                                          age_effect = age_effect,
+                                          time_effect = time_effect)
+    ans_expected <- merge(merge(intercept, age_effect, by = "draw"), time_effect, by = "draw")
+    value <- with(ans_expected, exp(.value.x + .value.y + .value))
+    ans_expected <- ans_expected[c("draw", "Age", "Time")]
+    ans_expected$.value <- value
+    ans_expected <- ans_expected[with(ans_expected, order(draw, Age, Time)), ]
+    ans_expected <- tibble(ans_expected)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'combine_draws_effects' works with valid input - age-time interaction", {
+    set.seed(0)
+    intercept <- tibble(draw = 1:20,
+                            .value = rnorm(20))
+    age_effect <- tibble(draw = rep(1:20, times = 4),
+                             Age = rep(c("0-4", "5-9", "10-14", "15-19"), each = 20),
+                             .value = rnorm(80))
+    time_effect <- tibble(draw = rep(1:20, times = 20),
+                          Age = rep(rep(c("0-4", "5-9", "10-14", "15-19"), each = 20), times = 5),
+                          Time = rep(2001:2005, each = 80),
+                          .value = rnorm(400))
+    ans_obtained <- combine_draws_effects(intercept = intercept,
+                                          age_effect = age_effect,
+                                          time_effect = time_effect)
+    ans_expected <- merge(merge(intercept, age_effect, by = "draw"), time_effect, by = c("draw", "Age"))
+    value <- with(ans_expected, exp(.value.x + .value.y + .value))
+    ans_expected <- ans_expected[c("draw", "Age", "Time")]
+    ans_expected$.value <- value
+    ans_expected <- ans_expected[with(ans_expected, order(draw, Age, Time)), ]
+    ans_expected <- tibble(ans_expected)
     expect_identical(ans_obtained, ans_expected)
 })
 
@@ -78,15 +99,15 @@ test_that("'make_credible_intervals' works - 'x' has classif vars", {
                      sex = c("F", "M"),
                      draw = 1:20,
                      KEEP.OUT.ATTRS = FALSE)
-    x$value <- rnorm(n = nrow(x))
-    ans <- make_credible_intervals(x, measurevar = "value", width = 0.9)
-    lower <- aggregate(x$value, x[c("age", "time", "sex")], quantile, prob = 0.05)
+    x$.value <- rnorm(n = nrow(x))
+    ans <- make_credible_intervals(x, measurevar = ".value", width = 0.9)
+    lower <- aggregate(x$.value, x[c("age", "time", "sex")], quantile, prob = 0.05)
     lower <- merge(ans, lower)
     expect_equal(lower$.lower, lower$x)
-    mid <- aggregate(x$value, x[c("age", "time", "sex")], quantile, prob = 0.5)
+    mid <- aggregate(x$.value, x[c("age", "time", "sex")], quantile, prob = 0.5)
     mid <- merge(ans, mid)
     expect_equal(mid$.fitted, mid$x)
-    upper <- aggregate(x$value, x[c("age", "time", "sex")], quantile, prob = 0.95)
+    upper <- aggregate(x$.value, x[c("age", "time", "sex")], quantile, prob = 0.95)
     upper <- merge(ans, upper)
     expect_equal(upper$.upper, upper$x)
 })
@@ -94,11 +115,11 @@ test_that("'make_credible_intervals' works - 'x' has classif vars", {
 test_that("'make_credible_intervals' works - 'x' does not have classif vars", {
     set.seed(0)
     x <- data.frame(draw = 1:100,
-                    value = rnorm(100))
-    ans_obtained <- make_credible_intervals(x, measurevar = "value", width = 0.9)
-    ans_expected <- tibble(.fitted = median(x$value),
-                           .lower = as.numeric(quantile(x$value, 0.05)),
-                           .upper = as.numeric(quantile(x$value, 0.95)))
+                    .value = rnorm(100))
+    ans_obtained <- make_credible_intervals(x, measurevar = ".value", width = 0.9)
+    ans_expected <- tibble(.fitted = median(x$.value),
+                           .lower = as.numeric(quantile(x$.value, 0.05)),
+                           .upper = as.numeric(quantile(x$.value, 0.95)))
     expect_equal(ans_obtained, ans_expected)
 })
 
@@ -122,14 +143,14 @@ test_that("'make_draws_age_effect' works", {
     offset <- 2L
     model <- RW2()
     labels_age <- c("0", "1", "2", "3+")
-    X_age <- get_X_age(model,  labels_age = labels_age)
+    X_age <- make_X_age(model,  labels_age = labels_age)
     ans_obtained <- make_draws_age_effect(draws_all = draws_all,
                                           offset = offset,
                                           X_age = X_age,
                                           agevar = "Age")
-    ans_expected <- matrix(draws_all[,2:3] %*% t(as.matrix(X_age)),
-                           nr = 20,
-                           dimnames = list(draw = 1:20, Age = labels_age))
+    ans_expected <- tibble(draw = rep(1:20, 4),
+                           Age = factor(rep(labels_age, each = 20), levels = labels_age),
+                           .value = as.numeric(draws_all[,2:3] %*% t(as.matrix(X_age))))
     expect_identical(ans_obtained, ans_expected)
 })
 
@@ -139,9 +160,8 @@ test_that("'make_draws_age_effect' works", {
 test_that("'make_draws_intercept' works", {
     draws_all <- matrix((1:200)/100, nc = 10)
     ans_obtained <- make_draws_intercept(draws_all)
-    ans_expected <- matrix(draws_all[,1],
-                           nr = 20,
-                           dimnames = list(draw = 1:20, "(Intercept)" = "(Intercept)"))
+    ans_expected <- tibble(draw = 1:20,
+                           .value = draws_all[,1])
     expect_identical(ans_obtained, ans_expected)
 })
 
@@ -151,80 +171,20 @@ test_that("'make_draws_intercept' works", {
 test_that("'make_draws_hyper' works", {
     draws_all <- matrix((1:200)/100, nc = 10)
     offset <- 2L
-    model <- RW2()
+    spec <- RW2()
     ans_obtained <- make_draws_hyper(draws_all = draws_all,
                                      offset = offset,
-                                     model = model)
-    ans_expected <- matrix(exp(draws_all[,2]),
-                           nr = 20,
-                           dimnames = list(draw = 1:20, hyper = "sd"))
+                                     spec = spec)
+    ans_expected <- tibble(draw = 1:20,
+                           hyper = rep("sd", 20),
+                           .value = exp(draws_all[,2]))
     expect_identical(ans_obtained, ans_expected)
 })
 
 
-## 'make_draws_time_effect' ---------------------------------------------------
+## 'make_draws_post' ----------------------------------------------------------
 
-test_that("'make_draws_time_effect' works", {
-    draws_all <- matrix((1:200)/100, nc = 10)
-    offset <- 7L
-    labels_time <- c("2000", "2001", "2002", "2003")
-    colnames(draws_all) <- c(rep("", 6), paste0("effect.", labels_time))
-    ans_obtained <- make_draws_time_effect(draws_all = draws_all,
-                                           offset = offset,
-                                           timevar = "TIME")
-    ans_expected <- matrix(draws_all[,7:10],
-                           nr = 20,
-                           dimnames = list(draw = 1:20, TIME = labels_time))
-    expect_identical(ans_obtained, ans_expected)
-})
-
-
-## 'make_fitted' --------------------------------------------------------------
-
-test_that("'make_fitted' works with RW2 age model and AR1 time model", {
-    set.seed(0)
-    nevent <- matrix(rpois(50, lambda = rep(1:10, each = 5)),
-                     nrow = 5,
-                     ncol = 10,
-                     dimnames = list(age = 0:4, time = 2001:2010))
-    py <- matrix(100,
-                 nrow = 5,
-                 ncol = 10,
-                 dimnames = list(age = 0:4, time = 2001:2010))
-    model_age <- RW2()
-    model_time <- AR1()
-    ans <- make_fitted(nevent = nevent,
-                       py = py,
-                       model_age = model_age,
-                       model_time = model_time)
-    expect_identical(names(ans), c("mean", "var", "model_age", "model_time", "X_age"))
-    expect_identical(length(unlist(ans$mean)), nrow(ans$var))
-})
-
-test_that("'make_fitted' works with RW2 age model and LocalTrend time model", {
-    set.seed(0)
-    nevent <- matrix(rpois(50, lambda = rep(1:10, each = 5)),
-                     nrow = 5,
-                     ncol = 10,
-                     dimnames = list(age = 0:4, time = 2001:2010))
-    py <- matrix(100,
-                 nrow = 5,
-                 ncol = 10,
-                 dimnames = list(age = 0:4, time = 2001:2010))
-    model_age <- RW2()
-    model_time <- LocalTrend()
-    ans <- make_fitted(nevent = nevent,
-                       py = py,
-                       model_age = model_age,
-                       model_time = model_time)
-    expect_identical(names(ans), c("mean", "var", "model_age", "model_time", "X_age"))
-    expect_identical(length(unlist(ans$mean)), nrow(ans$var))
-})
-
-
-## 'make_post_draws' ----------------------------------------------------------
-
-test_that("'make_post_draws' works", {
+test_that("'make_draws_post' works", {
     set.seed(0)
     nevent <- matrix(rpois(100, lambda = rep(1:20, each = 50)),
                      nrow = 5,
@@ -237,13 +197,13 @@ test_that("'make_post_draws' works", {
                  nrow = 5,
                  ncol = 20,
                  dimnames = list(AGE = 0:4, TIME = 2001:2020))
-    model_age <- RW2()
-    model_time <- AR1()
+    spec_age <- RW2()
+    spec_time <- TimeVarying()
     fitted <- make_fitted(nevent = nevent,
                           py = py,
-                          model_age = model_age,
-                          model_time = model_time)
-    ans <- make_post_draws(fitted = fitted,
+                          spec_age = spec_age,
+                          spec_time = spec_time)
+    ans <- make_draws_post(fitted = fitted,
                            n_draw = 10,
                            nevent_df = nevent_df,
                            agevar = "AGE",
@@ -258,6 +218,96 @@ test_that("'make_post_draws' works", {
 })
 
 
+## 'make_draws_time_effect' ---------------------------------------------------
+
+test_that("'make_draws_time_effect' works - main effect", {
+    draws_all <- matrix((1:200)/100, nc = 10)
+    offset <- 7L
+    labels_time <- c("2000", "2001", "2002", "2003")
+    colnames(draws_all) <- c(rep("", 6), paste0("effect.", labels_time))
+    spec_time <- TimeFixed()
+    X_time <- make_X_time(spec_time, labels_time = labels_time)
+    ans_obtained <- make_draws_time_effect(draws_all = draws_all,
+                                           offset = offset,
+                                           spec_time = spec_time,
+                                           agevar = NULL,
+                                           timevar = "TIME",
+                                           X_age = NULL,
+                                           X_time = X_time)
+    ans_expected <- tibble(draw = rep(1:20, 4),
+                           TIME = rep(labels_time, each = 20),
+                           .value = as.numeric(draws_all[,7:9] %*% t(as.matrix(X_time))))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'make_draws_time_effect' works - interaction", {
+    draws_all <- matrix((1:200)/100, nc = 10)
+    offset <- 2L
+    labels_age <- c("0-4", "5-9", "10-14")
+    labels_time <- c("2000", "2001", "2002", "2003")
+    colnames(draws_all) <- c(rep("", 6), paste0("effect.", labels_time))
+    spec_age <- RW2()
+    spec_time <- TimeVarying()
+    X_age <- make_X_age(spec_age, labels_age = labels_age)
+    X_time <- make_X_time(spec_time, labels_time = labels_time)
+    ans_obtained <- make_draws_time_effect(draws_all = draws_all,
+                                           offset = offset,
+                                           spec_time = spec_time,
+                                           agevar = "AGE",
+                                           timevar = "TIME",
+                                           X_age = X_age,
+                                           X_time = X_time)
+    ans_expected <- tibble(draw = rep(1:20, 12),
+                           AGE = factor(rep(rep(labels_age, each = 20), times = 4), levels = labels_age),
+                           TIME = rep(labels_time, each = 60),
+                           .value = as.numeric(matrix(draws_all[,2:10], ncol = 3) %*% t(as.matrix(X_time))))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'make_fitted' --------------------------------------------------------------
+
+test_that("'make_fitted' works with RW2 age model and TimeFixed time model", {
+    set.seed(0)
+    nevent <- matrix(rpois(50, lambda = rep(1:10, each = 5)),
+                     nrow = 5,
+                     ncol = 10,
+                     dimnames = list(age = 0:4, time = 2001:2010))
+    py <- matrix(100,
+                 nrow = 5,
+                 ncol = 10,
+                 dimnames = list(age = 0:4, time = 2001:2010))
+    spec_age <- RW2()
+    spec_time <- TimeFixed()
+    ans <- make_fitted(nevent = nevent,
+                       py = py,
+                       spec_age = spec_age,
+                       spec_time = spec_time)
+    expect_identical(names(ans), c("mean", "prec", "spec_age", "spec_time", "X_age", "X_time", "convergence"))
+    expect_identical(length(unlist(ans$mean)), nrow(ans$prec))
+})
+
+test_that("'make_fitted' works with RW2 age model and TimeVarying time model", {
+    set.seed(0)
+    nevent <- matrix(rpois(50, lambda = rep(1:10, each = 5)),
+                     nrow = 5,
+                     ncol = 10,
+                     dimnames = list(age = 0:4, time = 2001:2010))
+    py <- matrix(100,
+                 nrow = 5,
+                 ncol = 10,
+                 dimnames = list(age = 0:4, time = 2001:2010))
+    spec_age <- RW2()
+    spec_time <- TimeVarying()
+    ans <- make_fitted(nevent = nevent,
+                       py = py,
+                       spec_age = spec_age,
+                       spec_time = spec_time)
+    expect_identical(names(ans), c("mean", "prec", "spec_age", "spec_time", "X_age", "X_time", "convergence"))
+    expect_identical(length(unlist(ans$mean)), nrow(ans$prec))
+})
+
+
 ## 'make_probs' ---------------------------------------------------------------
 
 test_that("'make_probs' works", {
@@ -269,6 +319,19 @@ test_that("'make_probs' works", {
                  c(0, 0.5, 1))
     expect_error(make_probs(1.1))
     expect_error(make_probs(-1))
+})
+
+
+## 'make_rw_matrix' -----------------------------------------------------------
+
+test_that("'make_rw_matrix' works", {
+    set.seed(0)
+    n <- 10
+    m <- make_rw_matrix(n)
+    x <- rnorm(n - 1)
+    y <- as.numeric(m %*% x)
+    expect_equal(sum(y), 0)
+    expect_equal(diff(y), x)
 })
 
 
@@ -314,13 +377,13 @@ test_that("'merge_byvar_with_post' works", {
                  nrow = 5,
                  ncol = 20,
                  dimnames = list(AGE = 0:4, TIME = 2001:2020))
-    model_age <- RW2()
-    model_time <- AR1()
+    spec_age <- RW2()
+    spec_time <- TimeFixed()
     fitted <- make_fitted(nevent = nevent,
                           py = py,
-                          model_age = model_age,
-                          model_time = model_time)
-    post <- make_post_draws(fitted = fitted,
+                          spec_age = spec_age,
+                          spec_time = spec_time)
+    post <- make_draws_post(fitted = fitted,
                             n_draw = 10,
                             nevent_df = nevent_df,
                             agevar = "AGE",
@@ -328,7 +391,7 @@ test_that("'merge_byvar_with_post' works", {
     post <- list(post, post)
     data <- list(data.frame(sex = "Female"),
                  data.frame(sex = "Male"))
-    ans <- merge_byvar_with_post(post_draws = post,
+    ans <- merge_byvar_with_post(draws_post = post,
                                  data = data,
                                  byvar = "sex")
     expect_identical(names(ans),
@@ -339,79 +402,6 @@ test_that("'merge_byvar_with_post' works", {
                        "age_hyper",
                        "time_hyper"))
     expect_true(all(sapply(ans, tibble::is_tibble)))
-})
-
-
-
-## 'reformat_array' -----------------------------------------------------------
-
-test_that("'reformat_array' works with valid input", {
-    x <- matrix(1:4, nr = 2, dimnames = list(draw = 1:2, time = 2001:2002))
-    ans_obtained <- reformat_array(x)
-    ans_expected <- tibble(draw = c(1:2, 1:2),
-                           time = as.character(c(2001, 2001, 2002, 2002)),
-                           value = 1:4)
-    expect_identical(ans_obtained, ans_expected)
-})
-
-
-## 'reformat_age_effect' ------------------------------------------------------
-
-test_that("'reformat_age_effect' works with valid input", {
-    x <- matrix(1:4,
-                nr = 2,
-                dimnames = list(draw = 1:2, age = 0:1))
-    df <- data.frame(age = factor(c("0", "1", "2")))
-    ans_obtained <- reformat_age_effect(x, df = df, agevar = "age")
-    ans_expected <- tibble(draw = rep(1:2, times = 2),
-                           age = factor(c("0", "0", "1", "1"), levels = 0:2),
-                           value = 1:4)
-    expect_identical(ans_obtained, ans_expected)
-})
-
-
-## 'reformat_intercept' -------------------------------------------------------
-
-test_that("'reformat_intercept' works with valid input", {
-    x <- matrix(11:14,
-                nr = 4,
-                dimnames = list(draw = 1:4,  "(Intercept)" = "(Intercept)"))
-    ans_obtained <- reformat_intercept(x)
-    ans_expected <- tibble(draw = 1:4,
-                           value = 11:14)
-    expect_identical(ans_obtained, ans_expected)
-})
-
-
-## 'reformat_rates' -----------------------------------------------------------
-
-test_that("'reformat_rates' works with valid input", {
-    x <- array(1:8,
-               dim = c(2, 2, 2),
-               dimnames = list(draw = 1:2, age = 0:1, time = 2001:2002))
-    df <- data.frame(age = factor(c("0", "1", "2")),
-                     time = c(2002, 2001, 2000))
-    ans_obtained <- reformat_rates(x, df = df, agevar = "age", timevar = "time")
-    ans_expected <- tibble(draw = rep(1:2, times = 4),
-                           age = factor(rep(c("0", "0", "1", "1"), times = 2), levels = 0:2),
-                           time = rep(c(2001, 2002), each = 4),
-                           value = 1:8)
-    expect_identical(ans_obtained, ans_expected)
-})
-
-
-## 'reformat_time_effect' -----------------------------------------------------
-
-test_that("'reformat_time_effect' works with valid input", {
-    x <- matrix(1:4,
-                nr = 2,
-                dimnames = list(draw = 1:2, time = 0:1))
-    df <- data.frame(time = c(1, 0))
-    ans_obtained <- reformat_time_effect(x, df = df, timevar = "time")
-    ans_expected <- tibble(draw = rep(1:2, times = 2),
-                           time = c(0, 0, 1, 1),
-                           value = 1:4)
-    expect_identical(ans_obtained, ans_expected)
 })
 
 
@@ -465,7 +455,16 @@ test_that("'reformat_var_time' throws correct error with invalid input", {
 })
 
 
-    
-    
+## 'rmvn' ---------------------------------------------------------------------
 
-
+test_that("'rmvn' gives correct answer with valid inputs", {
+    set.seed(0)
+    mean <- rnorm(3)
+    prec <- matrix(runif(n = 9, max = 10), nr = 3)
+    prec <- t(prec) %*% prec
+    ans <- rmvn(n = 100000,
+                mean = mean,
+                prec = prec)
+    expect_equal(colMeans(ans), mean, tolerance = 0.01)
+    expect_equal(solve(cov(ans)), prec, tolerance = 0.01)
+})

@@ -14,10 +14,10 @@
 #' @param byvar The names of classification variables in `nevent_df`
 #' and `py_df`, other than age and time (eg `"sex"` or `"region"`).
 #' Optional.
-#' @param model_age The prior model for the age effect.
-#' Current choices: `"Spline"`, `"RW2"` (second-order random walk).
-#' @param model_time The prior model for the time effect. Current choices:
-#' `"AR1"`, `"LocalTrend"`.
+#' @param spec_age The prior model for the age effect.
+#' Current choices: [Spline()] and [RW2()]
+#' @param spec_time The prior model for the time effect. Current choices:
+#' [TimeFixed()] and [TimeVarying()]
 #' @param n_draw Number of draws from posterior distribution
 #' to use in output. Defaults to 1000.
 #'
@@ -29,8 +29,8 @@ smooth.agetime <- function(nevent_df,
                            agevar = "age",
                            timevar = "time",
                            byvar = character(),
-                           model_age = RW2(),
-                           model_time = AR1(),
+                           spec_age = RW2(),
+                           spec_time = TimeFixed(),
                            n_draw = 1000L) {
     ## check variable names
     checkmate::assert_string(agevar, min.chars = 1L)
@@ -56,18 +56,18 @@ smooth.agetime <- function(nevent_df,
                    agevar = agevar,
                    timevar = timevar,
                    byvar = byvar)
-    ## check 'model_age' and 'model_time'
-    if (!inherits(model_age,
-                  c("BayesRates_model_spline", "BayesRates_model_rw2")))
+    ## check 'spec_age' and 'spec_time'
+    if (!inherits(spec_age,
+                  c("BayesRates_spec_spline", "BayesRates_spec_rw2")))
         stop(gettextf("'%s' has class \"%s\"",
-                      "model_age",
-                      class(model_age)),
+                      "spec_age",
+                      class(spec_age)),
              call. = FALSE)
-    if (!inherits(model_time,
-                  c("BayesRates_model_ar1", "BayesRates_model_localtrend")))
+    if (!inherits(spec_time,
+                  c("BayesRates_spec_timefixed", "BayesRates_spec_timevarying")))
         stop(gettextf("'%s' has class \"%s\"",
-                      "model_time",
-                      class(model_time)),
+                      "spec_time",
+                      class(spec_time)),
              call. = FALSE)
     ## check 'n_draw'
     n_draw <- checkmate::assert_int(n_draw,
@@ -101,17 +101,17 @@ smooth.agetime <- function(nevent_df,
     fitted <- .mapply(make_fitted,
                       dots = list(nevent = nevent,
                                   py = py),
-                      MoreArgs = list(model_age = model_age,
-                                      model_time = model_time))
+                      MoreArgs = list(spec_age = spec_age,
+                                      spec_time = spec_time))
     ## generate draws from posterior distribution
-    post_draws <- lapply(fitted,
-                         make_post_draws,
+    draws_post <- lapply(fitted,
+                         make_draws_post,
                          n_draw = n_draw,
                          nevent_df = nevent_df,
                          agevar = agevar,
                          timevar = timevar)
     ## merge with byvar and combine
-    post_draws <- merge_byvar_with_post(post_draws = post_draws,
+    draws_post <- merge_byvar_with_post(draws_post = draws_post,
                                         data = data,
                                         byvar = byvar)
     ## make resultsobject
@@ -120,8 +120,8 @@ smooth.agetime <- function(nevent_df,
                                   agevar = agevar,
                                   timevar = timevar,
                                   byvar = byvar,
-                                  model_age = model_age,
-                                  model_time = model_time,
-                                  post_draws = post_draws)
+                                  spec_age = spec_age,
+                                  spec_time = spec_time,
+                                  draws_post = draws_post)
     ans
 }
