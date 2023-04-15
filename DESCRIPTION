@@ -24,6 +24,7 @@ Imports:
     MASS,
     Matrix,
     methods,
+    splines,
     stats,
     tibble,
     TMB

@@ -222,20 +222,21 @@ make_X_age.BayesRates_spec_rw2 <- function(spec, labels_age) {
     n_age <- length(labels_age)
     ans <- make_rw2_matrix(n_age)
     dimnames(ans) <- list(age = labels_age,
-                          freepar = seq_len(ncol(ans)))
+                          parfree = seq_len(ncol(ans)))
     ans
 }
 
 
-
+## HAS_TESTS
+#' @export
 make_X_age.BayesRates_spec_spline <- function(spec, labels_age) {
     n_age <- length(labels_age)
     df <- spec$df
-    X1 <- make_rw2_matrix(n_age)
+    X1 <- make_rw2_matrix(df)
     X2 <- make_spline_matrix(n = n_age, df = df)
     ans <- X2 %*% X1
-    dimnames(ans) <- list(freepar = seq_len(nrow(ans)),
-                          age = labels_age)
+    dimnames(ans) <- list(age = labels_age,
+                          parfree = seq_len(ncol(ans)))
     ans
 }
 
@@ -260,7 +261,7 @@ make_X_time.BayesRates_spec_timefixed <- function(spec, labels_time) {
     n_time <- length(labels_time)
     ans <- make_rw_matrix(n_time)
     dimnames(ans) <- list(time = labels_time,
-                          freepar = seq_len(ncol(ans)))
+                          parfree = seq_len(ncol(ans)))
     ans
 }
 
@@ -270,7 +271,7 @@ make_X_time.BayesRates_spec_timevarying <- function(spec, labels_time) {
     n_time <- length(labels_time)
     ans <- make_rw_matrix(n_time)
     dimnames(ans) <- list(time = labels_time,
-                          freepar = seq_len(ncol(ans)))
+                          parfree = seq_len(ncol(ans)))
     ans
 }
 

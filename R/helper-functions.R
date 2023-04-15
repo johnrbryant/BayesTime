@@ -524,15 +524,12 @@ make_rw2_matrix <- function(n) {
 #' @returns Matrix with n rows and df columns
 #'
 #' @noRd
-make_spline_matrix <- function(n, df) {
+make_spline_matrix <- function(n, df, q) {
     x <- seq_len(n)
-    ans <- splines::bs(x = x, df = df)
-    nr <- nrow(ans)
-    nc <- ncol(ans)
-    i <- rep(seq.int(from = 2L, to = nr), times = nc)
-    j <- rep(seq_len(nc), each = nr - 1L)
-    xx <- as.numeric(ans[-1, ])
-    Matrix::sparseMatrix(i = i, j = j, x = xx)
+    ans <- splines::bs(x = x, df = df, intercept = TRUE)
+    Matrix::sparseMatrix(i = as.integer(row(ans)),
+                         j = as.integer(col(ans)),
+                         x = as.numeric(ans))
 }
 
 
