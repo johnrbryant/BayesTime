@@ -167,8 +167,33 @@ make_credible_intervals <- function(x, measurevar, width) {
 
 
 ## HAS_TESTS
+#' Matrix to diff a vector
+#'
+#' @param n Number of elements of vector.
+#'
+#' @returns Sparse matrix with dim c(n-1, n)
+#'
+#' @noRd
+make_diff_matrix <- function(n) {
+    m <- matrix(0L, nrow = n - 1L, ncol = n)
+    row <- row(m)
+    col <- col(m)
+    m[row == col] <- -1L
+    m[row == col - 1L] <- 1L
+    is_non_zero <- m != 0L
+    i <- row[is_non_zero]
+    j <- col[is_non_zero]
+    x <- m[is_non_zero]
+    Matrix::sparseMatrix(i = i, j = j, x = x)
+}
+
+
+## HAS_TESTS
 #' Construct draws of age effect from draws
 #' of joint posterior of all unknowns
+#'
+#' Assumes that 'slope' parameters is at position
+#' offset - 1L
 #'
 #' @param draws_all A matrix with draws from the joint
 #' distribution. Each row is one draw.
@@ -176,21 +201,34 @@ make_credible_intervals <- function(x, measurevar, width) {
 #' @param X_age Matrix mapping free parameters to age effect.
 #' Object of class "BayesRate_spec"
 #' @param agevar Name of age variable
+#' @param age_hyper Data frame with hyper-parameters
+#' for prior model for age
 #'
 #' @returns A tibble with columns 'draw', X_age, 'age_effect'
 #'
 #' @noRd
-make_draws_age_effect <- function(draws_all, offset, X_age, agevar) {
+make_draws_age_effect <- function(draws_all, offset, X_age, agevar, age_hyper) {
+    ## extract parameters
     n_draw <- nrow(draws_all)
     X_age <- as.matrix(X_age)
     n_freepar <- ncol(X_age)
     n_age <- nrow(X_age)
     labels_age <- rownames(X_age)
-    s <- seq.int(from = offset, length.out = n_freepar)
+    ## classifying variables
     draw <- rep(seq_len(n_draw), times = n_age)
     age <- rep(labels_age, each = n_draw)
-    .value <- draws_all[ , s, drop = FALSE]
-    .value <- .value %*% t(X_age)
+    ## contribution from spline
+    s <- seq.int(from = offset, length.out = n_freepar)
+    val_spline <- draws_all[ , s, drop = FALSE]
+    val_spline <- val_spline %*% t(X_age)
+    ## contribution from line
+    slope <- age_hyper$.value[age_hyper$hyper == "slope"]
+    slope <- matrix(slope, nrow = n_draw, ncol = n_age)
+    index <- seq.int(from = 0L, to = n_age - 1L) - 0.5 * (n_age - 1L)
+    index <- matrix(index, nrow = n_draw, ncol = n_age, byrow = TRUE)
+    val_line <- slope * index
+    ## assemble and return
+    .value <- val_spline + val_line
     .value <- as.numeric(.value)
     ans <- tibble::tibble(draw = draw,
                           age = age,
@@ -289,7 +327,8 @@ make_draws_post <- function(fitted, n_draw, nevent_df, agevar, timevar) {
     age_effect <- make_draws_age_effect(draws_all = draws_all,
                                         offset = offset,
                                         X_age = X_age,
-                                        agevar = agevar)
+                                        agevar = agevar,
+                                        age_hyper = age_hyper)
     offset <- offset + ncol(as.matrix(X_age))
     time_effect <- make_draws_time_effect(draws_all = draws_all,
                                           offset = offset,
@@ -435,6 +474,7 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
                                       labels_time = labels_time)
     parameters = list(intercept = -1,
                       log_sd_age = 0,
+                      slope_age = 0,
                       log_sd_time = 0,
                       logit_rho_time = 0.8,
                       parfree_age = parfree_age,
@@ -492,9 +532,10 @@ make_probs <- function(width) {
 #'
 #' @noRd
 make_rw_matrix <- function(n) {
-    m1 <- make_accum_matrix(n)        ## n x n-1
-    m2 <- make_center_matrix(n)       ## n x n
-    m2 %*% m1                         ## n x n-2
+    D <- make_diff_matrix(n)
+    DD <- Matrix::tcrossprod(D)
+    DD_inv <- Matrix::solve(DD)
+    Matrix::crossprod(D, DD_inv)
 }
 
 
@@ -507,11 +548,12 @@ make_rw_matrix <- function(n) {
 #'
 #' @noRd
 make_rw2_matrix <- function(n) {
-    m1 <- make_accum_matrix(n - 1L)   ## n-1 x n-2
-    m2 <- make_center_matrix(n - 1L)  ## n-1 x n-1
-    m3 <- make_accum_matrix(n)        ## n x n-1
-    m4 <- make_center_matrix(n)       ## n x n
-    m4 %*% m3 %*% m2 %*% m1           ## n x n-2
+    D1 <- make_diff_matrix(n)
+    D2 <- make_diff_matrix(n - 1L)
+    M <- D2 %*% D1
+    MM <- Matrix::tcrossprod(M)
+    MM_inv <- Matrix::solve(MM)
+    Matrix::crossprod(M, MM_inv)
 }
 
 
@@ -524,12 +566,14 @@ make_rw2_matrix <- function(n) {
 #' @returns Matrix with n rows and df columns
 #'
 #' @noRd
-make_spline_matrix <- function(n, df, q) {
+make_spline_matrix <- function(n, df) {
     x <- seq_len(n)
     ans <- splines::bs(x = x, df = df, intercept = TRUE)
-    Matrix::sparseMatrix(i = as.integer(row(ans)),
-                         j = as.integer(col(ans)),
-                         x = as.numeric(ans))
+    non_zero <- abs(ans) > 1e-10
+    i <- row(ans)[non_zero]
+    j <- col(ans)[non_zero]
+    x <- ans[non_zero]
+    Matrix::sparseMatrix(i = i, j = j, x = x)
 }
 
 

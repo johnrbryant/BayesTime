@@ -90,6 +90,18 @@ test_that("'make_agetime_matrix' works", {
 })
 
 
+## 'make_center_matrix' -------------------------------------------------------
+
+test_that("'make_center_matrix' works", {
+    set.seed(0)
+    n <- 10
+    m <- make_center_matrix(n)
+    x <- rnorm(n)
+    y <- as.numeric(m %*% x)
+    expect_equal(sum(y), 0)
+})
+
+
 ## 'make_credible_intervals' --------------------------------------------------
 
 test_that("'make_credible_intervals' works - 'x' has classif vars", {
@@ -123,16 +135,14 @@ test_that("'make_credible_intervals' works - 'x' does not have classif vars", {
     expect_equal(ans_obtained, ans_expected)
 })
 
+## 'make_diff_matrix' ---------------------------------------------------------
 
-## 'make_center_matrix' -------------------------------------------------------
-
-test_that("'make_center_matrix' works", {
+test_that("'make_diff_matrix' works", {
     set.seed(0)
     n <- 10
-    m <- make_center_matrix(n)
+    m <- make_diff_matrix(n)
     x <- rnorm(n)
-    y <- as.numeric(m %*% x)
-    expect_equal(sum(y), 0)
+    expect_equal(as.numeric(m %*% x), diff(x))
 })
 
 
@@ -144,13 +154,19 @@ test_that("'make_draws_age_effect' works", {
     model <- RW2()
     labels_age <- c("0", "1", "2", "3+")
     X_age <- make_X_age(model,  labels_age = labels_age)
+    age_hyper <- data.frame(draw = c(1:20, 1:20),
+                            hyper = rep(c("sd", "slope"), each = 20),
+                            .value = c(rep(0.1, 20), draws_all[,1]))
     ans_obtained <- make_draws_age_effect(draws_all = draws_all,
                                           offset = offset,
                                           X_age = X_age,
-                                          agevar = "Age")
+                                          agevar = "Age",
+                                          age_hyper = age_hyper)
+    val_spline <- as.numeric(draws_all[,2:3] %*% t(as.matrix(X_age)))
+    val_line <- rep(draws_all[,1], times = 4) * rep((0:3) - 1.5, each = 20)
     ans_expected <- tibble(draw = rep(1:20, 4),
                            Age = factor(rep(labels_age, each = 20), levels = labels_age),
-                           .value = as.numeric(draws_all[,2:3] %*% t(as.matrix(X_age))))
+                           .value = val_spline + val_line)
     expect_identical(ans_obtained, ans_expected)
 })
 
@@ -175,9 +191,9 @@ test_that("'make_draws_hyper' works", {
     ans_obtained <- make_draws_hyper(draws_all = draws_all,
                                      offset = offset,
                                      spec = spec)
-    ans_expected <- tibble(draw = 1:20,
-                           hyper = rep("sd", 20),
-                           .value = exp(draws_all[,2]))
+    ans_expected <- tibble(draw = c(1:20, 1:20),
+                           hyper = c(rep("sd", 20), rep("slope", 20)),
+                           .value = c(exp(draws_all[,2]), draws_all[,3]))
     expect_identical(ans_obtained, ans_expected)
 })
 
@@ -344,7 +360,6 @@ test_that("'make_rw2_matrix' works", {
     x <- rnorm(n - 2)
     y <- as.numeric(m %*% x)
     expect_equal(sum(y), 0)
-    expect_equal(sum(diff(y)), 0)
     expect_equal(diff(diff(y)), x)
 })
 
@@ -357,8 +372,7 @@ test_that("'make_spline_matrix' works", {
     df <- 5
     m <- make_spline_matrix(n = n, df = df)
     expect_equal(dim(m), c(10L, 5L))
-    expect_equal(sum(as.matrix(m)[1,]), 0)
-    expect_true(all(rowSums(as.matrix(m)[-1,]) > 0))
+    expect_true(all(rowSums(as.matrix(m)) > 0))
 })
 
 

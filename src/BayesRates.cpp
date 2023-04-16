@@ -25,6 +25,7 @@ Type objective_function<Type>::operator() ()
 
   PARAMETER(intercept);
   PARAMETER(log_sd_age);
+  PARAMETER(slope_age);
   PARAMETER(log_sd_time);
   PARAMETER(logit_rho_time);
   PARAMETER_VECTOR(parfree_age);
@@ -39,7 +40,7 @@ Type objective_function<Type>::operator() ()
   
   Type ans = 0;
 
-  // contribution to log-posterior from free parameters for age
+  // contribution to log-posterior from parameters for age
   
   if ((class_spec_age == "spec_spline") || (class_spec_age == "spec_rw2")) {
     // spline and RW2 identical apart from X_age matrix
@@ -47,12 +48,13 @@ Type objective_function<Type>::operator() ()
     Type sd_age = exp(log_sd_age);
     ans -= dnorm(sd_age, Type(0), scale_age, true) + log_sd_age;
     ans -= dnorm(parfree_age, Type(0), sd_age, true).sum();
+    ans -= dnorm(slope_age, Type(0), Type(1), true);
   }
   else {
     error("invalid value for 'class_spec_age'");
   }
 
-  // contribution to log-posterior from free parameters for age-time
+  // contribution to log-posterior from parameters for time/age-time
 
   Type sd_time = exp(log_sd_time);
   ans -= dnorm(sd_time, Type(0), scale_time, true) + log_sd_time;
@@ -78,6 +80,9 @@ Type objective_function<Type>::operator() ()
   // form age term
 
   vector<Type> age_term = X_age * parfree_age;
+  for (int a = 0; a < A; a++) {
+    age_term[a] += slope_age * (a - 0.5 * (A - 1));
+  }
 
   // form age-time term  
   

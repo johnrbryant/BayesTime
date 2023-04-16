@@ -53,13 +53,15 @@ get_transforms_hyper.BayesRates_spec_timevarying <- function(model) {
 ## HAS_TESTS
 #' @export
 get_transforms_hyper.BayesRates_spec_rw2 <- function(model) {
-    list(sd = exp)
+    list(sd = exp,
+         slope = function(x) x)
 }
 
 ## HAS_TESTS
 #' @export
 get_transforms_hyper.BayesRates_spec_spline <- function(model) {
-    list(sd = exp)
+    list(sd = exp,
+         slope = function(x) x)
 }
 
 
@@ -304,13 +306,13 @@ n_hyper.BayesRates_spec_timevarying <- function(spec) {
 ## HAS_TESTS
 #' @export
 n_hyper.BayesRates_spec_spline <- function(spec) {
-    1L
+    2L
 }
 
 ## HAS_TESTS
 #' @export
 n_hyper.BayesRates_spec_rw2 <- function(spec) {
-    1L
+    2L
 }
 
 

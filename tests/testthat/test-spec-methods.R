@@ -47,15 +47,17 @@ test_that("'get_transforms_hyper' works with TimeVarying", {
 test_that("'get_transforms_hyper' works with spline", {
     spec <- Spline()
     ans <- get_transforms_hyper(spec)
-    expect_identical(names(ans), "sd")
+    expect_identical(names(ans), c("sd", "slope"))
     expect_equal(ans[[1]](0.2), exp(0.2))
+    expect_equal(ans[[2]](0.2), 0.2)
 })
 
 test_that("'get_transforms_hyper' works with rw2", {
     spec <- RW2()
     ans <- get_transforms_hyper(spec)
-    expect_identical(names(ans), "sd")
+    expect_identical(names(ans), c("sd", "slope"))
     expect_equal(ans[[1]](0.2), exp(0.2))
+    expect_equal(ans[[2]](0.2), 0.2)
 })
 
 
@@ -172,8 +174,8 @@ test_that("'make_X_time' works with timefxed", {
 test_that("'n_hyper' works", {
     expect_identical(n_hyper(TimeFixed()), 1L)
     expect_identical(n_hyper(TimeVarying()), 2L)
-    expect_identical(n_hyper(Spline()), 1L)
-    expect_identical(n_hyper(RW2()), 1L)
+    expect_identical(n_hyper(Spline()), 2L)
+    expect_identical(n_hyper(RW2()), 2L)
 })
 
 
