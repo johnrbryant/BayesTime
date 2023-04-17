@@ -10,24 +10,26 @@ smooth.agetime(
   agevar = "age",
   timevar = "time",
   byvar = character(),
-  spec_age = RW2(),
+  spec_age = Spline(),
   spec_time = TimeFixed(),
   n_draw = 1000L
 )
 }
 \arguments{
-\item{nevent_df}{A data frame with a column called \code{"nevent"}
-containing the number of events, plus additional classification
-variables.}
+\item{nevent_df}{A data frame with a column
+called \code{"nevent"} containing the number of events,
+plus additional classification variables.}
 
 \item{py_df}{A data frame with a column called \code{"py"}
 containing exposure, plus additional
 classification variables.}
 
-\item{agevar}{The name of the age variable in \code{nevent_df} and \code{py_df}.
+\item{agevar}{The name of the age variable in
+\code{nevent_df} and \code{py_df}.
 Defaults to \code{"age"}.}
 
-\item{timevar}{The name of the time variable in \code{nevent_df} and \code{py_df}.
+\item{timevar}{The name of the time variable in
+\code{nevent_df} and \code{py_df}.
 Defaults to \code{"time"}.}
 
 \item{byvar}{The names of classification variables in \code{nevent_df}
@@ -35,10 +37,12 @@ and \code{py_df}, other than age and time (eg \code{"sex"} or \code{"region"}).
 Optional.}
 
 \item{spec_age}{The prior model for the age effect.
-Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}}
+Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}. Defaults to
+\code{Spline()}.}
 
-\item{spec_time}{The prior model for the time effect. Current choices:
-\code{\link[=TimeFixed]{TimeFixed()}} and \code{\link[=TimeVarying]{TimeVarying()}}}
+\item{spec_time}{The prior model for the time effect.
+Current choices: \code{\link[=TimeFixed]{TimeFixed()}} and \code{\link[=TimeVarying]{TimeVarying()}}.
+Defaults to \code{TimeFixed()}.}
 
 \item{n_draw}{Number of draws from posterior distribution
 to use in output. Defaults to 1000.}

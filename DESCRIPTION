@@ -21,9 +21,8 @@ Depends:
 Imports:
     checkmate,
     generics,
-    MASS,
     Matrix,
-    methods,
+    matrixStats,
     splines,
     stats,
     tibble,

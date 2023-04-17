@@ -18,7 +18,8 @@ Type objective_function<Type>::operator() ()
   DATA_MATRIX(py);
   DATA_STRING(class_spec_age);
   DATA_STRING(class_spec_time);
-  DATA_SPARSE_MATRIX(X_age);
+  DATA_SPARSE_MATRIX(X_age_parfree);
+  DATA_SPARSE_MATRIX(X_age_subspace);
   DATA_SPARSE_MATRIX(X_time);
   DATA_SCALAR(scale_age);
   DATA_SCALAR(scale_time);
@@ -33,8 +34,9 @@ Type objective_function<Type>::operator() ()
 
   // derived quantities -------------------------------------------------------
 
-  int A = nevent.rows();      // number of age groups
-  int T = nevent.cols();      // number of periods
+  int A = nevent.rows();         // number of age groups
+  int T = nevent.cols();         // number of periods
+  int P = X_age_subspace.cols(); // dimension of age subspace
   
   // log posterior ------------------------------------------------------------
   
@@ -79,10 +81,11 @@ Type objective_function<Type>::operator() ()
   
   // form age term
 
-  vector<Type> age_term = X_age * parfree_age;
-  for (int a = 0; a < A; a++) {
-    age_term[a] += slope_age * (a - 0.5 * (A - 1));
+  vector<Type> par_age = X_age_parfree * parfree_age;
+  for (int p = 0; p < P; p++) {
+    par_age[p] += slope_age * (p - 0.5 * (P - 1));
   }
+  vector<Type> age_term = X_age_subspace * par_age;
 
   // form age-time term  
   

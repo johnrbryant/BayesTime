@@ -4,12 +4,15 @@
 \alias{components.BayesRates_results}
 \title{Extract components from a results object}
 \usage{
-\method{components}{BayesRates_results}(object, what, quantiles = TRUE, ...)
+\method{components}{BayesRates_results}(object, what, width = 0.95, ...)
 }
 \arguments{
 \item{object}{A results object.}
 
 \item{what}{Component to be extracted.}
+
+\item{width}{Width of credible intervals.
+A number between 0 and 1. Defaults to 0.95.}
 
 \item{...}{Not currently used.}
 }
@@ -33,9 +36,7 @@ in \code{agevar}, \code{timevar}, and \code{byvar} arguments.
 }
 \examples{
 results <- smooth.agetime(nevent_df = nz_divorces,
-                          py_df = nz_population,
-                          spec_age = RW2(),
-                          spec_time = AR1())
+                          py_df = nz_population)
 components(results, what = "age_effect")
 components(results, what = "time_effect")
 }

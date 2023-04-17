@@ -28,9 +28,7 @@ generics::augment
 #'
 #' @examples
 #' results <- smooth.agetime(nevent_df = nz_divorces,
-#'                           py_df = nz_population,
-#'                           spec_age = RW2(),
-#'                           spec_time = AR1())
+#'                           py_df = nz_population)
 #' augment(results)
 #' @export
 augment.BayesRates_results <- function(x, ...) {
@@ -66,6 +64,8 @@ generics::components
 #'
 #' @param object A results object.
 #' @param what Component to be extracted.
+#' @param width Width of credible intervals.
+#' A number between 0 and 1. Defaults to 0.95.
 #' @param ... Not currently used.
 #'
 #' @returns A [tibble][tibble::tibble-package].
@@ -74,13 +74,15 @@ generics::components
 #'
 #' @examples
 #' results <- smooth.agetime(nevent_df = nz_divorces,
-#'                           py_df = nz_population,
-#'                           spec_age = RW2(),
-#'                           spec_time = AR1())
+#'                           py_df = nz_population)
 #' components(results, what = "age_effect")
 #' components(results, what = "time_effect")
 #' @export
-components.BayesRates_results <- function(object, what, quantiles = TRUE, ...) {
+components.BayesRates_results <- function(object, what, width = 0.95, ...) {
+    checkmate::assert_string(what)
+    checkmate::assert_number(width,
+                             lower = 0,
+                             upper = 1)
     draws_post <- object$draws_post
     nms <- names(draws_post)
     if (!(what %in% nms)) {
@@ -90,10 +92,9 @@ components.BayesRates_results <- function(object, what, quantiles = TRUE, ...) {
              call. = FALSE)
     }
     ans <- draws_post[[what]]
-    if (quantiles)
-        ans <- make_credible_intervals(ans,
-                                       measurevar = ".value",
-                                       width = 0.95)
+    ans <- make_credible_intervals(ans,
+                                   measurevar = ".value",
+                                   width = width)
     ans
 }
     

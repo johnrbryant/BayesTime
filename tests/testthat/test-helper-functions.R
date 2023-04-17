@@ -153,20 +153,22 @@ test_that("'make_draws_age_effect' works", {
     offset <- 2L
     model <- RW2()
     labels_age <- c("0", "1", "2", "3+")
-    X_age <- make_X_age(model,  labels_age = labels_age)
+    X_age_parfree <- make_X_age_parfree(model,  labels_age = labels_age)
+    X_age_subspace <- make_X_age_subspace(model,  labels_age = labels_age)
     age_hyper <- data.frame(draw = c(1:20, 1:20),
                             hyper = rep(c("sd", "slope"), each = 20),
                             .value = c(rep(0.1, 20), draws_all[,1]))
     ans_obtained <- make_draws_age_effect(draws_all = draws_all,
                                           offset = offset,
-                                          X_age = X_age,
+                                          X_age_parfree = X_age_parfree,
+                                          X_age_subspace = X_age_subspace,
                                           agevar = "Age",
                                           age_hyper = age_hyper)
-    val_spline <- as.numeric(draws_all[,2:3] %*% t(as.matrix(X_age)))
+    val_par <- as.numeric(draws_all[,2:3] %*% t(as.matrix(X_age_parfree)))
     val_line <- rep(draws_all[,1], times = 4) * rep((0:3) - 1.5, each = 20)
     ans_expected <- tibble(draw = rep(1:20, 4),
                            Age = factor(rep(labels_age, each = 20), levels = labels_age),
-                           .value = val_spline + val_line)
+                           .value = (val_par + val_line))
     expect_identical(ans_obtained, ans_expected)
 })
 
@@ -248,7 +250,7 @@ test_that("'make_draws_time_effect' works - main effect", {
                                            spec_time = spec_time,
                                            agevar = NULL,
                                            timevar = "TIME",
-                                           X_age = NULL,
+                                           X_age_subspace = NULL,
                                            X_time = X_time)
     ans_expected <- tibble(draw = rep(1:20, 4),
                            TIME = rep(labels_time, each = 20),
@@ -264,14 +266,14 @@ test_that("'make_draws_time_effect' works - interaction", {
     colnames(draws_all) <- c(rep("", 6), paste0("effect.", labels_time))
     spec_age <- RW2()
     spec_time <- TimeVarying()
-    X_age <- make_X_age(spec_age, labels_age = labels_age)
+    X_age_subspace <- make_X_age_subspace(spec_age, labels_age = labels_age)
     X_time <- make_X_time(spec_time, labels_time = labels_time)
     ans_obtained <- make_draws_time_effect(draws_all = draws_all,
                                            offset = offset,
                                            spec_time = spec_time,
                                            agevar = "AGE",
                                            timevar = "TIME",
-                                           X_age = X_age,
+                                           X_age_subspace = X_age_subspace,
                                            X_time = X_time)
     ans_expected <- tibble(draw = rep(1:20, 12),
                            AGE = factor(rep(rep(labels_age, each = 20), times = 4), levels = labels_age),
@@ -299,7 +301,10 @@ test_that("'make_fitted' works with RW2 age model and TimeFixed time model", {
                        py = py,
                        spec_age = spec_age,
                        spec_time = spec_time)
-    expect_identical(names(ans), c("mean", "prec", "spec_age", "spec_time", "X_age", "X_time", "convergence"))
+    expect_identical(names(ans),
+                     c("mean", "prec", "spec_age", "spec_time",
+                       "X_age_parfree", "X_age_subspace",
+                       "X_time", "convergence"))
     expect_identical(length(unlist(ans$mean)), nrow(ans$prec))
 })
 
@@ -319,7 +324,10 @@ test_that("'make_fitted' works with RW2 age model and TimeVarying time model", {
                        py = py,
                        spec_age = spec_age,
                        spec_time = spec_time)
-    expect_identical(names(ans), c("mean", "prec", "spec_age", "spec_time", "X_age", "X_time", "convergence"))
+    expect_identical(names(ans),
+                     c("mean", "prec", "spec_age", "spec_time",
+                       "X_age_parfree", "X_age_subspace",
+                       "X_time", "convergence"))
     expect_identical(length(unlist(ans$mean)), nrow(ans$prec))
 })
 

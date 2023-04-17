@@ -16,7 +16,7 @@
 #' \deqn{\eta_{at} = \alpha_a + \beta_t}
 #'
 #' where
-#' - \eqn{\eta_{at} denotes the rates (on a log scale)
+#' - \eqn{\eta_{at}} denotes the rates (on a log scale)
 #' for age group \eqn{a} during period \eqn{t}
 #' - \eqn{\alpha_a} is an age effect
 #' - \eqn{\beta_t} is a time effect
@@ -71,10 +71,10 @@ TimeFixed <- function(scale = 1) {
 #' When the age pattern varies, the
 #' model for log rates is
 #'
-#' \deqn{\eta_{at} = \alpha_a + \beta_{at}
+#' \deqn{\eta_{at} = \alpha_a + \beta_{at}}
 #'
 #' where
-#' - \eqn{\eta_{at} denotes the rates (on a log scale)
+#' - \eqn{\eta_{at}} denotes the rates (on a log scale)
 #' for age group \eqn{a} during period \eqn{t}
 #' - \eqn{\alpha_a} is an age effect
 #' - \eqn{\beta_{at}} is an age-time interaction
@@ -92,7 +92,7 @@ TimeFixed <- function(scale = 1) {
 #'
 #' \deqn{v_{ij} = \rho^{|i-j|}\sigma^2}
 #' 
-#' Correlation parameter \eqn{\rho} has a Beta(2,2) prior.
+#' Correlation coefficiant \eqn{\rho} has a Beta(2,2) prior.
 #'
 #' Standard deviation \eqn{\sigma} has prior
 #'
@@ -116,8 +116,8 @@ TimeFixed <- function(scale = 1) {
 #' age effects
 #'
 #' @examples
-#' LocalTrend()
-#' LocalTrend(scale_trend = 0.1)
+#' TimeVarying()
+#' TimeVarying(scale = 0.1)
 #' @export
 TimeVarying <- function(scale = 1) {
     checkmate::assert_number(scale, lower = 0, finite = TRUE)

@@ -24,8 +24,6 @@ library(ggplot2)
 ```{r}
 ans <- smooth.agetime(nevent_df = nz_divorces,
                       py_df = nz_population,
-                      model_age = RW2(),
-                      model_time = AR1(),
                       byvar = "sex")
 ```
 
@@ -46,16 +44,11 @@ ggplot(ans_df, aes(x = time)) +
 
 
 ```{r}
-age_effect <- components(ans, what = "age_effect") %>%
-  mutate(age = poputils::age_mid(age))
+age_effect <- components(ans, what = "age_effect")
 ggplot(age_effect, aes(x = age)) +
   facet_wrap(vars(sex)) +
-  geom_ribbon(aes(ymin = .lower, ymax = .upper),
-              alpha = 0.6) +
-  geom_line(aes(y = .fitted))
+  geom_pointrange(aes(ymin = .lower, y = .fitted, ymax = .upper))
 ```
-
-
 
 ```{r}
 time_effect <- components(ans, what = "time_effect") 

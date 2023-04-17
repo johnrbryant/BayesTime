@@ -157,7 +157,7 @@ make_credible_intervals <- function(x, measurevar, width) {
         ans <- tibble::tibble(ans)
     }
     else {
-        q <- quantile(x[[measurevar]], probs = probs)
+        q <- stats::quantile(x[[measurevar]], probs = probs)
         ans <- tibble::tibble(.fitted = q[[2L]],
                               .lower = q[[1L]],
                               .upper = q[[3L]])
@@ -198,37 +198,43 @@ make_diff_matrix <- function(n) {
 #' @param draws_all A matrix with draws from the joint
 #' distribution. Each row is one draw.
 #' @param offset Index of first column of age effect
-#' @param X_age Matrix mapping free parameters to age effect.
-#' Object of class "BayesRate_spec"
+#' @param X_age_parfree Matrix mapping free parameters to
+#' constrained parameters.
+#' @param X_age_subspace Matrix mapping age subspace to
+#' age effect
 #' @param agevar Name of age variable
 #' @param age_hyper Data frame with hyper-parameters
 #' for prior model for age
 #'
-#' @returns A tibble with columns 'draw', X_age, 'age_effect'
+#' @returns A tibble with columns 'draw', agevar, 'age_effect'
 #'
 #' @noRd
-make_draws_age_effect <- function(draws_all, offset, X_age, agevar, age_hyper) {
+make_draws_age_effect <- function(draws_all, offset, X_age_parfree, X_age_subspace, agevar, age_hyper) {
     ## extract parameters
     n_draw <- nrow(draws_all)
-    X_age <- as.matrix(X_age)
-    n_freepar <- ncol(X_age)
-    n_age <- nrow(X_age)
-    labels_age <- rownames(X_age)
+    X_age_parfree <- as.matrix(X_age_parfree)
+    X_age_subspace <- as.matrix(X_age_subspace)
+    n_freepar <- ncol(X_age_parfree)
+    n_par <- nrow(X_age_parfree)
+    n_age <- nrow(X_age_subspace)
+    labels_age <- rownames(X_age_subspace)
     ## classifying variables
     draw <- rep(seq_len(n_draw), times = n_age)
     age <- rep(labels_age, each = n_draw)
     ## contribution from spline
     s <- seq.int(from = offset, length.out = n_freepar)
-    val_spline <- draws_all[ , s, drop = FALSE]
-    val_spline <- val_spline %*% t(X_age)
+    val_parfree <- draws_all[ , s, drop = FALSE]
+    val_par <- tcrossprod(val_parfree, X_age_parfree)
     ## contribution from line
     slope <- age_hyper$.value[age_hyper$hyper == "slope"]
-    slope <- matrix(slope, nrow = n_draw, ncol = n_age)
-    index <- seq.int(from = 0L, to = n_age - 1L) - 0.5 * (n_age - 1L)
-    index <- matrix(index, nrow = n_draw, ncol = n_age, byrow = TRUE)
+    slope <- matrix(slope, nrow = n_draw, ncol = n_par)
+    index <- seq.int(from = 0L, to = n_par - 1L) - 0.5 * (n_par - 1L)
+    index <- matrix(index, nrow = n_draw, ncol = n_par, byrow = TRUE)
     val_line <- slope * index
+    ## map from subspace to age effect
+    val_subspace = val_par + val_line
+    .value = tcrossprod(val_subspace, X_age_subspace)
     ## assemble and return
-    .value <- val_spline + val_line
     .value <- as.numeric(.value)
     ans <- tibble::tibble(draw = draw,
                           age = age,
@@ -309,7 +315,8 @@ make_draws_post <- function(fitted, n_draw, nevent_df, agevar, timevar) {
     prec <- fitted$prec
     spec_age <- fitted$spec_age
     spec_time <- fitted$spec_time
-    X_age <- fitted$X_age
+    X_age_parfree <- fitted$X_age_parfree
+    X_age_subspace <- fitted$X_age_subspace
     X_time <- fitted$X_time
     draws_all <- rmvn(n = n_draw,
                       mean = mean,
@@ -326,16 +333,17 @@ make_draws_post <- function(fitted, n_draw, nevent_df, agevar, timevar) {
     offset <- offset + n_hyper(spec_time)
     age_effect <- make_draws_age_effect(draws_all = draws_all,
                                         offset = offset,
-                                        X_age = X_age,
+                                        X_age_parfree = X_age_parfree,
+                                        X_age_subspace = X_age_subspace,
                                         agevar = agevar,
                                         age_hyper = age_hyper)
-    offset <- offset + ncol(as.matrix(X_age))
+    offset <- offset + ncol(as.matrix(X_age_parfree))
     time_effect <- make_draws_time_effect(draws_all = draws_all,
                                           offset = offset,
                                           spec_time = spec_time,
                                           agevar = agevar,
                                           timevar = timevar,
-                                          X_age = X_age,
+                                          X_age_subspace = X_age_subspace,
                                           X_time = X_time)
     rates <- combine_draws_effects(intercept = intercept,
                                    age_effect = age_effect,
@@ -360,7 +368,7 @@ make_draws_post <- function(fitted, n_draw, nevent_df, agevar, timevar) {
 #' specifying the time or age-time effect
 #' @param agevar Name of age variable
 #' @param timevar Name of time variable
-#' @param X_age Matrix mapping free parameters to age effect
+#' @param X_age_subspace Matrix mapping subspace parameters to age effect
 #' @param X_time Matrix mapping free parameters to time effect
 #'
 #' @returns A tibble with the following columns:
@@ -375,7 +383,7 @@ make_draws_time_effect <- function(draws_all,
                                    spec_time,
                                    agevar,
                                    timevar,
-                                   X_age,
+                                   X_age_subspace,
                                    X_time) {
     n_draw <- nrow(draws_all)
     X_time <- as.matrix(X_time)
@@ -384,9 +392,9 @@ make_draws_time_effect <- function(draws_all,
     labels_time <- rownames(X_time)
     is_interaction <- is_interaction(spec_time)
     if (is_interaction) {
-        X_age <- as.matrix(X_age)
-        n_age <- nrow(X_age)
-        labels_age <- rownames(X_age)
+        X_age_subspace <- as.matrix(X_age_subspace)
+        n_age <- nrow(X_age_subspace)
+        labels_age <- rownames(X_age_subspace)
         s <- seq.int(from = offset,
                      length.out = n_age * n_parfree_time)
         draw <- rep(seq_len(n_draw), times = n_age * n_time)
@@ -440,8 +448,8 @@ make_draws_time_effect <- function(draws_all,
 #' describing the prior model for time effects
 #' 
 #' @returns Named list with elements
-#' "mean", "var", "spec_age",
-#' "spec_time", and "X_age".
+#' "mean", "var", "spec_age", "spec_time",
+#' "X_age_parfree", and "X_age_subspace"
 #'
 #' @noRd
 make_fitted <- function(nevent, py, spec_age, spec_time) {
@@ -452,8 +460,10 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
     ## assemble data
     class_spec_age <- sub("^BayesRates_", "", class(spec_age)[[1L]])
     class_spec_time <- sub("^BayesRates_", "", class(spec_time)[[1L]])
-    X_age <- make_X_age(spec = spec_age,
-                        labels_age = labels_age)
+    X_age_parfree <- make_X_age_parfree(spec = spec_age,
+                                        labels_age = labels_age)
+    X_age_subspace <- make_X_age_subspace(spec = spec_age,
+                                          labels_age = labels_age)
     X_time <- make_X_time(spec = spec_time,
                           labels_time = labels_time)
     scale_age <- get_scale(spec_age)
@@ -462,7 +472,8 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
                  py = py,
                  class_spec_age = class_spec_age,
                  class_spec_time = class_spec_time,
-                 X_age = X_age,
+                 X_age_parfree = X_age_parfree,
+                 X_age_subspace = X_age_subspace,
                  X_time = X_time,
                  scale_age = scale_age,
                  scale_time = scale_time)
@@ -502,7 +513,8 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
          prec = prec,
          spec_age = spec_age,
          spec_time = spec_time,
-         X_age = X_age,
+         X_age_parfree = X_age_parfree,
+         X_age_subspace = X_age_subspace,
          X_time = X_time,
          convergence = convergence)
 }
@@ -558,7 +570,11 @@ make_rw2_matrix <- function(n) {
 
 
 ## HAS_TESTS
-#' Make a matrix of spline basis functions
+#' Make a matrix of B-spline basis functions
+#'
+#' Based on Eilers and Marx (1996). Flexible Smoothing
+#' with B-splines and Penalties.
+#' Statistical Science, 11(2), 89-121.
 #'
 #' @param n Number of elements vector being modelled
 #' @param df Degrees of freedom
@@ -567,8 +583,15 @@ make_rw2_matrix <- function(n) {
 #'
 #' @noRd
 make_spline_matrix <- function(n, df) {
-    x <- seq_len(n)
-    ans <- splines::bs(x = x, df = df, intercept = TRUE)
+    n_interval <- df - 2L
+    interval_length <- (n - 1L) / n_interval
+    start <- 1 - 3 * interval_length
+    end <- n + 3 * interval_length
+    x <- seq(from = start, to = end, by = 0.001)
+    base <- splines::bs(x = x, df = df + 6L)
+    i_keep <- findInterval(seq_len(n), x)
+    j_keep <- seq.int(from = 4L, length.out = df)
+    ans <- base[i_keep, j_keep]
     non_zero <- abs(ans) > 1e-10
     i <- row(ans)[non_zero]
     j <- col(ans)[non_zero]

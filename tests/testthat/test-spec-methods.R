@@ -96,7 +96,7 @@ test_that("'make_parfree_age' works with rw2", {
 })
 
 test_that("'make_parfree_age' works with spline", {
-    spec <- Spline()
+    spec <- Spline(df = 3L)
     labels_age <- c("0-4", "5-9", "10-14")
     expect_identical(make_parfree_age(spec, labels_age = labels_age),
                      c("parfree.1" = 0))
@@ -130,12 +130,12 @@ test_that("'make_parfree_time' works with timevarying", {
 })
 
 
-## 'make_X_age' ---------------------------------------------------------------
+## 'make_X_age_parfree' -------------------------------------------------------
 
-test_that("'make_X_age' works with rw2", {
+test_that("'make_X_age_parfree' works with rw2", {
     labels_age <- c("0-4", "5-9", "10-14")
     spec <- RW2()
-    ans_obtained <- make_X_age(spec, labels_age = labels_age)
+    ans_obtained <- make_X_age_parfree(spec, labels_age = labels_age)
     ans_expected <- make_rw2_matrix(n = 3)
     colnames(ans_expected) <- 1
     rownames(ans_expected) <- labels_age
@@ -143,14 +143,39 @@ test_that("'make_X_age' works with rw2", {
     expect_identical(ans_obtained, ans_expected)                     
 })
 
-test_that("'make_X_age' works with spline", {
+test_that("'make_X_age_parfree' works with spline", {
     labels_age <- 0:10
     spec <- Spline(df = 6)
-    ans_obtained <- make_X_age(spec, labels_age = labels_age)
-    ans_expected <- make_spline_matrix(n = 11, df = 6) %*% make_rw2_matrix(n = 6)
+    ans_obtained <- make_X_age_parfree(spec, labels_age = labels_age)
+    ans_expected <- make_rw2_matrix(n = 6)
     colnames(ans_expected) <- 1:4
+    rownames(ans_expected) <- 1:6
+    names(dimnames(ans_expected)) <- c("par", "parfree")
+    expect_identical(ans_obtained, ans_expected)                     
+})
+
+
+## 'make_X_age_subspace' ------------------------------------------------------
+
+test_that("'make_X_age_subspace' works with rw2", {
+    labels_age <- c("0-4", "5-9", "10-14")
+    spec <- RW2()
+    ans_obtained <- make_X_age_subspace(spec, labels_age = labels_age)
+    ans_expected <- Matrix::Diagonal(3)
+    colnames(ans_expected) <- labels_age
     rownames(ans_expected) <- labels_age
-    names(dimnames(ans_expected)) <- c("age", "parfree")
+    names(dimnames(ans_expected)) <- c("age", "age")
+    expect_identical(ans_obtained, ans_expected)                     
+})
+
+test_that("'make_X_age_subspace' works with spline", {
+    labels_age <- 0:10
+    spec <- Spline(df = 6)
+    ans_obtained <- make_X_age_subspace(spec, labels_age = labels_age)
+    ans_expected <- make_spline_matrix(n = 11, df = 6)
+    colnames(ans_expected) <- 1:6
+    rownames(ans_expected) <- labels_age
+    names(dimnames(ans_expected)) <- c("age", "par")
     expect_identical(ans_obtained, ans_expected)                     
 })
 

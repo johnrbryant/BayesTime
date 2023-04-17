@@ -28,7 +28,7 @@ model for log rates is
 
 where
 \itemize{
-\item \eqn{\eta_{at} denotes the rates (on a log scale)
+\item \eqn{\eta_{at}} denotes the rates (on a log scale)
 for age group \eqn{a} during period \eqn{t}
 \item \eqn{\alpha_a} is an age effect
 \item \eqn{\beta_t} is a time effect

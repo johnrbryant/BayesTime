@@ -151,9 +151,9 @@ make_parfree_age.BayesRates_spec_rw2 <- function(spec, labels_age) {
 ## HAS_TESTS
 #' @export
 make_parfree_age.BayesRates_spec_spline <- function(spec, labels_age) {
-    n <- length(labels_age)
-    ans <- rep(0, times = n - 2L)
-    names(ans) <- paste0("parfree.", seq_len(n - 2L))
+    df <- spec$df
+    ans <- rep(0, times = df - 2L)
+    names(ans) <- paste0("parfree.", seq_len(df - 2L))
     ans
 }
 
@@ -202,11 +202,11 @@ make_parfree_time.BayesRates_spec_timevarying <- function(spec,
 }
 
 
+## 'make_X_age_parfree' --------------------------------------------------------
 
-
-## 'make_X_age' ---------------------------------------------------------------
-
-#' Construct matrix X to be used in prior model for age
+#' Construct matrix X to contert free
+#' parameters for age effect into constrained
+#' parameters (ie random walk)
 #'
 #' @param spec An object of class "BayesRates_spec"
 #' @param labels_age Labels for age groups
@@ -214,13 +214,13 @@ make_parfree_time.BayesRates_spec_timevarying <- function(spec,
 #' @returns A sparse matrix
 #'
 #' @noRd
-make_X_age <- function(spec, labels_age) {
-  UseMethod("make_X_age")
+make_X_age_parfree <- function(spec, labels_age) {
+  UseMethod("make_X_age_parfree")
 }
 
 ## HAS_TESTS
 #' @export
-make_X_age.BayesRates_spec_rw2 <- function(spec, labels_age) {
+make_X_age_parfree.BayesRates_spec_rw2 <- function(spec, labels_age) {
     n_age <- length(labels_age)
     ans <- make_rw2_matrix(n_age)
     dimnames(ans) <- list(age = labels_age,
@@ -231,14 +231,50 @@ make_X_age.BayesRates_spec_rw2 <- function(spec, labels_age) {
 
 ## HAS_TESTS
 #' @export
-make_X_age.BayesRates_spec_spline <- function(spec, labels_age) {
+make_X_age_parfree.BayesRates_spec_spline <- function(spec, labels_age) {
     n_age <- length(labels_age)
     df <- spec$df
-    X1 <- make_rw2_matrix(df)
-    X2 <- make_spline_matrix(n = n_age, df = df)
-    ans <- X2 %*% X1
-    dimnames(ans) <- list(age = labels_age,
+    ans <- make_rw2_matrix(df)
+    dimnames(ans) <- list(par = seq_len(nrow(ans)),
                           parfree = seq_len(ncol(ans)))
+    ans
+}
+
+
+## 'make_X_age_subspace' --------------------------------------------------------
+
+#' Construct matrix X to map from subspace for age
+#' to age effect
+#'
+#' @param spec An object of class "BayesRates_spec"
+#' @param labels_age Labels for age groups
+#'
+#' @returns A sparse matrix
+#'
+#' @noRd
+make_X_age_subspace <- function(spec, labels_age) {
+  UseMethod("make_X_age_subspace")
+}
+
+## HAS_TESTS
+#' @export
+make_X_age_subspace.BayesRates_spec_rw2 <- function(spec, labels_age) {
+    n_age <- length(labels_age)
+    ans <- Matrix::Diagonal(n_age)
+    dimnames(ans) <- list(age = labels_age,
+                          age = labels_age)
+    ans
+}
+
+
+## HAS_TESTS
+#' @export
+make_X_age_subspace.BayesRates_spec_spline <- function(spec, labels_age) {
+    n_age <- length(labels_age)
+    df <- spec$df
+    ans <- make_spline_matrix(n = n_age, df = df)
+    dimnames(ans) <- list(age = labels_age,
+                          par = seq_len(ncol(ans)))
     ans
 }
 

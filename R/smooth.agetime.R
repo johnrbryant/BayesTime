@@ -1,23 +1,27 @@
 
 #' Smooth rates over age and time
 #'
-#' @param nevent_df A data frame with a column called `"nevent"`
-#' containing the number of events, plus additional classification
-#' variables.
+#' @param nevent_df A data frame with a column
+#' called `"nevent"` containing the number of events,
+#' plus additional classification variables.
 #' @param py_df A data frame with a column called `"py"`
 #' containing exposure, plus additional
 #' classification variables.
-#' @param agevar The name of the age variable in `nevent_df` and `py_df`.
+#' @param agevar The name of the age variable in
+#' `nevent_df` and `py_df`.
 #' Defaults to `"age"`.
-#' @param timevar The name of the time variable in `nevent_df` and `py_df`.
+#' @param timevar The name of the time variable in
+#' `nevent_df` and `py_df`.
 #' Defaults to `"time"`.
 #' @param byvar The names of classification variables in `nevent_df`
 #' and `py_df`, other than age and time (eg `"sex"` or `"region"`).
 #' Optional.
 #' @param spec_age The prior model for the age effect.
-#' Current choices: [Spline()] and [RW2()]
-#' @param spec_time The prior model for the time effect. Current choices:
-#' [TimeFixed()] and [TimeVarying()]
+#' Current choices: [Spline()] and [RW2()]. Defaults to
+#' `Spline()`.
+#' @param spec_time The prior model for the time effect.
+#' Current choices: [TimeFixed()] and [TimeVarying()].
+#' Defaults to `TimeFixed()`.
 #' @param n_draw Number of draws from posterior distribution
 #' to use in output. Defaults to 1000.
 #'
@@ -29,7 +33,7 @@ smooth.agetime <- function(nevent_df,
                            agevar = "age",
                            timevar = "time",
                            byvar = character(),
-                           spec_age = RW2(),
+                           spec_age = Spline(),
                            spec_time = TimeFixed(),
                            n_draw = 1000L) {
     ## check variable names
