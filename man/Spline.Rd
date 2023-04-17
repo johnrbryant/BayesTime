@@ -4,11 +4,11 @@
 \alias{Spline}
 \title{Specify a P-spline model for an age effect}
 \usage{
-Spline(df = 5L, scale = 1)
+Spline(df = 7, scale = 1)
 }
 \arguments{
 \item{df}{Degrees of freedom for spline.
-Defaults to 5.}
+Defaults to 7.}
 
 \item{scale}{Scale for error term.
 Defaults to 1.}

@@ -583,14 +583,14 @@ make_rw2_matrix <- function(n) {
 #'
 #' @noRd
 make_spline_matrix <- function(n, df) {
-    n_interval <- df - 2L
+    n_interval <- df - 3L
     interval_length <- (n - 1L) / n_interval
     start <- 1 - 3 * interval_length
     end <- n + 3 * interval_length
     x <- seq(from = start, to = end, by = 0.001)
-    base <- splines::bs(x = x, df = df + 6L)
+    base <- splines::bs(x = x, df = df + 5L)
     i_keep <- findInterval(seq_len(n), x)
-    j_keep <- seq.int(from = 4L, length.out = df)
+    j_keep <- seq.int(from = 3L, length.out = df)
     ans <- base[i_keep, j_keep]
     non_zero <- abs(ans) > 1e-10
     i <- row(ans)[non_zero]
