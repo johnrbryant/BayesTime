@@ -207,7 +207,7 @@ RW2 <- function(scale = 1) {
 #' and a value for \eqn{a} is supplied by the user.
 #'
 #' @param df Degrees of freedom for spline.
-#' Defaults to 5.
+#' Defaults to 7.
 #' @param scale Scale for error term.
 #' Defaults to 1.
 #'
@@ -228,7 +228,7 @@ RW2 <- function(scale = 1) {
 #' Spline()
 #' Spline(df = 10)
 #' @export
-Spline <- function(df = 5L, scale = 1) {
+Spline <- function(df = 7, scale = 1) {
     df <- checkmate::assert_int(df,
                                 lower = 2L,
                                 coerce = TRUE)

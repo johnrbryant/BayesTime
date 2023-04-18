@@ -136,7 +136,7 @@ smooth.age <- function(nevent_df,
 #' `Spline()`.
 #' @param spec_time The prior model for the time effect.
 #' Current choices: [TimeFixed()] and [TimeVarying()].
-#' Defaults to `TimeFixed()`.
+#' Defaults to `TimeVarying()`.
 #' @param n_draw Number of draws from posterior distribution
 #' to use in output. Defaults to 1000.
 #'
@@ -149,7 +149,7 @@ smooth.agetime <- function(nevent_df,
                            timevar = "time",
                            byvar = character(),
                            spec_age = Spline(),
-                           spec_time = TimeFixed(),
+                           spec_time = TimeVarying(),
                            n_draw = 1000L) {
     ## check variable names
     checkmate::assert_string(agevar, min.chars = 1L)

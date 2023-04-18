@@ -11,7 +11,7 @@ smooth.agetime(
   timevar = "time",
   byvar = character(),
   spec_age = Spline(),
-  spec_time = TimeFixed(),
+  spec_time = TimeVarying(),
   n_draw = 1000L
 )
 }
@@ -42,7 +42,7 @@ Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}. 
 
 \item{spec_time}{The prior model for the time effect.
 Current choices: \code{\link[=TimeFixed]{TimeFixed()}} and \code{\link[=TimeVarying]{TimeVarying()}}.
-Defaults to \code{TimeFixed()}.}
+Defaults to \code{TimeVarying()}.}
 
 \item{n_draw}{Number of draws from posterior distribution
 to use in output. Defaults to 1000.}
