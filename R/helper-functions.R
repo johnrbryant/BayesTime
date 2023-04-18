@@ -81,6 +81,27 @@ make_accum_matrix <- function(n) {
 
 
 ## HAS_TESTS
+#' Make column matrix holding event or person-year data by age
+#'
+#' @param data Data frame with age, time, and measurement variables
+#' @param measurevar Name of measurement variable
+#' @param agevar Name of age variable
+#'
+#' @returns A matrix with a single column
+#'
+#' @noRd
+make_age_matrix <- function(data, measurevar, agevar) {
+    formula <- sprintf("%s ~ %s", measurevar, agevar)
+    formula <- stats::as.formula(formula)
+    ans <- stats::xtabs(formula, data = data, addNA = TRUE)
+    matrix(ans,
+           nrow = length(ans),
+           ncol = 1L,
+           dimnames = c(dimnames(ans), list(NULL)))
+}
+
+
+## HAS_TESTS
 #' Make matrix holding event or person-year data by age by time
 #'
 #' @param data Data frame with age, time, and measurement variables
@@ -88,14 +109,16 @@ make_accum_matrix <- function(n) {
 #' @param agevar Name of age variable
 #' @param timevar Name of time variable
 #'
-#' @returns An array
+#' @returns A matrix
 #'
 #' @noRd
 make_agetime_matrix <- function(data, measurevar, agevar, timevar) {
     formula <- sprintf("%s ~ %s + %s", measurevar, agevar, timevar)
     formula <- stats::as.formula(formula)
     ans <- stats::xtabs(formula, data = data, addNA = TRUE)
-    array(ans, dim = dim(ans), dimnames = dimnames(ans))
+    array(ans,
+          dim = dim(ans),
+          dimnames = dimnames(ans))
 }
 
 

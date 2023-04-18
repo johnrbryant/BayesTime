@@ -65,6 +65,8 @@ test_that("'Spline' raises correct error with invalid inputs", {
 ## 'new' ----------------------------------------------------------------------
 
 test_that("'new_*' functions work with valid inputs", {
+    expect_s3_class(new_BayesRates_spec_timenull(),
+                    c("BayesRates_spec_timenull", "BayesRates_spec"))
     expect_s3_class(new_BayesRates_spec_timefixed(scale = 0.5),
                     c("BayesRates_spec_timefixed", "BayesRates_spec"))
     expect_s3_class(new_BayesRates_spec_timevarying(scale = 0.1),

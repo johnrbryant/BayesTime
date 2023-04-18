@@ -74,6 +74,21 @@ test_that("'make_accum_matrix' works", {
 })
 
 
+## 'make_age_matrix' ----------------------------------------------------------
+
+test_that("'make_age_matrix' works", {
+    data <- expand.grid(region = c("a", "b"), age = 0:1,
+                        KEEP.OUT.ATTRS = FALSE)
+    data$nevent <- 1
+    ans_obtained <- make_age_matrix(data,
+                                    measurevar = "nevent",
+                                    agevar = "age")
+    ans_expected <- matrix(2, nrow = 2, ncol = 1,
+                           dimnames = list(age = 0:1, NULL))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
 ## 'make_agetime_matrix' ------------------------------------------------------
 
 test_that("'make_agetime_matrix' works", {

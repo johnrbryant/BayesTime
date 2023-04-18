@@ -75,6 +75,9 @@ Type objective_function<Type>::operator() ()
     for (int t = 0; t < T - 1; t++)
       ans += neg_log_density(parfree_time.col(t));
   }
+  else if (class_spec_time == "spec_timenull") {
+    // do nothing
+  }
   else {
     error("invalid value for 'class_spec_time'");
   }
@@ -103,6 +106,9 @@ Type objective_function<Type>::operator() ()
       vector<Type> row_term = X_time * row_parfree;
       agetime_term.row(a) = row_term;
     }
+  }
+  else if (class_spec_time == "spec_timenull") {
+    // do nothing - leave at initial value of 0
   }
   else {
     error("invalid value for 'class_spec_time'");

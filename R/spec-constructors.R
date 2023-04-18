@@ -242,6 +242,23 @@ Spline <- function(df = 5L, scale = 1) {
 ## Internal constructors ------------------------------------------------------
 
 ## HAS_TESTS
+#' New object of class "BayesRates_spec_null"
+#'
+#' Placeholder used in models with no time dimension.
+#' No user-visible constructor, since this class
+#' is never seen by users.
+#'
+#' @returns Object of class "BayesRates_spec_null"
+#'
+#' @noRd
+new_BayesRates_spec_timenull <- function() {
+    ans <- list()
+    class(ans) <- c("BayesRates_spec_timenull", "BayesRates_spec")
+    ans
+}
+
+
+## HAS_TESTS
 #' New object of class "BayesRates_spec_timefixed"
 #'
 #' @param scale Double greater than 0

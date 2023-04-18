@@ -20,6 +20,103 @@ check_gt_zero <- function(x, nm) {
 
 ## HAS_TESTS
 #' Check a data frame of events or exposures
+#' that does not include a time variable
+#'
+#' We assume that the name of the data frame
+#' has the form "<measurevar>_df".
+#' 
+#' @param df The input data frame.
+#' @param measurevar The name of the measurement variable.
+#' @param agevar The name of the age variable.
+#' @param byvar The names of additional classification variables.
+#' (May have length 0.)
+#'
+#' @returns TRUE, invisibly.
+#'
+#' @noRd
+check_input_notime_df <- function(df,
+                                  measurevar,
+                                  agevar,
+                                  byvar) {
+    timevars <- c("time", "year", "period")
+    nm_df <- paste0(measurevar, "_df")
+    nms_classif_vars <- c(agevar, byvar)
+    ## is data frame with no missing values,
+    ## at least 1 row, and at least 3 columns
+    checkmate::assert_data_frame(df,
+                                 min.rows = 1L,
+                                 min.cols = 2L,
+                                 .var.name = nm_df)
+    nms_df <- names(df)
+    ## has all required variables
+    for (vname in c(measurevar, nms_classif_vars)) {
+        if (!(vname %in% nms_df))
+            stop(gettextf("data frame '%s' does not have a variable called \"%s\"",
+                          nm_df,
+                          vname),
+                 call. = FALSE)
+    }
+    ## check age var
+    agevar_val <- df[[agevar]]
+    if (is.numeric(agevar_val)) {
+        check_age <- checkmate::check_integerish(agevar_val, any.missing = FALSE)
+        if (!isTRUE(check_age))
+            stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
+                          agevar,
+                          nm_df,
+                          check_age),
+                 call. = FALSE)
+        complete_levels <- seq(from = min(agevar_val), to = max(agevar_val))
+        if (!setequal(agevar_val, complete_levels))
+            stop(gettextf(paste("variable '%s' in data frame '%s' does not have",
+                                "a complete set of levels"),
+                          agevar,
+                          nm_df),
+                 call. = FALSE)
+    }
+    else if (is.character(agevar_val) || is.factor(agevar_val)) {
+        if (anyNA(agevar_val))
+            stop(gettextf("variable '%s' in data frame '%s' has NAs",
+                          agevar,
+                          nm_df),
+                 call. = FALSE)
+    }
+    else
+        stop(gettextf("variable '%s' in data frame '%s' has class \"%s\"",
+                      agevar,
+                      nm_df,
+                      class(agevar_val)),
+             call. = FALSE)
+    ## check measure var
+    measurevar_val <- df[[measurevar]]
+    check_measure <- checkmate::check_numeric(measurevar_val,
+                                              any.missing = FALSE,
+                                              lower = 0,
+                                              finite = TRUE)
+    if (!isTRUE(check_measure))
+        stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
+                      measurevar,
+                      nm_df,
+                      check_measure),
+             call. = FALSE)
+    ## check no timevar
+    for (timevar in timevars) {
+        p <- sprintf("^%s$", timevar)
+        is_timevar <- grepl(p, nms_df, ignore.case = TRUE)
+        i_timevar <- match(TRUE, is_timevar, nomatch = 0L)
+        if (i_timevar > 0L)
+            warning(gettextf("'%s' appears to include a time variable [\"%s\"]",
+                             nm_df,
+                             nms_df[[i_timevar]]))
+    }
+    ## return TRUE
+    invisible(TRUE)
+}                                
+
+
+## HAS_TESTS
+#' Check a data frame of events or exposures
+#' that includes a time variable
 #'
 #' We assume that the name of the data frame
 #' has the form "<measurevar>_df".
@@ -34,11 +131,11 @@ check_gt_zero <- function(x, nm) {
 #' @returns TRUE, invisibly.
 #'
 #' @noRd
-check_input_df <- function(df,
-                           measurevar,
-                           agevar,
-                           timevar,
-                           byvar) {
+check_input_withtime_df <- function(df,
+                                    measurevar,
+                                    agevar,
+                                    timevar,
+                                    byvar) {
     nm_df <- paste0(measurevar, "_df")
     nms_classif_vars <- c(agevar, timevar, byvar)
     ## is data frame with no missing values,
