@@ -721,11 +721,11 @@ make_spline_matrix <- function(n, df) {
     i_keep <- findInterval(seq_len(n), x)
     j_keep <- seq.int(from = 3L, length.out = df)
     ans <- base[i_keep, j_keep]
-    non_zero <- abs(ans) > 1e-10
-    i <- row(ans)[non_zero]
-    j <- col(ans)[non_zero]
-    x <- ans[non_zero]
-    Matrix::sparseMatrix(i = i, j = j, x = x)
+    colmeans <- colMeans(ans)
+    ans <- ans - rep(colmeans, each = nrow(ans))
+    Matrix::sparseMatrix(i = row(ans),
+                         j = col(ans),
+                         x = as.double(ans))
 }
 
 

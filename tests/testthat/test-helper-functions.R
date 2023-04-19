@@ -508,7 +508,6 @@ test_that("'make_spline_matrix' works", {
     df <- 5
     m <- make_spline_matrix(n = n, df = df)
     expect_equal(dim(m), c(10L, 5L))
-    expect_true(all(rowSums(as.matrix(m)) > 0))
 })
 
 
