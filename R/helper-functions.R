@@ -517,6 +517,7 @@ make_draws_time_effect <- function(draws_all,
     n_time <- nrow(X_time)
     n_parfree_time <- ncol(X_time)
     labels_time <- rownames(X_time)
+    labels_time <- as.integer(labels_time)
     is_interaction <- is_interaction(spec_time)
     if (is_interaction) {
         X_age_subspace <- as.matrix(X_age_subspace)

@@ -20,20 +20,58 @@ library(dplyr)
 library(ggplot2)
 ```
 
+## Smoothing by across age
 
 ```{r}
-ans <- smooth_agetime(nevent_df = nz_divorces,
-                      py_df = nz_population,
-                      byvar = "sex")
+divorce_2020 <- nz_divorces %>%
+  filter(time == 2020) %>%
+  select(-time)
+popn_2020 <- nz_population %>%
+  filter(time == 2020) %>%
+  select(-time)
+
+res_age <- smooth_age(nevent_df = divorce_2020,
+                      py_df = popn_2020)
+res_age
+```
+
+```{r}
+components(res_age, what = "rates")
+```
+
+```{r}
+components(res_age, what = "age_effect")
 ```
 
 
 ```{r}
-ans_df <- augment(ans)
+rates_age_df <- augment(res_age)
+rates_age_df
+```
+
+```{r}
+ggplot(rates_age_df, aes(x = age)) +
+  facet_wrap(vars(sex)) +
+  geom_pointrange(aes(ymin = .lower, y = .fitted, ymax = .upper)) +
+  geom_point(aes(y = .observed), col = "blue")
+```
+
+## Smoothing across age and time
+
+
+```{r}
+res_agetime <- smooth_agetime(nevent_df = nz_divorces,
+                              py_df = nz_population,
+                              byvar = "sex")
+```
+
+
+```{r}
+rates_agetime_df <- augment(res_agetime)
 ```
 
 ```{r, fig.width = 7, fig.height = 7}
-ggplot(ans_df, aes(x = time)) +
+ggplot(rates_agetime_df, aes(x = time)) +
   facet_wrap(vars(age)) +
   geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
               alpha = 0.6) +
@@ -44,17 +82,20 @@ ggplot(ans_df, aes(x = time)) +
 
 
 ```{r}
-age_effect <- components(ans, what = "age_effect")
+age_effect <- components(res_agetime, what = "age_effect")
 ggplot(age_effect, aes(x = age)) +
   facet_wrap(vars(sex)) +
   geom_pointrange(aes(ymin = .lower, y = .fitted, ymax = .upper))
 ```
 
 ```{r}
-time_effect <- components(ans, what = "time_effect") 
-ggplot(time_effect, aes(x = time)) +
-  facet_wrap(vars(sex)) + 
-  geom_ribbon(aes(ymin = .lower, ymax = .upper),
-              alpha = 0.6) +
+time_effect <- components(res_agetime, what = "time_effect") 
+head(time_effect)
+```
+
+```{r}
+ggplot(time_effect, aes(x = time, y = .fitted, color = sex)) +
+  facet_wrap(vars(age)) +
   geom_line(aes(y = .fitted))
 ```
+

@@ -369,7 +369,7 @@ test_that("'make_draws_post_one_withtime' works", {
 test_that("'make_draws_time_effect' works - main effect", {
     draws_all <- matrix((1:200)/100, nc = 10)
     offset <- 7L
-    labels_time <- c("2000", "2001", "2002", "2003")
+    labels_time <- 2000:2003
     colnames(draws_all) <- c(rep("", 6), paste0("effect.", labels_time))
     spec_time <- TimeFixed()
     X_time <- make_X_time(spec_time, labels_time = labels_time)
@@ -390,7 +390,7 @@ test_that("'make_draws_time_effect' works - interaction", {
     draws_all <- matrix((1:200)/100, nc = 10)
     offset <- 2L
     labels_age <- c("0-4", "5-9", "10-14")
-    labels_time <- c("2000", "2001", "2002", "2003")
+    labels_time <- 2000:2003
     colnames(draws_all) <- c(rep("", 6), paste0("effect.", labels_time))
     spec_age <- RW2()
     spec_time <- TimeVarying()
