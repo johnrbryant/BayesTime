@@ -1,6 +1,12 @@
 
 ## 'get_scale' ----------------------------------------------------------------
 
+test_that("'get_scale' works with BayesRates_spec_timenull", {
+    spec <- new_BayesRates_spec_timenull()
+    expect_identical(get_scale(spec),
+                     c(scale = 0))
+})
+
 test_that("'get_scale' works with BayesRates_spec_timefixed", {
     spec <- TimeFixed()
     expect_identical(get_scale(spec),
@@ -61,6 +67,16 @@ test_that("'get_transforms_hyper' works with rw2", {
 })
 
 
+## 'has_time_var' -----------------------------------------------------------
+
+test_that("'has_time_var' works", {
+    expect_false(has_time_var(new_BayesRates_spec_timenull()))
+    expect_true(has_time_var(TimeFixed()))
+    expect_true(has_time_var(TimeVarying()))
+    expect_error(has_time_var(RW2()))
+})
+
+
 ## 'is_interaction' -----------------------------------------------------------
 
 test_that("'is_interaction' works", {
@@ -72,6 +88,14 @@ test_that("'is_interaction' works", {
 
 
 ## 'make_map' -----------------------------------------------------------------
+
+test_that("'make_map' works with spec_timenull", {
+    spec <- new_BayesRates_spec_timenull()
+    expect_identical(make_map(spec),
+                     list(log_sd_time = factor(NA),
+                          logit_rho_time = factor(NA),
+                          parfree_time = factor(NA)))
+})
 
 test_that("'make_map' works with spec_timefixed", {
     spec <- TimeFixed()
@@ -105,6 +129,16 @@ test_that("'make_parfree_age' works with spline", {
 
 ## 'make_parfree_time' ---------------------------------------------------------
 
+test_that("'make_parfree_time' works with timenull", {
+    spec <- new_BayesRates_spec_timenull()
+    labels_age <- c("0-4", "5-9", "10-14")
+    labels_time <- 2001:2004
+    expect_identical(make_parfree_time(spec,
+                                       labels_age = labels_age,
+                                       labels_time = labels_time),
+                     matrix(0, nr = 1, nc = 1))
+})
+
 test_that("'make_parfree_time' works with timefixed", {
     spec <- TimeFixed()
     labels_age <- c("0-4", "5-9", "10-14")
@@ -127,6 +161,27 @@ test_that("'make_parfree_time' works with timevarying", {
                      matrix(0, nr = 3, nc = 2,
                             dimnames = list(labels_age,
                                             c("parfree_time.1", "parfree_time.2"))))
+})
+
+
+## 'make_random' --------------------------------------------------------------
+
+test_that("'make_random' works with timenull", {
+    spec <- new_BayesRates_spec_timenull()
+    expect_identical(make_random(spec),
+                     "parfree_age")
+})
+
+test_that("'make_random' works with timefixed", {
+    spec <- TimeFixed()
+    expect_identical(make_random(spec),
+                     c("parfree_age", "parfree_time"))
+})
+
+test_that("'make_random' works with timevarying", {
+    spec <- TimeVarying()
+    expect_identical(make_random(spec),
+                     c("parfree_age", "parfree_time"))
 })
 
 
@@ -182,7 +237,7 @@ test_that("'make_X_age_subspace' works with spline", {
 
 ## 'make_X_time' ---------------------------------------------------------------
 
-test_that("'make_X_time' works with timefxed", {
+test_that("'make_X_time' works with timefixed", {
     labels_time <- 2001:2003
     spec <- TimeFixed()
     ans_obtained <- make_X_time(spec, labels_time = labels_time)
@@ -197,6 +252,7 @@ test_that("'make_X_time' works with timefxed", {
 ## 'n_hyper' ------------------------------------------------------------------
 
 test_that("'n_hyper' works", {
+    expect_identical(n_hyper(new_BayesRates_spec_timenull()), 0L)
     expect_identical(n_hyper(TimeFixed()), 1L)
     expect_identical(n_hyper(TimeVarying()), 2L)
     expect_identical(n_hyper(Spline()), 2L)

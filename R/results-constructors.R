@@ -1,25 +1,30 @@
 
-#' Create object to hold results from function
-#' 'smooth.agetime'
+
+#' Create object to hold results from functions
+#' 'smooth_age' and 'smooth_agetime'
 #'
-#' As the interface for BayesRates develops,
-#' we may modify the "BayesRates_results"
-#' class.
+#' The object holds multiple copies of some
+#' objects, eg 'spec_age' is held in the
+#' object itself, and in each element of
+#' 'fitted'. This uses a tiny bit of extra space,
+#' but is convenient.
 #'
 #' @param nevent_df Data frame describing events.
 #' @param py_df Data frame describing exposure.
 #' @param agevar Name of the age variable.
-#' @param timevar Name of the time variable.
+#' @param timevar Name of time variable, or NULL.
 #' @param byvar Names of classification variables,
 #' other than age and time.
-#' @param spec_age Prior model for age effect.
-#' Current choices: `"Spline"`, `"RW2"`.
-#' @param spec_time Prior model for time effect. Current choices:
-#' `"AR1"`, `"LocalTrend"`.
-#' @param draws_post List of tibbles with draws from
+#' @param spec_age Specification of prior model for
+#' age effect.
+#' @param spec_time Specification of prior model for
+#' time effect.
+#' @param fitted List of tibbles with draws from
 #' posterior distribution.
+#' @param vals_by List of data frames with
+#' levels of byvar.
 #'
-#' @returns An object of class "BayesRates_results".
+#' @returns An object of class "BayesRates_results_notime".
 #'
 #' @noRd
 new_BayesRates_results <- function(nevent_df,
@@ -29,7 +34,8 @@ new_BayesRates_results <- function(nevent_df,
                                    byvar,
                                    spec_age,
                                    spec_time,
-                                   draws_post) {
+                                   fitted,
+                                   vals_by) {
     ans <- list(nevent_df = nevent_df,
                 py_df = py_df,
                 agevar = agevar,
@@ -37,7 +43,8 @@ new_BayesRates_results <- function(nevent_df,
                 byvar = byvar,
                 spec_age = spec_age,
                 spec_time = spec_time,
-                draws_post = draws_post)
+                fitted = fitted,
+                vals_by = vals_by)
     class(ans) <- "BayesRates_results"
     ans
 }

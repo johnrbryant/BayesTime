@@ -4,41 +4,74 @@
 \alias{components.BayesRates_results}
 \title{Extract components from a results object}
 \usage{
-\method{components}{BayesRates_results}(object, what, width = 0.95, ...)
+\method{components}{BayesRates_results}(object, what = "rates", n_draw = 1000, width = 0.95, ...)
 }
 \arguments{
 \item{object}{A results object.}
 
-\item{what}{Component to be extracted.}
+\item{what}{Components to be extracted.
+Default is \code{"rates"}.}
+
+\item{n_draw}{Number of draws from posterior distribution
+to use in output. Default is \code{1000}.}
 
 \item{width}{Width of credible intervals.
-A number between 0 and 1. Defaults to 0.95.}
+A number between 0 and 1. Default is \code{0.95}.}
 
 \item{...}{Not currently used.}
 }
 \value{
-A \link[tibble:tibble-package]{tibble}.
+The return value depends on the value supplied for \code{what}:
+\itemize{
+\item If \code{what} is a single name (eg \code{"rates"}), then \code{components()}
+returns a \link[tibble:tibble-package]{tibbles}
+\item If \code{what} is two or more names (eg \code{c("rates", "age_effect")}),
+then \code{components()} returns a named list of tibbles.
+}
 }
 \description{
 Extract components from an object
-of class \code{"BayesRates_results"}.
+created by a call to \code{\link[=smooth_age]{smooth_age()}}
+or \code{\link[=smooth_agetime]{smooth_agetime()}}.
 }
 \details{
-The components that can be extracted are:
+If the object was created by a call to
+\code{\link[=smooth_age]{smooth_age()}}, then the components that can be extracted are:
+\itemize{
+\item \code{"rates"} Rates disaggregated by variables specified
+in \code{agevar} and \code{byvar} arguments.
+\item \code{"age_effect"} Age main effect.
+\item \code{"age_hyper"} Hyper-parameters for age main effect.
+}
+
+If the object was created by a call to \code{\link[=smooth_agetime]{smooth_agetime()}},
+then the components that can be extracted are
 \itemize{
 \item \code{"rates"} Rates disaggregated by variables specified
 in \code{agevar}, \code{timevar}, and \code{byvar} arguments.
 \item \code{"age_effect"} Age main effect.
-\item \code{"time_effect"} Time main effect.
-\item \code{"age_hyper"} Hyper-parametrs for age main effect.
-\item \code{"time_hyper"} Hyper-parametrs for time main effect.
+\item \code{"time_effect"} Time main effect or age-time interaction.
+\item \code{"age_hyper"} Hyper-parametres for age main effect.
+\item \code{"time_hyper"} Hyper-parameters for time main effect or
+age-time interaction.
 }
 }
 \examples{
-results <- smooth.agetime(nevent_df = nz_divorces,
-                          py_df = nz_population)
+## extract data for 2020 
+nz_divorces_2020 <- subset(nz_divorces,
+                           time == 2020,
+                           select = c(age, sex, nevent))
+nz_popn_2020 <- subset(nz_population,
+                       time == 2020,
+                       select = c(age, sex, py))
+
+## run age-only model
+results <- smooth_age(nevent_df = nz_divorces_2020,
+                      py_df = nz_popn_2020)
+
+## extract components
 components(results, what = "age_effect")
-components(results, what = "time_effect")
+components(results, what = c("rates", "age_effect"))
 }
 \seealso{
 \code{\link[=augment]{augment()}}

@@ -1,7 +1,29 @@
 
-## 'combine_draws_effects' ----------------------------------------------------
 
-test_that("'combine_draws_effects' works with valid input - time main effect", {
+## 'combine_draws_effects_notime' ---------------------------------------------
+
+test_that("'combine_draws_effects_notime' works with valid input", {
+    set.seed(0)
+    intercept <- tibble(draw = 1:20,
+                        .value = rnorm(20))
+    age_effect <- tibble(draw = rep(1:20, times = 4),
+                         Age = rep(c("0-4", "5-9", "10-14", "15-19"), each = 20),
+                         .value = rnorm(80))
+    ans_obtained <- combine_draws_effects_notime(intercept = intercept,
+                                                 age_effect = age_effect)
+    ans_expected <- merge(intercept, age_effect, by = "draw")
+    value <- with(ans_expected, exp(.value.x + .value.y))
+    ans_expected <- ans_expected[c("draw", "Age")]
+    ans_expected$.value <- value
+    ans_expected <- ans_expected[with(ans_expected, order(draw, Age)), ]
+    ans_expected <- tibble(ans_expected)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'combine_draws_effects_withtime' -------------------------------------------
+
+test_that("'combine_draws_effects_withtime' works with valid input - time main effect", {
     set.seed(0)
     intercept <- tibble(draw = 1:20,
                             .value = rnorm(20))
@@ -11,7 +33,7 @@ test_that("'combine_draws_effects' works with valid input - time main effect", {
     time_effect <- tibble(draw = rep(1:20, times = 5),
                               Time = rep(2001:2005, each = 20),
                               .value = rnorm(100))
-    ans_obtained <- combine_draws_effects(intercept = intercept,
+    ans_obtained <- combine_draws_effects_withtime(intercept = intercept,
                                           age_effect = age_effect,
                                           time_effect = time_effect)
     ans_expected <- merge(merge(intercept, age_effect, by = "draw"), time_effect, by = "draw")
@@ -23,7 +45,7 @@ test_that("'combine_draws_effects' works with valid input - time main effect", {
     expect_identical(ans_obtained, ans_expected)
 })
 
-test_that("'combine_draws_effects' works with valid input - age-time interaction", {
+test_that("'combine_draws_effects_withtime' works with valid input - age-time interaction", {
     set.seed(0)
     intercept <- tibble(draw = 1:20,
                             .value = rnorm(20))
@@ -34,7 +56,7 @@ test_that("'combine_draws_effects' works with valid input - age-time interaction
                           Age = rep(rep(c("0-4", "5-9", "10-14", "15-19"), each = 20), times = 5),
                           Time = rep(2001:2005, each = 80),
                           .value = rnorm(400))
-    ans_obtained <- combine_draws_effects(intercept = intercept,
+    ans_obtained <- combine_draws_effects_withtime(intercept = intercept,
                                           age_effect = age_effect,
                                           time_effect = time_effect)
     ans_expected <- merge(merge(intercept, age_effect, by = "draw"), time_effect, by = c("draw", "Age"))
@@ -219,6 +241,98 @@ test_that("'make_draws_hyper' works", {
 
 test_that("'make_draws_post' works", {
     set.seed(0)
+    nevent_df <- expand.grid(age = 0:9, time = 1:5, sex = c("F", "M"),
+                             KEEP.OUT.ATTRS = FALSE)
+    py_df <- expand.grid(age = 0:9, time = 1:5, sex = c("F", "M"),
+                         KEEP.OUT.ATTRS = FALSE)
+    nevent_df$nevent <- rpois(n = nrow(nevent_df), lambda = 10)
+    py_df$py <- 100
+    obj <- smooth_agetime(nevent_df = nevent_df,
+                          py_df = py_df,
+                          byvar = "sex",
+                          spec_age = RW2(),
+                          spec_time = TimeFixed())
+    ans <- make_draws_post(object = obj,
+                           n_draw = 10)
+    expect_identical(names(ans),
+                     c("rates", "intercept", "age_effect",
+                       "time_effect", "age_hyper", "time_hyper"))
+    nd <- sapply(ans, function(x) length(unique(x$draw)))
+    expect_true(all(nd == nd[1]))
+    draw_is_int <- sapply(ans, function(x) is.integer(x$draw))
+    expect_true(all(draw_is_int))
+})
+
+
+
+## 'make_draws_post_one_notime' -----------------------------------------------
+
+test_that("'make_draws_post_one_notime' works", {
+    set.seed(0)
+    nevent <- matrix(rpois(20, lambda = 1:20),
+                     nrow = 20,
+                     ncol = 1,
+                     dimnames = list(AGE = 0:19, NULL))
+    nevent_df <- as.data.frame.table(nevent, stringsAsFactors = FALSE)
+    nevent_df$AGE <- factor(nevent_df$AGE)
+    py <- matrix(1000,
+                 nrow = 20,
+                 ncol = 1,
+                 dimnames = list(AGE = 0:19, NULL))
+    spec_age <- RW2()
+    spec_time <- new_BayesRates_spec_timenull()
+    fitted <- make_fitted(nevent = nevent,
+                          py = py,
+                          spec_age = spec_age,
+                          spec_time = spec_time)
+    ans <- make_draws_post_one_notime(fitted = fitted,
+                                      agevar = "AGE",
+                                      n_draw = 10)
+    expect_identical(names(ans),
+                     c("rates", "intercept", "age_effect", "age_hyper"))
+    nd <- sapply(ans, function(x) length(unique(x$draw)))
+    expect_true(all(nd == nd[1]))
+    draw_is_int <- sapply(ans, function(x) is.integer(x$draw))
+    expect_true(all(draw_is_int))
+})
+
+
+## 'make_draws_post_one_notime' -----------------------------------------------
+
+test_that("'make_draws_post_one_notime' works", {
+    set.seed(0)
+    nevent <- matrix(rpois(20, lambda = 1:20),
+                     nrow = 20,
+                     ncol = 1,
+                     dimnames = list(AGE = 0:19, NULL))
+    nevent_df <- as.data.frame.table(nevent, stringsAsFactors = FALSE)
+    nevent_df$AGE <- factor(nevent_df$AGE)
+    py <- matrix(1000,
+                 nrow = 20,
+                 ncol = 1,
+                 dimnames = list(AGE = 0:19, NULL))
+    spec_age <- RW2()
+    spec_time <- new_BayesRates_spec_timenull()
+    fitted <- make_fitted(nevent = nevent,
+                          py = py,
+                          spec_age = spec_age,
+                          spec_time = spec_time)
+    ans <- make_draws_post_one_notime(fitted = fitted,
+                                      agevar = "AGE",
+                                      n_draw = 10)
+    expect_identical(names(ans),
+                     c("rates", "intercept", "age_effect", "age_hyper"))
+    nd <- sapply(ans, function(x) length(unique(x$draw)))
+    expect_true(all(nd == nd[1]))
+    draw_is_int <- sapply(ans, function(x) is.integer(x$draw))
+    expect_true(all(draw_is_int))
+})
+
+
+## 'make_draws_post_one_withtime' ---------------------------------------------
+
+test_that("'make_draws_post_one_withtime' works", {
+    set.seed(0)
     nevent <- matrix(rpois(100, lambda = rep(1:20, each = 50)),
                      nrow = 5,
                      ncol = 20,
@@ -236,11 +350,10 @@ test_that("'make_draws_post' works", {
                           py = py,
                           spec_age = spec_age,
                           spec_time = spec_time)
-    ans <- make_draws_post(fitted = fitted,
-                           n_draw = 10,
-                           nevent_df = nevent_df,
-                           agevar = "AGE",
-                           timevar = "TIME")
+    ans <- make_draws_post_one_withtime(fitted = fitted,
+                                        agevar = "AGE",
+                                        timevar = "TIME",
+                                        n_draw = 10L)
     expect_identical(names(ans),
                      c("rates", "intercept", "age_effect",
                        "time_effect", "age_hyper", "time_hyper"))
@@ -387,7 +500,7 @@ test_that("'make_rw2_matrix' works", {
 })
 
 
-## 'make_spline_matrix' ----------------------------------------------------------
+## 'make_spline_matrix' -------------------------------------------------------
 
 test_that("'make_spline_matrix' works", {
     set.seed(0)
@@ -399,9 +512,27 @@ test_that("'make_spline_matrix' works", {
 })
 
 
-## 'merge_byvar_with_post' ----------------------------------------------------
+## 'make_vals_by' -------------------------------------------------------------
 
-test_that("'merge_byvar_with_post' works", {
+test_that("'make_vals_by' works", {
+    df <- expand.grid(age = 0:4, sex = c("F", "M"), reg = c("a", "b"), time = 2001:2005,
+                      KEEP.OUT.ATTRS = FALSE,
+                      stringsAsFactors = FALSE)
+    df$nevent <- 2
+    df$py <- 10
+    byvar <- c("reg", "sex")
+    ans_obtained <- make_vals_by(df = df, byvar = byvar)
+    ans_expected <- list('a.F' = tibble(reg = "a", sex = "F"),
+                         'b.F' = tibble(reg = "b", sex = "F"),
+                         'a.M' = tibble(reg = "a", sex = "M"),
+                         'b.M' = tibble(reg = "b", sex = "M"))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'merge_draws_with_vals_by' -------------------------------------------------
+
+test_that("'merge_draws_with_vals_by' works", {
     set.seed(0)
     nevent <- matrix(rpois(100, lambda = rep(1:20, each = 50)),
                      nrow = 5,
@@ -420,17 +551,16 @@ test_that("'merge_byvar_with_post' works", {
                           py = py,
                           spec_age = spec_age,
                           spec_time = spec_time)
-    post <- make_draws_post(fitted = fitted,
-                            n_draw = 10,
-                            nevent_df = nevent_df,
-                            agevar = "AGE",
-                            timevar = "TIME")
-    post <- list(post, post)
-    data <- list(data.frame(sex = "Female"),
-                 data.frame(sex = "Male"))
-    ans <- merge_byvar_with_post(draws_post = post,
-                                 data = data,
-                                 byvar = "sex")
+    draws <- make_draws_post_one_withtime(fitted = fitted,
+                                          agevar = "AGE",
+                                          timevar = "TIME",
+                                          n_draw = 10)
+    draws <- list(draws, draws)
+    df <- data.frame(rbind(nevent_df[c("AGE", "TIME")], nevent_df[c("AGE", "TIME")]),
+                     sex = rep(c("Female", "Male"), each = 100))
+    vals_by <- make_vals_by(df, byvar = "sex")
+    ans <- merge_draws_with_vals_by(draws = draws,
+                                    vals_by = vals_by)
     expect_identical(names(ans),
                      c("rates",
                        "intercept",

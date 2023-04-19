@@ -22,6 +22,12 @@ get_scale.BayesRates_spec <- function(spec) {
     c(scale = spec$scale)      
 }
 
+## HAS_TESTS
+#' @export
+get_scale.BayesRates_spec_timenull <- function(spec) {
+    c(scale = 0)
+}
+
 
 ## 'get_transforms_hyper' -----------------------------------------------------
 
@@ -63,6 +69,39 @@ get_transforms_hyper.BayesRates_spec_spline <- function(model) {
     list(sd = exp,
          slope = function(x) x)
 }
+
+
+## 'has_time_var' -------------------------------------------------------------
+
+#' Whether a prior model allows for a time variable
+#'
+#' @param spec An object of class "BayesRates_spec"
+#'
+#' @returns TRUE or FALSE
+#'
+#' @noRd
+has_time_var <- function(spec) {
+  UseMethod("has_time_var")
+}
+
+## HAS_TESTS
+#' @export
+has_time_var.BayesRates_spec_timenull <- function(spec) {
+    FALSE
+}
+
+## HAS_TESTS
+#' @export
+has_time_var.BayesRates_spec_timefixed <- function(spec) {
+    TRUE
+}
+
+## HAS_TESTS
+#' @export
+has_time_var.BayesRates_spec_timevarying <- function(spec) {
+    TRUE
+}
+
 
 
 ## 'is_interaction' ------------------------------------------------------------
@@ -108,6 +147,14 @@ make_map <- function(spec, labels_age) {
     UseMethod("make_map")
 }
 
+
+## HAS_TESTS
+#' @export
+make_map.BayesRates_spec_timenull <- function(spec) {
+    list(log_sd_time = factor(NA),
+         logit_rho_time = factor(NA),
+         parfree_time = factor(NA))
+}
 
 ## HAS_TESTS
 #' @export
@@ -179,6 +226,14 @@ make_parfree_time <- function(spec, labels_age, labels_time) {
 
 ## HAS_TESTS
 #' @export
+make_parfree_time.BayesRates_spec_timenull <- function(spec,
+                                                       labels_age,
+                                                       labels_time) {
+    matrix(0, nrow = 1L, ncol = 1L)
+}
+
+## HAS_TESTS
+#' @export
 make_parfree_time.BayesRates_spec_timefixed <- function(spec,
                                                         labels_age,
                                                         labels_time) {
@@ -199,6 +254,34 @@ make_parfree_time.BayesRates_spec_timevarying <- function(spec,
     dimnames(ans) <- list(labels_age,
                           paste0("parfree_time.", seq_len(n_time - 1L)))
     ans
+}
+
+## 'make_random' --------------------------------------------------------------
+
+#' Make 'random' argument for MakeADFun
+#'
+#' Make 'random' argument, which is used to identify
+#' random effects
+#' 
+#' @param spec An object of class "BayesRates_spec"
+#'
+#' @returns A list or NULL
+#'
+#' @noRd
+make_random <- function(spec) {
+    UseMethod("make_random")
+}
+
+## HAS_TESTS
+#' @export
+make_random.BayesRates_spec <- function(spec) {
+    c("parfree_age", "parfree_time")
+}
+
+## HAS_TESTS
+#' @export
+make_random.BayesRates_spec_timenull <- function(spec) {
+    "parfree_age"
 }
 
 
@@ -295,6 +378,12 @@ make_X_time <- function(spec, labels_time) {
 
 ## HAS_TESTS
 #' @export
+make_X_time.BayesRates_spec_timenull <- function(spec, labels_time) {
+    Matrix::sparseMatrix(i = 1L, j = 1L, x = 0)
+}
+
+## HAS_TESTS
+#' @export
 make_X_time.BayesRates_spec_timefixed <- function(spec, labels_time) {
     n_time <- length(labels_time)
     ans <- make_rw_matrix(n_time)
@@ -329,6 +418,12 @@ n_hyper <- function(spec) {
 
 ## HAS_TESTS
 #' @export
+n_hyper.BayesRates_spec_timenull <- function(spec) {
+    0L
+}
+
+## HAS_TESTS
+#' @export
 n_hyper.BayesRates_spec_timefixed <- function(spec) {
     1L
 }
@@ -355,23 +450,17 @@ n_hyper.BayesRates_spec_rw2 <- function(spec) {
 ## 'print' --------------------------------------------------------------------
 
 #' @export
-print.BayesRates_spec_ar1 <- function(x, ...) {
+print.BayesRates_spec_timefixed <- function(x, ...) {
     nchar_offset <- 15
     cat("< Object of class \"", class(x)[[1L]], "\" >\n", sep = "")
-    cat(sprintf("% *s: %s\n", nchar_offset, "coef_min", x$coef_min))
-    cat(sprintf("% *s: %s\n", nchar_offset, "coef_max", x$coef_max))
-    cat(sprintf("% *s: %s\n", nchar_offset, "mean", x$mean))
-    cat(sprintf("% *s: %s\n", nchar_offset, "sd", x$sd))
     cat(sprintf("% *s: %s\n", nchar_offset, "scale", x$scale))
 }
 
 #' @export
-print.BayesRates_spec_localtrend <- function(x, ...) {
+print.BayesRates_spec_timevarying <- function(x, ...) {
     nchar_offset <- 15
     cat("< Object of class \"", class(x)[[1L]], "\" >\n", sep = "")
-    cat(sprintf("% *s: %s\n", nchar_offset, "scale_effect", x$scale_effect))
-    cat(sprintf("% *s: %s\n", nchar_offset, "scale_level", x$scale_level))
-    cat(sprintf("% *s: %s\n", nchar_offset, "scale_trend", x$scale_trend))
+    cat(sprintf("% *s: %s\n", nchar_offset, "scale", x$scale_effect))
 }
 
 #' @export

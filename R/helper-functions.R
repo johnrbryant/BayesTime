@@ -1,5 +1,32 @@
 
 ## HAS_TESTS
+#' Combine posterior samples for intercept and age effect,
+#' and then exponentiate,
+#' to obtain a posterior sample for rates
+#'
+#' @param intercept Data frame containing posterior sample
+#' for intercept
+#' @param age_effect Data frame containing posterior sample
+#' for age effect
+#' @returns A tibble with columns 'draw', agevar, '.value'
+#'
+#' @noRd
+combine_draws_effects_notime <- function(intercept,
+                                           age_effect) {
+    names(intercept)[match(".value", names(intercept))] <- ".intercept"
+    names(age_effect)[match(".value", names(age_effect))] <- ".age_effect"
+    ans <- merge(intercept, age_effect)
+    ans$.value <- with(ans, exp(.intercept + .age_effect))
+    ans <- ans[-match(c(".intercept", ".age_effect"), names(ans))]
+    nms_ord <- setdiff(names(ans), ".value")
+    ord <- do.call(order, ans[nms_ord])
+    ans <- ans[ord, , drop = FALSE]
+    ans <- tibble(ans)
+    ans
+}
+
+
+## HAS_TESTS
 #' Combine posterior samples for intercept, age effect,
 #' and time effect, and then exponentiate,
 #' to obtain a posterior sample for rates
@@ -14,7 +41,7 @@
 #' @returns A tibble with columns 'draw', agevar, timevar, '.value'
 #'
 #' @noRd
-combine_draws_effects <- function(intercept,
+combine_draws_effects_withtime <- function(intercept,
                                   age_effect,
                                   time_effect) {
     names(intercept)[match(".value", names(intercept))] <- ".intercept"
@@ -320,20 +347,97 @@ make_draws_intercept <- function(draws_all) {
 
 
 ## HAS_TESTS
-#' Extract posterior draws from fitted model
+#' Extract and combine posterior draws from
+#' multiple fitted models
 #'
-#' @param fitted A named list. Output from
-#' function 'smooth_agetime_inner'
+#' @param object An object of class "BayesRates_results",
+#' created by a call to [smooth_age()] or
+#' [smooth_agetime()].
 #' @param n_draw Number of posterior draws
-#' @param nevent_df Data frame containing
-#' data on events
-#' @param agevar Name of age variable
-#' @param timevar Name of time variable
 #'
 #' @returns A named list of tibbles.
 #'
 #' @noRd
-make_draws_post <- function(fitted, n_draw, nevent_df, agevar, timevar) {
+make_draws_post <- function(object, n_draw) {
+    agevar <- object$agevar
+    timevar <- object$timevar
+    spec_time <- object$spec_time
+    fitted <- object$fitted
+    vals_by <- object$vals_by
+    has_time_var <- has_time_var(spec_time)
+    if (has_time_var)
+        draws <- lapply(fitted,
+                        make_draws_post_one_withtime,
+                        agevar = agevar,
+                        timevar = timevar,
+                        n_draw = n_draw)
+    else
+        draws <- lapply(fitted,
+                        make_draws_post_one_notime,
+                        agevar = agevar,
+                        n_draw = n_draw)
+    ans <- merge_draws_with_vals_by(draws = draws,
+                                    vals_by = vals_by)
+    ans
+}
+    
+
+## HAS_TESTS
+#' Extract posterior draws from single fitted model
+#' that does not include a time variable
+#'
+#' @param object An object of class "BayesRates_results",
+#' created by a call to [smooth_age()].
+#' @param agevar Name of age variable
+#' @param n_draw Number of posterior draws
+#'
+#' @returns A named list of tibbles.
+#'
+#' @noRd
+make_draws_post_one_notime <- function(fitted, agevar, n_draw) {
+    mean <- fitted$mean
+    prec <- fitted$prec
+    spec_age <- fitted$spec_age
+    X_age_parfree <- fitted$X_age_parfree
+    X_age_subspace <- fitted$X_age_subspace
+    draws_all <- rmvn(n = n_draw,
+                      mean = mean,
+                      prec = prec)
+    intercept <- make_draws_intercept(draws_all)
+    offset <- 2L
+    age_hyper <- make_draws_hyper(draws_all = draws_all,
+                                  offset = offset,
+                                  spec = spec_age)
+    offset <- offset + n_hyper(spec_age)
+    age_effect <- make_draws_age_effect(draws_all = draws_all,
+                                        offset = offset,
+                                        X_age_parfree = X_age_parfree,
+                                        X_age_subspace = X_age_subspace,
+                                        agevar = agevar,
+                                        age_hyper = age_hyper)
+    rates <- combine_draws_effects_notime(intercept = intercept,
+                                          age_effect = age_effect)
+    list(rates = rates,
+         intercept = intercept,
+         age_effect = age_effect,
+         age_hyper = age_hyper)
+}
+
+
+## HAS_TESTS
+#' Extract posterior draws from single fitted model
+#' that includes a time variable
+#'
+#' @param object An object of class "BayesRates_results",
+#' created by a call to [smooth_agetime()].
+#' @param agevar Name of the age variable
+#' @param timevar Name of the time variable
+#' @param n_draw Number of posterior draws
+#'
+#' @returns A named list of tibbles.
+#'
+#' @noRd
+make_draws_post_one_withtime <- function(fitted, agevar, timevar, n_draw) {
     mean <- fitted$mean
     prec <- fitted$prec
     spec_age <- fitted$spec_age
@@ -368,9 +472,9 @@ make_draws_post <- function(fitted, n_draw, nevent_df, agevar, timevar) {
                                           timevar = timevar,
                                           X_age_subspace = X_age_subspace,
                                           X_time = X_time)
-    rates <- combine_draws_effects(intercept = intercept,
-                                   age_effect = age_effect,
-                                   time_effect = time_effect)
+    rates <- combine_draws_effects_withtime(intercept = intercept,
+                                            age_effect = age_effect,
+                                            time_effect = time_effect)
     list(rates = rates,
          intercept = intercept,
          age_effect = age_effect,
@@ -457,7 +561,7 @@ make_draws_time_effect <- function(draws_all,
 
 #' Fit model
 #'
-#' Workhorse function for `smooth.agetime()`.
+#' Workhorse function for `smooth_agetime()`.
 #' Given matrices of events and
 #' person-years at risk, plus prior
 #' models for age and time, approximate the
@@ -514,12 +618,13 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
                       parfree_age = parfree_age,
                       parfree_time = parfree_time)
     map <- make_map(spec_time)
+    random <- make_random(spec_time)
     ## optimisation
     f <- TMB::MakeADFun(data = data,
                         parameters = parameters,
                         DLL = "BayesRates",
                         map = map,
-                        random = c("parfree_age", "parfree_time"),
+                        random = random,
                         silent = TRUE)
     suppressWarnings(
         convergence <- stats::nlminb(start = f$par,
@@ -624,39 +729,65 @@ make_spline_matrix <- function(n, df) {
 
 
 ## HAS_TESTS
+#' Store values of 'by' variable(s) in form
+#' that is convenient for merging with
+#' posterior draws
+#'
+#' @param df Data frame created by merging
+#' nevent_df and py_df
+#' @param byvar Name(s) of 'by' variables.
+#' Can have length 0.
+#'
+#' @returns A list, possibly empty.
+#'
+#' @noRd
+make_vals_by <- function(df, byvar) {
+    if (length(byvar) > 0L) {
+        ans <- split(df[byvar], df[byvar])
+        ans <- lapply(ans, unique)
+        ans <- lapply(ans, tibble::tibble)
+    }
+    else
+        ans <- list()
+    ans
+}
+    
+
+## HAS_TESTS
 #' Merge 'by' variables into posterior draws and rbind results
 #'
 #' @param draws_post List of lists. Each element of the inner
 #' list is a set of posterior samples for a particular combination
 #' of 'by' variables.
 #' @param data List of data frames used as input for fitting.
-#' @param byvar Names of 'by' variables. Can have zero length.
 #'
 #' @return A list of tibbles.
 #'
 #' @noRd
-merge_byvar_with_post <- function(draws_post, data, byvar) {
-    has_by <- length(byvar) > 0L
+merge_draws_with_vals_by <- function(draws, vals_by) {
+    n_by <- length(vals_by)
+    has_by <- n_by > 0L
     if (has_by) {
-        by <- lapply(data, function(x) unique(x[byvar])) ## split in same way as 'data' arg
-        n_by <- length(by)
-        nms_elements <- names(draws_post[[1L]])
+        nms_elements <- names(draws[[1L]])
         n_element <- length(nms_elements)
+        ## create list of length n_element x n_by
         ans <- .mapply(merge,
-                       dots = list(x = rep(by, each = n_element),
-                                   y = unlist(draws_post, recursive = FALSE)),
+                       dots = list(x = rep(vals_by, each = n_element),
+                                   y = unlist(draws, recursive = FALSE)),
                        MoreArgs = list())
+        ## turn into matrix with dim c(n_by, n_element), using byrow = TRUE
         ans <- matrix(ans, nrow = n_by, ncol = n_element, byrow = TRUE)
+        ## rbind columns
         ans <- apply(ans, 2L, function(args) do.call(rbind, args), simplify = FALSE)
         ans <- lapply(ans, tibble::tibble)
         names(ans) <- nms_elements
-        ans
     }
     else
-        draws_post[[1L]]
+        ans <- draws[[1L]]
+    ans
 }
 
-    
+
 ## HAS_TESTS    
 #' Reformat age variable so it has same class as target
 #'

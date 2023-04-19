@@ -58,13 +58,15 @@ Type objective_function<Type>::operator() ()
 
   // contribution to log-posterior from parameters for time/age-time
 
-  Type sd_time = exp(log_sd_time);
-  ans -= dnorm(sd_time, Type(0), scale_time, true) + log_sd_time;
   if (class_spec_time == "spec_timefixed") {
+    Type sd_time = exp(log_sd_time);
+    ans -= dnorm(sd_time, Type(0), scale_time, true) + log_sd_time;
     for (int t = 0; t < T - 1; t++)
       ans -= dnorm(parfree_time(0, t), Type(0), sd_time, true);
   }
   else if (class_spec_time == "spec_timevarying") {
+    Type sd_time = exp(log_sd_time);
+    ans -= dnorm(sd_time, Type(0), scale_time, true) + log_sd_time;
     Type rho = exp(logit_rho_time) / (1 + exp(logit_rho_time));
     ans -= dbeta(rho, Type(2), Type(2), true) + log(rho) + log(1 - rho);
     matrix<Type> V(A, A);
@@ -108,7 +110,8 @@ Type objective_function<Type>::operator() ()
     }
   }
   else if (class_spec_time == "spec_timenull") {
-    // do nothing - leave at initial value of 0
+    for (int a = 0; a < A; a++)
+      agetime_term(a, 0) = Type(0);
   }
   else {
     error("invalid value for 'class_spec_time'");

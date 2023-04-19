@@ -4,31 +4,38 @@
 \alias{augment.BayesRates_results}
 \title{Data and values from a results object}
 \usage{
-\method{augment}{BayesRates_results}(x, ...)
+\method{augment}{BayesRates_results}(x, n_draw = 1000, width = 0.95, ...)
 }
 \arguments{
 \item{x}{A \code{"BayesRates_results"} object created
-by calling function \code{\link[=smooth.agetime]{smooth.agetime()}}.}
+by calling function \code{\link[=smooth_age]{smooth_age()}}
+or \code{\link[=smooth_agetime]{smooth_agetime()}}.}
+
+\item{n_draw}{Number of draws from posterior
+distribution. Default is \code{1000}.}
+
+\item{width}{Width of credible intervals.
+A number between 0 and 1. Default is \code{0.95}.}
 
 \item{...}{Not currently used.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble},
 constructed by merging the original \code{nevent_df} and
-\code{py_df} arguments to \code{\link[=smooth.agetime]{smooth.agetime()}},
+\code{py_df} arguments to \code{\link[=smooth_agetime]{smooth_agetime()}},
 plus four new columns:
 \itemize{
 \item \code{.fitted} Point estimates (posterior medians) of rates.
 \item \code{.lower}, \code{.upper} Lower and upper bounds of
-95\% credible intervals for \code{.fitted}.
-\item \code{.observed} Direct estimates of the rate.
+credible intervals specified by \code{width}
+\item \code{.observed} Direct estimates of rates.
 }
 }
 \description{
 Data and values from a results object
 }
 \examples{
-results <- smooth.agetime(nevent_df = nz_divorces,
+results <- smooth_agetime(nevent_df = nz_divorces,
                           py_df = nz_population)
 augment(results)
 }

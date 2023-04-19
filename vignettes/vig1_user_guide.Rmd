@@ -22,7 +22,7 @@ library(ggplot2)
 
 
 ```{r}
-ans <- smooth.agetime(nevent_df = nz_divorces,
+ans <- smooth_agetime(nevent_df = nz_divorces,
                       py_df = nz_population,
                       byvar = "sex")
 ```
