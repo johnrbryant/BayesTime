@@ -5,7 +5,7 @@ library(tidyr)
 library(poputils)
 
 levels_time_keep <- 1992:2021
-levels_age_keep <- age_labels(type = "five", min = 20, max = 65, open = TRUE)
+levels_age_keep <- age_labels(type = "five", min = 15, max = 65, open = TRUE)
 
 age_labels <- age_labels(type = "single", max = 95)
 col_names <- c("time",
@@ -17,7 +17,7 @@ col_types <- paste(rep(c("c", "d", "-", "d", "-", "d", "-", "d", "-"),
 levels_time <- 1992:2021
 age_max <- 65
 
-nz_population <- read_csv("DPE403905_20230322_103055_56.csv",
+nz_population <- read_csv("DPE403905_20230322_103055_56.csv.gz",
                           skip = 5, ## skip values for 1991, which have NAs
                           n_max = 31,
                           na = "..",

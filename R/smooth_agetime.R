@@ -50,6 +50,9 @@ smooth_age <- function(nevent_df,
                       "spec_age",
                       class(spec_age)),
              call. = FALSE)
+    ## tidy age variables
+    nevent_df[[agevar]] <- tidy_agevar(nevent_df[[agevar]])
+    py_df[[agevar]] <- tidy_agevar(py_df[[agevar]])
     ## construct datasets required for fitting
     nevent_ag <- stats::aggregate(nevent_df["nevent"],
                                   nevent_df[nms_classif_vars],
@@ -58,7 +61,6 @@ smooth_age <- function(nevent_df,
                               py_df[nms_classif_vars],
                               sum)
     df <- merge(nevent_ag, py_ag, by = nms_classif_vars)
-    df[[agevar]] <- format_agevar(df[[agevar]])
     has_byvar <- length(byvar) > 0L
     if (has_byvar)
         data <- split(df, df[byvar])
@@ -167,6 +169,11 @@ smooth_agetime <- function(nevent_df,
                       "spec_time",
                       class(spec_time)),
              call. = FALSE)
+    ## tidy age and time variables
+    nevent_df[[agevar]] <- tidy_agevar(nevent_df[[agevar]])
+    py_df[[agevar]] <- tidy_agevar(py_df[[agevar]])
+    nevent_df[[timevar]] <- tidy_timevar(nevent_df[[timevar]])
+    py_df[[timevar]] <- tidy_timevar(py_df[[timevar]])
     ## construct datasets required for fitting
     nevent_ag <- stats::aggregate(nevent_df["nevent"],
                                   nevent_df[nms_classif_vars],
@@ -175,7 +182,6 @@ smooth_agetime <- function(nevent_df,
                               py_df[nms_classif_vars],
                               sum)
     df <- merge(nevent_ag, py_ag, by = nms_classif_vars)
-    df[[agevar]] <- format_agevar(df[[agevar]])
     has_byvar <- length(byvar) > 0L
     if (has_byvar)
         data <- split(df, df[byvar])

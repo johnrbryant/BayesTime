@@ -60,33 +60,23 @@ combine_draws_effects_withtime <- function(intercept,
 
 
 ## HAS_TESTS
-#' Coerce age variable to correct format
+#' Test whether a character vector can be
+#' coerced to integer without creating
+#' new NAs
 #'
-#' Leave age variable untouched if it
-#' is numeric or a factor, and coerce to
-#' a factor (with levels ordered by appearance)
-#' if it is character.
+#' @param A character vector
 #'
-#' @param x The age variable
-#' @param nm Name of age variable
-#'
-#' @returns Vector with same length as 'x'
+#' @returns TRUE or FALSE
 #'
 #' @noRd
-format_agevar <- function(x, nm) {
-    if (is.numeric(x))
-        x
-    else if (is.factor(x))
-        x
-    else if (is.character(x))
-         factor(x, levels = unique(x))
-    else
-        stop(gettextf("'%s' has class \"%s\"",
-                      nm,
-                      class(x)),
-             call. = FALSE)
+is_char_int <- function(x) {
+    if (is.factor(x))
+        x <- levels(x)
+    x_obs <- x[!is.na(x)]
+    x_obs_int <- suppressWarnings(as.integer(x_obs))
+    !anyNA(x_obs_int) && all(x_obs_int == x_obs)
 }
-    
+
 
 ## HAS_TESTS
 #' Matrix to add up elements of vector
@@ -125,6 +115,25 @@ make_age_matrix <- function(data, measurevar, agevar) {
            nrow = length(ans),
            ncol = 1L,
            dimnames = c(dimnames(ans), list(NULL)))
+}
+
+
+
+#' Make an 'age_width_df' matrix (as required by function
+#' 'total_rates') from an 'agevar_val' vector consisting
+#' of integer ages
+#'
+#' @param agevar_val
+#'
+#' @returns A data frame with two columns
+#'
+#' @noRd
+make_age_width_df <- function(agevar_val) {
+    age <- unique(agevar_val)
+    age <- sort(age)
+    n_age <- length(age)
+    width <- rep(1, times = n_age)
+    data.frame(age = age, width = width)
 }
 
 
@@ -290,7 +299,7 @@ make_draws_age_effect <- function(draws_all, offset, X_age_parfree, X_age_subspa
                           age = age,
                           .value = .value)
     names(ans)[[2L]] <- agevar
-    ans[[agevar]] <- format_agevar(x = ans[[agevar]],
+    ans[[agevar]] <- tidy_agevar(x = ans[[agevar]],
                                    nm = agevar)
     ans
 }
@@ -540,7 +549,7 @@ make_draws_time_effect <- function(draws_all,
                       .value = .value)
         names(ans)[[2L]] <- agevar
         names(ans)[[3L]] <- timevar
-        ans[[agevar]] <- format_agevar(x = ans[[agevar]],
+        ans[[agevar]] <- tidy_agevar(x = ans[[agevar]],
                                        nm = agevar)
     }
     else {
@@ -862,3 +871,79 @@ rmvn <- function(n, mean, prec) {
                 ncol = n)
     t(mean + sd %*% Z)
 }
+
+
+## HAS_TESTS
+#' Coerce age variable to correct format
+#'
+#' Coerce to integer if possible.
+#' Otherwise, leave age variable untouched if it
+#' is numeric or a factor, and coerce to
+#' a factor (with levels ordered by appearance)
+#' if it is character.
+#'
+#' @param x The age variable
+#' @param nm Name of age variable
+#'
+#' @returns Vector with same length as 'x'
+#'
+#' @noRd
+tidy_agevar <- function(x, nm) {
+    if (is.numeric(x)) {
+        x
+    }
+    else if (is.factor(x)) {
+        if (is_char_int(x)) {
+            x <- as.character(x)
+            as.integer(x)
+        }
+        else {
+            x
+        }
+    }
+    else if (is.character(x)) {
+        if (is_char_int(x)) {
+            as.integer(x)
+        }
+        else {
+            factor(x, levels = unique(x))
+        }
+    }
+    else {
+        stop(gettextf("'%s' has class \"%s\"",
+                      nm,
+                      class(x)),
+             call. = FALSE)
+    }
+}
+
+
+## HAS_TESTS
+#' Coerce time variable to correct format
+#'
+#' Coerce to integer if character or factor.
+#' A check to make sure this is possible
+#' should already have been run.
+#'
+#' @param x The time variable
+#' @param nm Name of time variable
+#'
+#' @returns Vector with same length as 'x'
+#'
+#' @noRd
+tidy_timevar <- function(x, nm) {
+    if (is.numeric(x)) {
+        x
+    }
+    else if ((is.factor(x) || is.character(x)) && is_char_int(x)) {
+        x <- as.character(x)
+        as.integer(x)
+    }
+    else {
+        stop(gettextf("'%s' has class \"%s\"",
+                      nm,
+                      class(x)),
+             call. = FALSE)
+    }
+}
+    

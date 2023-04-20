@@ -1,4 +1,37 @@
 
+## 'check_age_width_df' -------------------------------------------------------
+
+test_that("'check_age_width_df' returns TRUE with valid value", {
+    expect_true(check_age_width_df(age_width_df = data.frame(age = 0:2,
+                                                       width = rep(1, 3)),
+                                agevar_val = 2:1))
+    expect_true(check_age_width_df(age_width_df = data.frame(age = c("0-4", "5-9", "10+"),
+                                                       width = rep(5, 3)),
+                                agevar_val = c("5-9", "5-9", "10+")))
+})
+
+test_that("'check_age_width_df' raises correct error with invalid col names", {
+    expect_error(check_age_width_df(age_width_df = data.frame(age = 0:2,
+                                                       wrong = rep(1, 3)),
+                                 agevar_val = 2:1),
+                 "colnames for 'age_width_df' invalid : should be \"age\", \"width\"")
+})
+
+test_that("'check_age_width_df' raises correct error with invalid age column", {
+    expect_error(check_age_width_df(age_width_df = data.frame(age = 2:4,
+                                                        width = rep(1, 3)),
+                                 agevar_val = 2:1),
+                 "variable 'age' in 'age_width_df' does not include age group \"1\"")
+})
+
+test_that("'check_age_width_df' raises correct error with invalid age column", {
+    expect_error(check_age_width_df(age_width_df = data.frame(age = 2:4,
+                                                        width = c(1, 1, Inf)),
+                                 agevar_val = 2:4),
+                 "problem with variable 'width' in 'age_width_df' :")
+})
+
+
 ## 'check_gt_zero' ------------------------------------------------------------
 
 test_that("'check_gt_zero' returns TRUE with valid value", {
@@ -114,6 +147,18 @@ test_that("'check_input_notime_df' warns when df appears to have timevar", {
                    "'count_df' appears to include a time variable \\[\"period\"\\]")
 })
 
+test_that("'check_input_notime_df' throws correct error when less than 3 age values", {
+    df <- expand.grid(age = 0:1, sex = c("F", "M"),
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 1
+    expect_error(check_input_notime_df(df = df,
+                                       measurevar = "count",
+                                       agevar = "age",
+                                       byvar = character()),
+                 "age variable \\['age'\\] in data frame 'count_df' has only 2 unique value\\(s\\) : needs at least 3")
+})
+
+
 
 ## 'check_input_withtime_df' --------------------------------------------------
 
@@ -223,6 +268,33 @@ test_that("'check_input_withtime_df' throws correct error when measure var negat
                                byvar = character()),
                  "problem with variable 'count' in data frame 'count_df' :")
 })
+
+
+test_that("'check_input_withtime_df' throws correct error when less than 3 age values", {
+    df <- expand.grid(age = 0:1, sex = c("F", "M"), time = 2000:2001,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 1
+    expect_error(check_input_withtime_df(df = df,
+                                         measurevar = "count",
+                                         agevar = "age",
+                                         timevar = "time",
+                                         byvar = character()),
+                 "age variable \\['age'\\] in data frame 'count_df' has only 2 unique value\\(s\\) : needs at least 3")
+})
+
+
+test_that("'check_input_withtime_df' throws correct error when less than 2 time values", {
+    df <- expand.grid(age = 0:2, sex = c("F", "M"), time = 2000,
+                      KEEP.OUT.ATTRS = FALSE)
+    df$count <- 1
+    expect_error(check_input_withtime_df(df = df,
+                                         measurevar = "count",
+                                         agevar = "age",
+                                         timevar = "time",
+                                         byvar = character()),
+                 "time variable \\['time'\\] in data frame 'count_df' has only 1 unique value\\(s\\) : needs at least 2")
+})
+
 
 
 

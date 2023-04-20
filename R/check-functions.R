@@ -1,5 +1,55 @@
 
 ## HAS_TESTS
+#' Check that the 'age_width_df' argument to function 'total_rates'
+#' is valid
+#'
+#' @param age_width_df A data frame with two columns
+#' @param agevar_val A vector with age labels
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_age_width_df <- function(age_width_df, agevar_val) {
+    checkmate::assert_data_frame(age_width_df,
+                                 any.missing = FALSE,
+                                 min.rows = 3L,
+                                 ncols = 2L,
+                                 col.names = "strict")
+    if (!setequal(names(age_width_df), c("age", "width")))
+        stop(gettextf("colnames for '%s' invalid : should be \"%s\", \"%s\"",
+                      "age_width_df",
+                      "age",
+                      "width"),
+             call. = FALSE)
+    is_found <- agevar_val %in% age_width_df$age
+    i_not_found <- match(FALSE, is_found, nomatch = 0L)
+    if (i_not_found > 0L)
+        stop(gettextf("variable '%s' in '%s' does not include age group \"%s\"",
+                      "age",
+                      "age_width_df",
+                      agevar_val[[i_not_found]]),
+             call. = FALSE)
+    width <- age_width_df$width
+    val <- checkmate::check_numeric(width,
+                                    any.missing = FALSE,
+                                    lower = 0,
+                                    finite = TRUE)
+    if (!isTRUE(val))
+        stop(gettextf("problem with variable '%s' in '%s' : %s",
+                      "width",
+                      "age_width_df",
+                      val),
+             call. = FALSE)
+    invisible(TRUE)
+}
+    
+    
+    
+        
+                      
+
+
+## HAS_TESTS
 #' Check that a scalar is greater than 0
 #'
 #' @param x Scalar
@@ -87,6 +137,14 @@ check_input_notime_df <- function(df,
                       nm_df,
                       class(agevar_val)),
              call. = FALSE)
+    n_val_age <- length(unique(agevar_val))
+    if (n_val_age < 3L)
+        stop(gettextf("%s variable ['%s'] in data frame '%s' has only %d unique value(s) : needs at least %d",
+                      "age",
+                      agevar,
+                      nm_df,
+                      n_val_age,
+                      3L))
     ## check measure var
     measurevar_val <- df[[measurevar]]
     check_measure <- checkmate::check_numeric(measurevar_val,
@@ -184,15 +242,34 @@ check_input_withtime_df <- function(df,
                       nm_df,
                       class(agevar_val)),
              call. = FALSE)
+    n_val_age <- length(unique(agevar_val))
+    if (n_val_age < 3L)
+        stop(gettextf("%s variable ['%s'] in data frame '%s' has only %d unique value(s) : needs at least %d",
+                      "age",
+                      agevar,
+                      nm_df,
+                      n_val_age,
+                      3L))
     ## check time var
     timevar_val <- df[[timevar]]
     check_time <- checkmate::check_integerish(timevar_val, any.missing = FALSE)
-    if (!isTRUE(check_time))
-        stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
+    if (!isTRUE(check_time)) {
+        if (!is_char_int(timevar_val)) {
+            stop(gettextf("problem with variable '%s' in data frame '%s' : %s",
+                          timevar,
+                          nm_df,
+                          check_time),
+                 call. = FALSE)
+        }
+    }
+    n_val_time <- length(unique(timevar_val))
+    if (n_val_time < 2L)
+        stop(gettextf("%s variable ['%s'] in data frame '%s' has only %d unique value(s) : needs at least %d",
+                      "time",
                       timevar,
                       nm_df,
-                      check_time),
-             call. = FALSE)
+                      n_val_time,
+                      2L))
     ## check measure var
     measurevar_val <- df[[measurevar]]
     check_measure <- checkmate::check_numeric(measurevar_val,

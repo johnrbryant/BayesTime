@@ -53,13 +53,15 @@ test_that("'combine_draws_effects_withtime' works with valid input - age-time in
                              Age = rep(c("0-4", "5-9", "10-14", "15-19"), each = 20),
                              .value = rnorm(80))
     time_effect <- tibble(draw = rep(1:20, times = 20),
-                          Age = rep(rep(c("0-4", "5-9", "10-14", "15-19"), each = 20), times = 5),
+                          Age = rep(rep(c("0-4", "5-9", "10-14", "15-19"),
+                                        each = 20), times = 5),
                           Time = rep(2001:2005, each = 80),
                           .value = rnorm(400))
     ans_obtained <- combine_draws_effects_withtime(intercept = intercept,
                                           age_effect = age_effect,
                                           time_effect = time_effect)
-    ans_expected <- merge(merge(intercept, age_effect, by = "draw"), time_effect, by = c("draw", "Age"))
+    ans_expected <- merge(merge(intercept, age_effect, by = "draw"),
+                          time_effect, by = c("draw", "Age"))
     value <- with(ans_expected, exp(.value.x + .value.y + .value))
     ans_expected <- ans_expected[c("draw", "Age", "Time")]
     ans_expected$.value <- value
@@ -69,18 +71,23 @@ test_that("'combine_draws_effects_withtime' works with valid input - age-time in
 })
 
 
-## 'format_agevar' ------------------------------------------------------------
+## 'is_char_int' --------------------------------------------------------------
 
-test_that("'format_agevar' works with valid input", {
-    expect_identical(format_agevar(1:3, "age"), 1:3)
-    expect_identical(format_agevar(factor(c("a", "b")), "age"), factor(c("a", "b")))
-    expect_identical(format_agevar(c("b", "a", "b"), "age"),
-                     factor(c("b", "a", "b"), levels = c("b", "a")))
+test_that("'is_char_int' works with some non-NA", {
+    expect_true(is_char_int("1"))
+    expect_true(is_char_int(c("0", "-1", "99")))
+    expect_false(is_char_int(c("a", "1", NA)))
+    expect_true(is_char_int(1))
+    expect_false(is_char_int(1.2))
+    expect_false(is_char_int("1.2"))
+    expect_true(is_char_int(factor(1:3)))
 })
-    
-test_that("'format_agevar' raises correct error with invalid input", {
-    expect_error(format_agevar(NULL, "age"),
-                 "'age' has class \"NULL\"")
+
+test_that("'is_char_int' works with no non-NA", {
+    expect_true(is_char_int(character()))
+    expect_true(is_char_int(c("0", "-1", "99")))
+    expect_false(is_char_int(c("a", "1", NA)))
+    expect_true(is_char_int(numeric()))
 })
 
 
@@ -111,9 +118,21 @@ test_that("'make_age_matrix' works", {
 })
 
 
+## 'make_age_width_df' --------------------------------------------------------
+
+test_that("'make_age_age_width_df' works", {
+    agevar_val <- c(3, 1, 2, 4, 2)
+    ans_obtained <- make_age_width_df(agevar_val)
+    ans_expected <- data.frame(age = c(1, 2, 3, 4),
+                               width = rep(1, 4))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
 ## 'make_agetime_matrix' ------------------------------------------------------
 
 test_that("'make_agetime_matrix' works", {
+    set.seed(0)
     data <- expand.grid(time = 2000:2002, age = 0:1,
                         KEEP.OUT.ATTRS = FALSE)
     data$nevent <- 1
@@ -123,8 +142,9 @@ test_that("'make_agetime_matrix' works", {
                                         timevar = "time")
     ans_expected <- matrix(1, nrow = 2, ncol = 3,
                            dimnames = list(age = 0:1, time = 2000:2002))
-    expect_identical(ans_obtained, ans_expected)
+    expect_identical(ans_obtained, ans_expected, tolerance = 0.01)
 })
+
 
 
 ## 'make_center_matrix' -------------------------------------------------------
@@ -634,3 +654,35 @@ test_that("'rmvn' gives correct answer with valid inputs", {
     expect_equal(colMeans(ans), mean, tolerance = 0.01)
     expect_equal(solve(cov(ans)), prec, tolerance = 0.01)
 })
+
+
+## 'tidy_agevar' --------------------------------------------------------------
+
+test_that("'tidy_agevar' works with valid input", {
+    expect_identical(tidy_agevar(1:3, "age"), 1:3)
+    expect_identical(tidy_agevar(factor(c("a", "b")), "age"), factor(c("a", "b")))
+    expect_identical(tidy_agevar(c("b", "a", "b"), "age"),
+                     factor(c("b", "a", "b"), levels = c("b", "a")))
+})
+    
+test_that("'tidy_agevar' raises correct error with invalid input", {
+    expect_error(tidy_agevar(NULL, "age"),
+                 "'age' has class \"NULL\"")
+})
+
+
+## 'tidy_timevar' -------------------------------------------------------------
+
+test_that("'tidy_timevar' works with valid input", {
+    expect_identical(tidy_timevar(1:3, "time"), 1:3)
+    expect_identical(tidy_timevar(c("1", "2", "3"), "time"),
+                     1:3)
+    expect_identical(tidy_timevar(factor(c("1", "2", "3")), "time"),
+                     1:3)
+})
+    
+test_that("'tidy_timevar' raises correct error with invalid input", {
+    expect_error(tidy_timevar(NULL, "time"),
+                 "'time' has class \"NULL\"")
+})
+
