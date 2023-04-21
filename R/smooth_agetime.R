@@ -181,6 +181,8 @@ smooth_agetime <- function(nevent_df,
     py_ag <- stats::aggregate(py_df["py"],
                               py_df[nms_classif_vars],
                               sum)
+    nevent_ag <- fill_times(nevent_ag, nms_classif_vars = nms_classif_vars)
+    py_ag <- fill_times(py_ag, nms_classif_vars = nms_classif_vars)
     df <- merge(nevent_ag, py_ag, by = nms_classif_vars)
     has_byvar <- length(byvar) > 0L
     if (has_byvar)

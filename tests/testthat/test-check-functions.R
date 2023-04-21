@@ -32,6 +32,37 @@ test_that("'check_age_width_df' raises correct error with invalid age column", {
 })
 
 
+## 'check_all_combn_classif_vars' ---------------------------------------------
+
+test_that("'check_all_combn_classif_vars' returns TRUE with valid value", {
+    df <- data.frame(age = rep(0:1, 2), sex = c("f", "f", "m", "m"))
+    expect_true(check_all_combn_classif_vars(df = df,
+                                             nm_df = "data",
+                                             nms_classif_vars = c("sex", "age")))
+})
+
+test_that("'check_all_combn_classif_vars' returns expected error with one row missing", {
+    df <- data.frame(age = c(0, 1, 0), sex = c("f", "f", "m"))
+    expect_error(check_all_combn_classif_vars(df = df,
+                                              nm_df = "data",
+                                              nms_classif_vars = c("sex", "age")),
+                 paste0("'data' missing combination of classification variables:\n",
+                        "    sex: m\n",
+                        "    age: 1"))                       
+})
+
+test_that("'check_all_combn_classif_vars' returns expected error with two rows missing", {
+    df <- data.frame(age = c(0, 1), sex = c("f", "m"))
+    expect_error(check_all_combn_classif_vars(df = df,
+                                              nm_df = "data",
+                                              nms_classif_vars = c("age", "sex")),
+                 paste0("'data' missing combination of classification variables:\n",
+                        "    age: 1\n",
+                        "    sex: f"))
+})
+
+
+
 ## 'check_gt_zero' ------------------------------------------------------------
 
 test_that("'check_gt_zero' returns TRUE with valid value", {

@@ -23,6 +23,6 @@ and \code{\link{nz_population_2020}}.
 }
 \seealso{
 Data frames like \code{nz_age_width_df} are
-used by function \code{\link[=total_rates]{total_rates()}}.
+used by function \code{\link[=total_rate]{total_rate()}}.
 }
 \keyword{datasets}

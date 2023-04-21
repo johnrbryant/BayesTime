@@ -164,6 +164,57 @@ test_that("'make_parfree_time' works with timevarying", {
 })
 
 
+## 'make_str' -----------------------------------------------------------------
+
+test_that("'make_str' works with TimeFixed", {
+    spec <- TimeFixed()
+    expect_identical(make_str(spec),
+                     "TimeFixed()")
+    spec <- TimeFixed(scale = 0.1)
+    expect_identical(make_str(spec),
+                     "TimeFixed(scale=0.1)")
+})
+
+test_that("'make_str' works with TimeVarying", {
+    spec <- TimeVarying()
+    expect_identical(make_str(spec),
+                     "TimeVarying()")
+    spec <- TimeVarying(scale = 0.1)
+    expect_identical(make_str(spec),
+                     "TimeVarying(scale=0.1)")
+})
+
+test_that("'make_str' works with RW2", {
+    spec <- RW2()
+    expect_identical(make_str(spec),
+                     "RW2()")
+    spec <- RW2(scale = 0.1)
+    expect_identical(make_str(spec),
+                     "RW2(scale=0.1)")
+})
+
+test_that("'make_str' works with Spline", {
+    spec <- Spline()
+    expect_identical(make_str(spec),
+                     "Spline()")
+    spec <- Spline(scale = 0.1)
+    expect_identical(make_str(spec),
+                     "Spline(scale=0.1)")
+    spec <- Spline(df = 2)
+    expect_identical(make_str(spec),
+                     "Spline(df=2)")
+    spec <- Spline(df = 2, scale = 3)
+    expect_identical(make_str(spec),
+                     "Spline(scale=3, df=2)")
+})
+
+
+
+
+
+
+
+
 ## 'make_random' --------------------------------------------------------------
 
 test_that("'make_random' works with timenull", {

@@ -59,6 +59,39 @@ combine_draws_effects_withtime <- function(intercept,
 }
 
 
+
+#' Add rows to datasets representing intermediate periods
+#'
+#' Assumes that dataset has all possible combinations of
+#' existing levels of classification variables
+#'
+#' @param df A data frame
+#' @param nms_classif_vars Names of classification variables
+#'
+#' @returns A tibble
+#'
+#' @noRd
+fill_times <- function(df, nms_classif_vars) {
+    time <- df$time
+    time_filled <- seq.int(from = min(time), to = max(time))
+    if (all(time_filled %in% time))
+        return(df)
+    levels_classif_vars_filled <- lapply(df[nms_classif_vars], unique)
+    levels_classif_vars_filled$time <- time_filled
+    classif_vars_filled <- expand.grid(levels_classif_vars_filled,
+                                       KEEP.OUT.ATTRS = FALSE,
+                                       stringsAsFactors = FALSE)
+    ans <- merge(x = df,
+                 y = classif_vars_filled,
+                 by = nms_classif_vars,
+                 all.y = TRUE)
+    ans <- tibble::tibble(ans)
+    ord <- do.call(order, ans[nms_classif_vars])
+    ans <- ans[ord, , drop = FALSE]
+    ans
+}
+
+
 ## HAS_TESTS
 #' Test whether a character vector can be
 #' coerced to integer without creating
@@ -120,7 +153,7 @@ make_age_matrix <- function(data, measurevar, agevar) {
 
 
 #' Make an 'age_width_df' matrix (as required by function
-#' 'total_rates') from an 'agevar_val' vector consisting
+#' 'total_rate') from an 'agevar_val' vector consisting
 #' of integer ages
 #'
 #' @param agevar_val
@@ -179,7 +212,8 @@ make_center_matrix <- function(n) {
 #' Create credible intervals from draws for a measure variable
 #'
 #' Modify a data frame so it replaces "draw" and measurevar
-#' columns with columns ".fitted", ".lower", and ".upper"
+#' columns with columns ".fitted", ".lower", ".upper",
+#' and .value,
 #' (and shrink the number of rows by a factor equal
 #' to the number of draws).
 #'
@@ -187,13 +221,13 @@ make_center_matrix <- function(n) {
 #'
 #' @param x A data frame
 #' @param measurevar Name of the measurement variable
-#' @param width With of credible intervals
+#' @param interval With of credible intervals
 #'
 #' @returns A data frame
 #'
 #' @noRd
-make_credible_intervals <- function(x, measurevar, width) {
-    probs <- make_probs(width)
+make_credible_intervals <- function(x, measurevar, interval) {
+    probs <- make_probs(interval)
     nms <- names(x)
     nms_classif <- setdiff(nms, c(measurevar, "draw"))
     n_classif <- length(nms_classif)
@@ -213,13 +247,15 @@ make_credible_intervals <- function(x, measurevar, width) {
         ans$.fitted <- q[, 2L]
         ans$.lower <- q[, 1L]
         ans$.upper <- q[, 3L]
+        ans$.probability <- apply(m, 2L, function(x) x, simplify = FALSE)
         ans <- tibble::tibble(ans)
     }
     else {
         q <- stats::quantile(x[[measurevar]], probs = probs)
         ans <- tibble::tibble(.fitted = q[[2L]],
                               .lower = q[[1L]],
-                              .upper = q[[3L]])
+                              .upper = q[[3L]],
+                              .probability = list(x[[measurevar]]))
     }
     ans
 }
@@ -595,6 +631,7 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
     n_age <- length(labels_age)
     n_time <- length(labels_time)
     ## assemble data
+    is_in_lik <- 1L * (!is.na(nevent) & !is.na(py))
     class_spec_age <- sub("^BayesRates_", "", class(spec_age)[[1L]])
     class_spec_time <- sub("^BayesRates_", "", class(spec_time)[[1L]])
     X_age_parfree <- make_X_age_parfree(spec = spec_age,
@@ -607,6 +644,7 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
     scale_time <- get_scale(spec_time)
     data <- list(nevent = nevent,
                  py = py,
+                 is_in_lik = is_in_lik,
                  class_spec_age = class_spec_age,
                  class_spec_time = class_spec_time,
                  X_age_parfree = X_age_parfree,
@@ -658,17 +696,18 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
 }
 
 
-#' Given an interval width, make the 'probs' argument
+#' Given a credible interval width,
+#' make the 'probs' argument
 #' to be supplied to quantiles function
 #'
-#' @param width A number between 0 and 1.
+#' @param interval A number between 0 and 1.
 #'
 #' @returns A numeric vector of length 3.
 #'
 #' @noRd
-make_probs <- function(width) {
-    checkmate::assert_number(width, lower = 0, upper = 1)
-    alpha <- 1 - width
+make_probs <- function(interval) {
+    checkmate::assert_number(interval, lower = 0, upper = 1)
+    alpha <- 1 - interval
     c(0.5 * alpha, 0.5, 1 - 0.5 * alpha)
 }
 

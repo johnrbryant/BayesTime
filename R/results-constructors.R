@@ -36,6 +36,7 @@ new_BayesRates_results <- function(nevent_df,
                                    spec_time,
                                    fitted,
                                    vals_by) {
+    n_draw <- 1000L
     ans <- list(nevent_df = nevent_df,
                 py_df = py_df,
                 agevar = agevar,
@@ -44,7 +45,8 @@ new_BayesRates_results <- function(nevent_df,
                 spec_age = spec_age,
                 spec_time = spec_time,
                 fitted = fitted,
-                vals_by = vals_by)
+                vals_by = vals_by,
+                n_draw = n_draw)
     class(ans) <- "BayesRates_results"
     ans
 }

@@ -71,6 +71,31 @@ test_that("'combine_draws_effects_withtime' works with valid input - age-time in
 })
 
 
+## 'fill_times' ---------------------------------------------------------------
+
+test_that("'fill_times' works with valid inputs", {
+    df <- data.frame(age = c(0, 0, 1, 1),
+                     time = c(2000, 2002, 2000, 2002),
+                     counts = c(1, 3, 4, 6))
+    ans_obtained <- fill_times(df, nms_classif_vars = c("age", "time"))
+    ans_expected <- tibble(age = c(0, 0, 0, 1, 1, 1),
+                           time = c(2000, 2001, 2002, 2000, 2001, 2002),
+                           counts = c(1, NA, 3, 4, NA, 6))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'fill_times' works with valid inputs", {
+    df <- data.frame(time = c(2000, 2000, 2002, 2002),
+                     sex = c("m", "f", "m", "f"),
+                     counts = c(1, 2, 5, 6))
+    ans_obtained <- fill_times(df, nms_classif_vars = c("sex", "time"))
+    ans_expected <- tibble(sex = c("f", "f", "f", "m", "m", "m"),
+                           time = c(2000, 2001, 2002, 2000, 2001, 2002),
+                           counts = c(2, NA, 6, 1, NA, 5))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
 ## 'is_char_int' --------------------------------------------------------------
 
 test_that("'is_char_int' works with some non-NA", {
@@ -169,7 +194,7 @@ test_that("'make_credible_intervals' works - 'x' has classif vars", {
                      draw = 1:20,
                      KEEP.OUT.ATTRS = FALSE)
     x$.value <- rnorm(n = nrow(x))
-    ans <- make_credible_intervals(x, measurevar = ".value", width = 0.9)
+    ans <- make_credible_intervals(x, measurevar = ".value", interval = 0.9)
     lower <- aggregate(x$.value, x[c("age", "time", "sex")], quantile, prob = 0.05)
     lower <- merge(ans, lower)
     expect_equal(lower$.lower, lower$x)
@@ -179,16 +204,22 @@ test_that("'make_credible_intervals' works - 'x' has classif vars", {
     upper <- aggregate(x$.value, x[c("age", "time", "sex")], quantile, prob = 0.95)
     upper <- merge(ans, upper)
     expect_equal(upper$.upper, upper$x)
+    probability <- aggregate(x$.value,
+                             x[c("age", "time", "sex")],
+                             function(x) list(x))
+    probability <- merge(ans, probability)
+    expect_equal(probability$.probability, probability$x)
 })
 
 test_that("'make_credible_intervals' works - 'x' does not have classif vars", {
     set.seed(0)
     x <- data.frame(draw = 1:100,
                     .value = rnorm(100))
-    ans_obtained <- make_credible_intervals(x, measurevar = ".value", width = 0.9)
+    ans_obtained <- make_credible_intervals(x, measurevar = ".value", interval = 0.9)
     ans_expected <- tibble(.fitted = median(x$.value),
                            .lower = as.numeric(quantile(x$.value, 0.05)),
-                           .upper = as.numeric(quantile(x$.value, 0.95)))
+                           .upper = as.numeric(quantile(x$.value, 0.95)),
+                           .probability = list(x$.value))
     expect_equal(ans_obtained, ans_expected)
 })
 

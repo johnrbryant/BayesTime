@@ -146,5 +146,5 @@
 #' - `width`: Width of the age group
 #'
 #' @seealso Data frames like `nz_age_width_df` are
-#' used by function [total_rates()].
+#' used by function [total_rate()].
 "nz_age_width_df"

@@ -16,6 +16,7 @@ Type objective_function<Type>::operator() ()
 
   DATA_MATRIX(nevent);
   DATA_MATRIX(py);
+  DATA_IMATRIX(is_in_lik);
   DATA_STRING(class_spec_age);
   DATA_STRING(class_spec_time);
   DATA_SPARSE_MATRIX(X_age_parfree);
@@ -121,8 +122,10 @@ Type objective_function<Type>::operator() ()
 
   for (int a = 0; a < A; a++) {
     for (int t = 0; t < T; t++) {
-      Type mu = intercept + age_term[a] + agetime_term(a, t);
-      ans -= dpois(nevent(a, t), py(a, t) * exp(mu), true);
+      if (is_in_lik(a, t)) {
+	Type mu = intercept + age_term[a] + agetime_term(a, t);
+	ans -= dpois(nevent(a, t), py(a, t) * exp(mu), true);
+      }
     }
   }
 

@@ -13,7 +13,7 @@ Authors@R:
              email = "junnizhang@163.com"))
 Description: Bayesian smoothing of demographic rates over age and time.
     Calculations are done internally using TMB.
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends:

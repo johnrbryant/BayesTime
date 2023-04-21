@@ -1,6 +1,6 @@
 
 ## HAS_TESTS
-#' Check that the 'age_width_df' argument to function 'total_rates'
+#' Check that the 'age_width_df' argument to function 'total_rate'
 #' is valid
 #'
 #' @param age_width_df A data frame with two columns
@@ -42,12 +42,44 @@ check_age_width_df <- function(age_width_df, agevar_val) {
              call. = FALSE)
     invisible(TRUE)
 }
-    
-    
-    
-        
-                      
 
+
+## HAS_TESTS
+#' Check that a data frame has all possible levels of the
+#' classification variables
+#'
+#' @param df A data frame
+#' @param nm_df The name of the data frame
+#' @param nms_classif_vars
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_all_combn_classif_vars <- function(df, nm_df, nms_classif_vars) {
+    classif_vars_curr <- df[nms_classif_vars]
+    levels_classif_vars <- lapply(classif_vars_curr, unique)
+    classif_vars_all <- expand.grid(levels_classif_vars,
+                                    KEEP.OUT.ATTRS = FALSE,
+                                    stringsAsFactors = FALSE)
+    paste_dots <- function(...) paste(..., sep = ".")
+    id_curr <- do.call(paste_dots, classif_vars_curr)
+    id_all <- do.call(paste_dots, classif_vars_all)
+    is_in_curr <- id_all %in% id_curr
+    i_not_in_curr <- match(FALSE, is_in_curr, nomatch = 0L)
+    if (i_not_in_curr > 0L) {
+        str_missing <- sprintf("    %s: %s",
+                               nms_classif_vars,
+                               unlist(classif_vars_all[i_not_in_curr, ]))
+        str_missing <- paste(str_missing, collapse = "\n")
+        stop(gettextf(paste0("'%s' missing combination of classification variables:\n",
+                             "%s"),
+                      nm_df,
+                      str_missing),
+             call. = FALSE)
+    }
+    invisible(TRUE)
+}    
+    
 
 ## HAS_TESTS
 #' Check that a scalar is greater than 0
@@ -145,6 +177,10 @@ check_input_notime_df <- function(df,
                       nm_df,
                       n_val_age,
                       3L))
+    ## check all combinations of classif vars present
+    check_all_combn_classif_vars(df = df,
+                                 nm_df = nm_df,
+                                 nms_classif_vars = nms_classif_vars)
     ## check measure var
     measurevar_val <- df[[measurevar]]
     check_measure <- checkmate::check_numeric(measurevar_val,
@@ -270,6 +306,10 @@ check_input_withtime_df <- function(df,
                       nm_df,
                       n_val_time,
                       2L))
+    ## check all combinations of classif vars present
+    check_all_combn_classif_vars(df = df,
+                                 nm_df = nm_df,
+                                 nms_classif_vars = nms_classif_vars)
     ## check measure var
     measurevar_val <- df[[measurevar]]
     check_measure <- checkmate::check_numeric(measurevar_val,

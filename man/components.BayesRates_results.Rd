@@ -4,7 +4,7 @@
 \alias{components.BayesRates_results}
 \title{Extract components from a results object}
 \usage{
-\method{components}{BayesRates_results}(object, what = "rates", n_draw = 1000, width = 0.95, ...)
+\method{components}{BayesRates_results}(object, what = "rates", interval = 0.95, ...)
 }
 \arguments{
 \item{object}{A results object.}
@@ -12,10 +12,7 @@
 \item{what}{Components to be extracted.
 Default is \code{"rates"}.}
 
-\item{n_draw}{Number of draws from posterior distribution
-to use in output. Default is \code{1000}.}
-
-\item{width}{Width of credible intervals.
+\item{interval}{Width of credible intervals.
 A number between 0 and 1. Default is \code{0.95}.}
 
 \item{...}{Not currently used.}
@@ -27,6 +24,16 @@ The return value depends on the value supplied for \code{what}:
 returns a \link[tibble:tibble-package]{tibbles}
 \item If \code{what} is two or more names (eg \code{c("rates", "age_effect")}),
 then \code{components()} returns a named list of tibbles.
+}
+
+Each tibble contains classification variables,
+plus the following columns:
+\itemize{
+\item \code{.fitted} Point estimates (posterior medians).
+\item \code{.lower}, \code{.upper} Lower and upper bounds of
+credible intervals.
+\item \code{.probability}. A list column with all draws
+from the posterior distribution.
 }
 }
 \description{
@@ -74,5 +81,9 @@ components(results, what = "age_effect")
 components(results, what = c("rates", "age_effect"))
 }
 \seealso{
-\code{\link[=augment]{augment()}}
+\itemize{
+\item \code{\link[=augment]{augment()}} combines data and results for rates
+\item \code{\link[=n_draw<-]{n_draw<-()}} sets the default number
+of draws from the posterior distribution
+}
 }

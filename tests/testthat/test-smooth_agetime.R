@@ -29,3 +29,20 @@ test_that("'smooth_agetime' works with valid data - no 'by' variables", {
     expect_s3_class(ans, "BayesRates_results")
 })
 
+test_that("'smooth_agetime' works with valid data - missing some years", {
+    set.seed(0)
+    nevent_df <- expand.grid(age = 0:9, time = 2011:2020,
+                             KEEP.OUT.ATTRS = FALSE)
+    nevent_df$nevent <- rpois(n = nrow(nevent_df), lambda = outer(11:20, 5:14))
+    py_df <- expand.grid(age = 0:9, time = 2011:2020,
+                         KEEP.OUT.ATTRS = FALSE)
+    py_df$py <- 100
+    nevent_df <- nevent_df[nevent_df$time %in% c(2011, 2015, 2020), ]
+    py_df <- py_df[py_df$time %in% c(2011, 2015, 2020), ]
+    ans <- smooth_agetime(nevent_df = nevent_df,
+                          py_df = py_df,
+                          spec_time = TimeFixed())
+    expect_s3_class(ans, "BayesRates_results")
+})
+
+

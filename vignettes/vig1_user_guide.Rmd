@@ -10,7 +10,8 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7
 )
 ```
 
@@ -46,7 +47,7 @@ components(res_age, what = "age_effect")
 
 ```{r}
 rates_age_df <- augment(res_age)
-rates_age_df
+head(rates_age_df)
 ```
 
 ```{r}
@@ -63,14 +64,16 @@ ggplot(rates_age_df, aes(x = age)) +
 res_agetime <- smooth_agetime(nevent_df = nz_divorces,
                               py_df = nz_population,
                               byvar = "sex")
+res_agetime
 ```
 
 
 ```{r}
 rates_agetime_df <- augment(res_agetime)
+head(rates_agetime_df)
 ```
 
-```{r, fig.width = 7, fig.height = 7}
+```{r, fig.height = 7}
 ggplot(rates_agetime_df, aes(x = time)) +
   facet_wrap(vars(age)) +
   geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
@@ -93,9 +96,65 @@ time_effect <- components(res_agetime, what = "time_effect")
 head(time_effect)
 ```
 
-```{r}
+```{r, fig.height = 7}
 ggplot(time_effect, aes(x = time, y = .fitted, color = sex)) +
   facet_wrap(vars(age)) +
   geom_line(aes(y = .fitted))
 ```
 
+## Total rate
+
+```{r}
+res_cn <- smooth_agetime(nevent_df = cn_divorces,
+                         py_df = cn_population,
+                         spec_time = TimeFixed(),
+                         byvar = "sex")
+res_cn
+```
+
+```{r}
+total_divorce_rate <- total_rate(res_cn)  
+head(total_divorce_rate)
+```
+
+```{r}
+ggplot(total_divorce_rate, 
+       aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
+  facet_wrap(vars(sex)) +
+  geom_ribbon(fill = "salmon") +
+  geom_line() +
+  geom_point(aes(y = .observed), col = "blue")
+```
+
+
+
+## Interpolation
+
+
+```{r}
+cn_divorces_5 <- cn_divorces %>%
+  filter(time %in% seq(1980, 2020, 5))
+res_cn5 <- smooth_agetime(nevent_df = cn_divorces_5,
+                          py_df = cn_population,
+                          spec_time = TimeFixed(),
+                          byvar = "sex")
+res_cn5
+```
+
+```{r}
+rates_cn5 <- augment(res_cn5)
+head(rates_cn5)
+```
+
+
+```{r, fig.height = 7}
+rates_cn5_selected <- rates_cn5 %>%
+  filter(age %in% seq(20, 50, 5),
+         sex == "Female")
+ggplot(rates_cn5_selected, 
+       aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
+  facet_wrap(vars(age)) +
+  geom_ribbon(fill = "salmon") +
+  geom_line() +
+  geom_point(aes(y = .observed), col = "blue")
+```

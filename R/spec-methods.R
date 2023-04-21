@@ -284,6 +284,81 @@ make_random.BayesRates_spec_timenull <- function(spec) {
     "parfree_age"
 }
 
+## HAS_TESTS
+#' @export
+make_random.BayesRates_spec_timenull <- function(spec) {
+    "parfree_age"
+}
+
+
+## 'make_str' -----------------------------------------------------------------
+
+#' Make string to use in printing results object
+#'
+#' @param spec An object of class "BayesRates_spec"
+#'
+#' @returns A string
+#'
+#' @noRd
+make_str <- function(spec) {
+    UseMethod("make_str")
+}
+
+## HAS_TESTS
+#' @export
+make_str.BayesRates_spec_timefixed <- function(spec) {
+    scale_curr <- spec$scale
+    scale_default <- TimeFixed()$scale
+    is_default <- isTRUE(all.equal(scale_curr, scale_default))
+    if (is_default)
+        "TimeFixed()"
+    else
+        sprintf("TimeFixed(scale=%s)", scale_curr)
+}
+
+## HAS_TESTS
+#' @export
+make_str.BayesRates_spec_timevarying <- function(spec) {
+    scale_curr <- spec$scale
+    scale_default <- TimeVarying()$scale
+    is_default <- isTRUE(all.equal(scale_curr, scale_default))
+    if (is_default)
+        "TimeVarying()"
+    else
+        sprintf("TimeVarying(scale=%s)", scale_curr)
+}
+
+## HAS_TESTS
+#' @export
+make_str.BayesRates_spec_rw2 <- function(spec) {
+    scale_curr <- spec$scale
+    scale_default <- RW2()$scale
+    is_default <- isTRUE(all.equal(scale_curr, scale_default))
+    if (is_default)
+        "RW2()"
+    else
+        sprintf("RW2(scale=%s)", scale_curr)
+}
+
+## HAS_TESTS
+#' @export
+make_str.BayesRates_spec_spline <- function(spec) {
+    scale_curr <- spec$scale
+    df_curr <- spec$df
+    scale_default <- Spline()$scale
+    df_default <- Spline()$df
+    is_default_scale <- isTRUE(all.equal(scale_curr, scale_default))
+    is_default_df <- isTRUE(all.equal(df_curr, df_default))
+    if (is_default_scale && is_default_df)
+        "Spline()"
+    else if (is_default_scale && !is_default_df)
+        sprintf("Spline(df=%s)", df_curr)
+    else if (!is_default_scale && is_default_df)
+        sprintf("Spline(scale=%s)", scale_curr)
+    else
+        sprintf("Spline(scale=%s, df=%s)", scale_curr, df_curr)
+}
+                
 
 ## 'make_X_age_parfree' --------------------------------------------------------
 
