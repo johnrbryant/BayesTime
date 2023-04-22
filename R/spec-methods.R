@@ -51,21 +51,21 @@ get_transforms_hyper.BayesRates_spec_timefixed <- function(spec) {
 
 ## HAS_TESTS
 #' @export
-get_transforms_hyper.BayesRates_spec_timevarying <- function(model) {
+get_transforms_hyper.BayesRates_spec_timevarying <- function(spec) {
     list(sd = exp,
          coef = function(x) exp(x) / (1 + exp(x)))
 }
 
 ## HAS_TESTS
 #' @export
-get_transforms_hyper.BayesRates_spec_rw2 <- function(model) {
+get_transforms_hyper.BayesRates_spec_rw2 <- function(spec) {
     list(sd = exp,
          slope = function(x) x)
 }
 
 ## HAS_TESTS
 #' @export
-get_transforms_hyper.BayesRates_spec_spline <- function(model) {
+get_transforms_hyper.BayesRates_spec_spline <- function(spec) {
     list(sd = exp,
          slope = function(x) x)
 }
@@ -143,7 +143,7 @@ is_interaction.BayesRates_spec_timevarying <- function(spec) {
 #' @returns A list or NULL
 #'
 #' @noRd
-make_map <- function(spec, labels_age) {
+make_map <- function(spec) {
     UseMethod("make_map")
 }
 
