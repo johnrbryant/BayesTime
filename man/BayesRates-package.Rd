@@ -4,9 +4,19 @@
 \name{BayesRates-package}
 \alias{BayesRates}
 \alias{BayesRates-package}
-\title{Bayesian smoothing over and and time}
+\title{Smooth demographic rates using Bayesian methods}
 \description{
-Bayesian smoothing of demographic rates over age and time. Calculations are done internally using TMB.
+Use Bayesian methods to smooth demographic rates
+over age and (optionally) over time. Calculations
+are done internally using package TMB.
+}
+\details{
+The key functions are
+\itemize{
+\item \code{\link[=smooth_age]{smooth_age()}} for smoothing over age only
+\item \code{\link[=smooth_agetime]{smooth_agetime()}} for simultaneously smoothing
+over age and time
+}
 }
 \author{
 \strong{Maintainer}: John Bryant \email{john@bayesiandemography.com}
