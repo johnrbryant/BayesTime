@@ -120,10 +120,10 @@ test_that("'make_parfree_age' works with rw2", {
 })
 
 test_that("'make_parfree_age' works with spline", {
-    spec <- Spline(df = 3L)
+    spec <- Spline(df = 4L)
     labels_age <- c("0-4", "5-9", "10-14")
     expect_identical(make_parfree_age(spec, labels_age = labels_age),
-                     c("parfree.1" = 0))
+                     c("parfree.1" = 0, "parfree.2" = 0))
 })
 
 
@@ -200,19 +200,13 @@ test_that("'make_str' works with Spline", {
     spec <- Spline(scale = 0.1)
     expect_identical(make_str(spec),
                      "Spline(scale=0.1)")
-    spec <- Spline(df = 2)
+    spec <- Spline(df = 12)
     expect_identical(make_str(spec),
-                     "Spline(df=2)")
-    spec <- Spline(df = 2, scale = 3)
+                     "Spline(df=12)")
+    spec <- Spline(df = 12, scale = 3)
     expect_identical(make_str(spec),
-                     "Spline(scale=3, df=2)")
+                     "Spline(scale=3, df=12)")
 })
-
-
-
-
-
-
 
 
 ## 'make_random' --------------------------------------------------------------

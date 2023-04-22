@@ -262,6 +262,25 @@ make_credible_intervals <- function(x, measurevar, interval) {
 
 
 ## HAS_TESTS
+#' Calculate a value for 'df' to use in P-splines
+#'
+#' If 'df' is NULL, set to sensible value
+#' based on number of age groups.
+#'
+#' @param df An integer-ish or NULL.
+#' @param n Number of age gruops
+#'
+#' @returns An integer
+#'
+#' @noRd
+make_df_spline <- function(df, n) {
+    if (is.null(df))
+        df <- max(ceiling(0.7 * n), 4L)
+    as.integer(df)
+}
+
+
+## HAS_TESTS
 #' Matrix to diff a vector
 #'
 #' @param n Number of elements of vector.

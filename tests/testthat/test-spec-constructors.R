@@ -49,7 +49,7 @@ test_that("'RW2' raises correct error with invalid inputs", {
 test_that("'Spline' works with valid inputs", {
     ans <- Spline()
     expect_s3_class(ans, "BayesRates_spec_spline")
-    ans <- Spline(df = 3, scale = 0.33)
+    ans <- Spline(df = 4, scale = 0.33)
     expect_s3_class(ans, "BayesRates_spec_spline")
 })
 

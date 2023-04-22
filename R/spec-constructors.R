@@ -178,7 +178,7 @@ RW2 <- function(scale = 1) {
 #'
 #' Specify a P-spline (penalised spline)
 #' model for an age effect.
-#' A P-spline model is flexible, but
+#' A P-spline is flexible, but
 #' favours profiles that are relatively smooth.
 #'
 #' @section Mathematical details:
@@ -207,7 +207,8 @@ RW2 <- function(scale = 1) {
 #' and a value for \eqn{a} is supplied by the user.
 #'
 #' @param df Degrees of freedom for spline.
-#' Defaults to 7.
+#' Defaults to 0.7 times the number of age groups,
+#' or 4, whichever is higher.
 #' @param scale Scale for error term.
 #' Defaults to 1.
 #'
@@ -228,11 +229,14 @@ RW2 <- function(scale = 1) {
 #' Spline()
 #' Spline(df = 10)
 #' @export
-Spline <- function(df = 7, scale = 1) {
-    df <- checkmate::assert_int(df,
-                                lower = 2L,
-                                coerce = TRUE)
-    checkmate::assert_number(scale, lower = 0, finite = TRUE)
+Spline <- function(df = NULL, scale = 1) {
+    checkmate::assert_int(df,
+                          lower = 4L,
+                          null.ok = TRUE,
+                          coerce = TRUE)
+    checkmate::assert_number(scale,
+                             lower = 0,
+                             finite = TRUE)
     check_gt_zero(scale, nm = "scale")
     new_BayesRates_spec_spline(df = df,
                                 scale = scale)

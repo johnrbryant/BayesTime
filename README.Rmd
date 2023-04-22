@@ -1,0 +1,66 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# BayesRates
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+Using Bayesian methods, smooth demographic rates over age and time. Internally, calculations are done using [TMB](https://CRAN.R-project.org/package=TMB).
+
+## Installation
+
+Install the development version of BayesRates from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("junnizhang/BayesRates")
+```
+
+## Example
+
+```{r}
+library(BayesRates)
+library(ggplot2)
+```
+
+Smooth Chinese data on divorce rates
+```{r}
+library(BayesRates)
+results <- smooth_agetime(nevent_df = cn_divorces,
+                          py_df = cn_population,
+                          spec_time = TimeFixed(),
+                          byvar = "sex")
+results
+```
+
+Extract rates
+```{r}
+rates <- augment(results)
+head(rates)
+```
+
+Calculate 'total divorce rate', and plot it
+```{r, fig.width = 7}
+total_divorce_rate <- total_rate(results)
+ggplot(total_divorce_rate,
+       aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
+  facet_wrap(vars(sex)) +
+  geom_ribbon(fill = "salmon") +
+  geom_line() +
+  geom_point(aes(y = .observed), col = "blue")
+```
+
+

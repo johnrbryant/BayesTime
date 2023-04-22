@@ -4,11 +4,12 @@
 \alias{Spline}
 \title{Specify a P-spline model for an age effect}
 \usage{
-Spline(df = 7, scale = 1)
+Spline(df = NULL, scale = 1)
 }
 \arguments{
 \item{df}{Degrees of freedom for spline.
-Defaults to 7.}
+Defaults to 0.7 times the number of age groups,
+or 4, whichever is higher.}
 
 \item{scale}{Scale for error term.
 Defaults to 1.}
@@ -19,7 +20,7 @@ An object of class \code{BayesRates_spec_spline}.
 \description{
 Specify a P-spline (penalised spline)
 model for an age effect.
-A P-spline model is flexible, but
+A P-spline is flexible, but
 favours profiles that are relatively smooth.
 }
 \section{Mathematical details}{

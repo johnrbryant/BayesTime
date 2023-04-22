@@ -223,6 +223,22 @@ test_that("'make_credible_intervals' works - 'x' does not have classif vars", {
     expect_equal(ans_obtained, ans_expected)
 })
 
+
+## 'make_df_spline' -----------------------------------------------------------
+
+test_that("'make_df_spline' works when 'df' is a number", {
+    expect_identical(make_df_spline(df = 33, n = 11),
+                     33L)
+})
+
+test_that("'make_df_spline' works when 'df' is NULL", {
+    expect_identical(make_df_spline(df = NULL, n = 11),
+                     8L)
+    expect_identical(make_df_spline(df = NULL, n = 5),
+                     4L)
+})
+
+
 ## 'make_diff_matrix' ---------------------------------------------------------
 
 test_that("'make_diff_matrix' works", {

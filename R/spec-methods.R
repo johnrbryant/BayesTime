@@ -198,7 +198,9 @@ make_parfree_age.BayesRates_spec_rw2 <- function(spec, labels_age) {
 ## HAS_TESTS
 #' @export
 make_parfree_age.BayesRates_spec_spline <- function(spec, labels_age) {
+    n_age <- length(labels_age)
     df <- spec$df
+    df <- make_df_spline(df = df, n = n_age)
     ans <- rep(0, times = df - 2L)
     names(ans) <- paste0("parfree.", seq_len(df - 2L))
     ans
@@ -392,6 +394,7 @@ make_X_age_parfree.BayesRates_spec_rw2 <- function(spec, labels_age) {
 make_X_age_parfree.BayesRates_spec_spline <- function(spec, labels_age) {
     n_age <- length(labels_age)
     df <- spec$df
+    df <- make_df_spline(df = df, n = n_age)
     ans <- make_rw2_matrix(df)
     dimnames(ans) <- list(par = seq_len(nrow(ans)),
                           parfree = seq_len(ncol(ans)))
@@ -430,6 +433,7 @@ make_X_age_subspace.BayesRates_spec_rw2 <- function(spec, labels_age) {
 make_X_age_subspace.BayesRates_spec_spline <- function(spec, labels_age) {
     n_age <- length(labels_age)
     df <- spec$df
+    df <- make_df_spline(df = df, n = n_age)
     ans <- make_spline_matrix(n = n_age, df = df)
     dimnames(ans) <- list(age = labels_age,
                           par = seq_len(ncol(ans)))
