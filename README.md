@@ -4,6 +4,10 @@
 # BayesRates
 
 <!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/junnizhang/BayesRates/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/junnizhang/BayesRates/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Using Bayesian methods, smooth demographic rates over age and time.
@@ -57,12 +61,12 @@ head(rates)
 #> # A tibble: 6 × 10
 #>     age sex     time nevent    py .fitted  .lower  .upper .probability .observed
 #>   <int> <chr>  <int>  <int> <dbl>   <dbl>   <dbl>   <dbl> <list>           <dbl>
-#> 1    15 Female  1980      0  489. 8.89e-6 2.66e-6 3.28e-5 <dbl>                0
-#> 2    15 Female  1981      0  494. 9.23e-6 2.95e-6 2.92e-5 <dbl>                0
-#> 3    15 Female  1982      0  462. 9.65e-6 3.06e-6 3.38e-5 <dbl>                0
-#> 4    15 Female  1983      0  496. 1.14e-5 3.57e-6 3.99e-5 <dbl>                0
-#> 5    15 Female  1984      0  496. 1.09e-5 3.69e-6 3.65e-5 <dbl>                0
-#> 6    15 Female  1985      0  514. 1.20e-5 3.97e-6 4.06e-5 <dbl>                0
+#> 1    15 Female  1980      0  489. 9.36e-6 2.90e-6 3.47e-5 <dbl>                0
+#> 2    15 Female  1981      0  494. 9.50e-6 3.31e-6 3.28e-5 <dbl>                0
+#> 3    15 Female  1982      0  462. 1.00e-5 3.30e-6 3.64e-5 <dbl>                0
+#> 4    15 Female  1983      0  496. 1.17e-5 4.03e-6 4.00e-5 <dbl>                0
+#> 5    15 Female  1984      0  496. 1.18e-5 3.95e-6 4.12e-5 <dbl>                0
+#> 6    15 Female  1985      0  514. 1.27e-5 4.32e-6 4.27e-5 <dbl>                0
 ```
 
 Calculate ‘total divorce rate’, and plot it
