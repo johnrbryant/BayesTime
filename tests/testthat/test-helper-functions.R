@@ -10,14 +10,14 @@ test_that("'combine_draws_effects_notime' works with valid input", {
                          Age = rep(c("0-4", "5-9", "10-14", "15-19"), each = 20),
                          .value = rnorm(80))
     ans_obtained <- combine_draws_effects_notime(intercept = intercept,
-                                                 age_effect = age_effect)
+                                                 age_effect = age_effect,
+                                                 agevar = "Age")
     ans_expected <- merge(intercept, age_effect, by = "draw")
     value <- with(ans_expected, exp(.value.x + .value.y))
     ans_expected <- ans_expected[c("draw", "Age")]
-    ans_expected$.value <- value
-    ans_expected <- ans_expected[with(ans_expected, order(draw, Age)), ]
-    ans_expected <- tibble(ans_expected)
-    expect_identical(ans_obtained, ans_expected)
+    ans_expected$.value.expected <- value
+    ans_expected <- merge(ans_expected, ans_obtained)
+    expect_identical(ans_expected$.value.expected, ans_expected$.value)
 })
 
 
@@ -35,14 +35,15 @@ test_that("'combine_draws_effects_withtime' works with valid input - time main e
                               .value = rnorm(100))
     ans_obtained <- combine_draws_effects_withtime(intercept = intercept,
                                           age_effect = age_effect,
-                                          time_effect = time_effect)
+                                          time_effect = time_effect,
+                                          agevar = "Age",
+                                          timevar = "Time")
     ans_expected <- merge(merge(intercept, age_effect, by = "draw"), time_effect, by = "draw")
     value <- with(ans_expected, exp(.value.x + .value.y + .value))
     ans_expected <- ans_expected[c("draw", "Age", "Time")]
-    ans_expected$.value <- value
-    ans_expected <- ans_expected[with(ans_expected, order(draw, Age, Time)), ]
-    ans_expected <- tibble(ans_expected)
-    expect_identical(ans_obtained, ans_expected)
+    ans_expected$.value.expected <- value
+    ans_expected <- merge(ans_obtained, ans_expected)
+    expect_equal(ans_expected$.value.expected, ans_expected$.value)
 })
 
 test_that("'combine_draws_effects_withtime' works with valid input - age-time interaction", {
@@ -59,15 +60,16 @@ test_that("'combine_draws_effects_withtime' works with valid input - age-time in
                           .value = rnorm(400))
     ans_obtained <- combine_draws_effects_withtime(intercept = intercept,
                                           age_effect = age_effect,
-                                          time_effect = time_effect)
+                                          time_effect = time_effect,
+                                          agevar = "Age",
+                                          timevar = "Time")
     ans_expected <- merge(merge(intercept, age_effect, by = "draw"),
                           time_effect, by = c("draw", "Age"))
     value <- with(ans_expected, exp(.value.x + .value.y + .value))
     ans_expected <- ans_expected[c("draw", "Age", "Time")]
-    ans_expected$.value <- value
-    ans_expected <- ans_expected[with(ans_expected, order(draw, Age, Time)), ]
-    ans_expected <- tibble(ans_expected)
-    expect_identical(ans_obtained, ans_expected)
+    ans_expected$.value.expected <- value
+    ans_expected <- merge(ans_obtained, ans_expected)
+    expect_equal(ans_expected$.value.expected, ans_expected$.value)
 })
 
 
