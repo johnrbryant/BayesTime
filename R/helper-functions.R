@@ -4,24 +4,24 @@
 #' and then exponentiate,
 #' to obtain a posterior sample for rates
 #'
+#' Merge data frames by hand because "merge" function too slow.
+#'
 #' @param intercept Data frame containing posterior sample
 #' for intercept
 #' @param age_effect Data frame containing posterior sample
 #' for age effect
+#' @param agevar Name of age variable#'
+#' 
 #' @returns A tibble with columns 'draw', agevar, '.value'
 #'
 #' @noRd
 combine_draws_effects_notime <- function(intercept,
-                                           age_effect) {
-    names(intercept)[match(".value", names(intercept))] <- ".intercept"
-    names(age_effect)[match(".value", names(age_effect))] <- ".age_effect"
-    ans <- merge(intercept, age_effect)
-    ans$.value <- with(ans, exp(.intercept + .age_effect))
-    ans <- ans[-match(c(".intercept", ".age_effect"), names(ans))]
-    nms_ord <- setdiff(names(ans), ".value")
-    ord <- do.call(order, ans[nms_ord])
-    ans <- ans[ord, , drop = FALSE]
-    ans <- tibble(ans)
+                                         age_effect,
+                                         agevar) {
+    ans <- age_effect[c("draw", agevar)]
+    i_draw <- match(ans$draw, intercept$draw)
+    ans$.value <- exp(age_effect$.value + intercept$.value[i_draw])
+    ans <- tibble::tibble(ans)
     ans
 }
 
@@ -31,33 +31,55 @@ combine_draws_effects_notime <- function(intercept,
 #' and time effect, and then exponentiate,
 #' to obtain a posterior sample for rates
 #'
+#' Merge data frames by hand because "merge" function too slow.
+#'
 #' @param intercept Data frame containing posterior sample
 #' for intercept
 #' @param age_effect Data frame containing posterior sample
 #' for age effect
 #' @param time_effect Data frame containing posterior sample
 #' for time effect or age-time interaction
+#' @param agevar Name of age variable
+#' @param timevar Name of time variable
 #'
 #' @returns A tibble with columns 'draw', agevar, timevar, '.value'
 #'
 #' @noRd
 combine_draws_effects_withtime <- function(intercept,
-                                  age_effect,
-                                  time_effect) {
-    names(intercept)[match(".value", names(intercept))] <- ".intercept"
-    names(age_effect)[match(".value", names(age_effect))] <- ".age_effect"
-    names(time_effect)[match(".value", names(time_effect))] <- ".time_effect"
-    ans <- merge(intercept, age_effect)
-    ans <- merge(ans, time_effect)
-    ans$.value <- with(ans, exp(.intercept + .age_effect + .time_effect))
-    ans <- ans[-match(c(".intercept", ".age_effect", ".time_effect"), names(ans))]
-    nms_ord <- setdiff(names(ans), ".value")
-    ord <- do.call(order, ans[nms_ord])
-    ans <- ans[ord, , drop = FALSE]
-    ans <- tibble(ans)
+                                           age_effect,
+                                           time_effect,
+                                           agevar,
+                                           timevar) {
+    l <- list(intercept[["draw"]],
+              unique(age_effect[[agevar]]),
+              unique(time_effect[[timevar]]))
+    names(l) <- c("draw", agevar, timevar)
+    ans <- expand.grid(l, KEEP.OUT.ATTRS = FALSE)
+    i_intercept <- match(ans[["draw"]],
+                         intercept[["draw"]])
+    i_age <- match(paste(ans[["draw"]],
+                         ans[[agevar]]),
+                   paste(age_effect[["draw"]],
+                         age_effect[[agevar]]))
+    is_interaction <- agevar %in% names(time_effect)
+    if (is_interaction)
+        i_time <- match(paste(ans[["draw"]],
+                              ans[[agevar]],
+                              ans[[timevar]]),
+                        paste(time_effect[["draw"]],
+                              time_effect[[agevar]],
+                              time_effect[[timevar]]))
+    else
+        i_time <- match(paste(ans[["draw"]],
+                              ans[[timevar]]),
+                        paste(time_effect[["draw"]],
+                              time_effect[[timevar]]))
+    ans$.value <- exp(intercept$.value[i_intercept]
+                      + age_effect$.value[i_age]
+                      + time_effect$.value[i_time])
+    ans <- tibble::tibble(ans)
     ans
 }
-
 
 
 #' Add rows to datasets representing intermediate periods
@@ -480,7 +502,8 @@ make_draws_post_one_notime <- function(fitted, agevar, n_draw) {
                                         agevar = agevar,
                                         age_hyper = age_hyper)
     rates <- combine_draws_effects_notime(intercept = intercept,
-                                          age_effect = age_effect)
+                                          age_effect = age_effect,
+                                          agevar = agevar)
     list(rates = rates,
          intercept = intercept,
          age_effect = age_effect,
@@ -538,7 +561,9 @@ make_draws_post_one_withtime <- function(fitted, agevar, timevar, n_draw) {
                                           X_time = X_time)
     rates <- combine_draws_effects_withtime(intercept = intercept,
                                             age_effect = age_effect,
-                                            time_effect = time_effect)
+                                            time_effect = time_effect,
+                                            agevar = agevar,
+                                            timevar = timevar)
     list(rates = rates,
          intercept = intercept,
          age_effect = age_effect,
