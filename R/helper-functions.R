@@ -50,25 +50,24 @@ combine_draws_effects_withtime <- function(intercept,
                                            time_effect,
                                            agevar,
                                            timevar) {
-    l <- list(intercept[["draw"]],
-              unique(age_effect[[agevar]]),
-              unique(time_effect[[timevar]]))
-    names(l) <- c("draw", agevar, timevar)
-    ans <- expand.grid(l, KEEP.OUT.ATTRS = FALSE)
+    is_interaction <- agevar %in% names(time_effect)
+    if (is_interaction)
+        ans <- time_effect[c("draw", agevar, timevar)]
+    else {
+        l <- list(intercept[["draw"]],
+                  unique(age_effect[[agevar]]),
+                  unique(time_effect[[timevar]]))
+        names(l) <- c("draw", agevar, timevar)
+        ans <- expand.grid(l, KEEP.OUT.ATTRS = FALSE)
+    }
     i_intercept <- match(ans[["draw"]],
                          intercept[["draw"]])
     i_age <- match(paste(ans[["draw"]],
                          ans[[agevar]]),
                    paste(age_effect[["draw"]],
                          age_effect[[agevar]]))
-    is_interaction <- agevar %in% names(time_effect)
     if (is_interaction)
-        i_time <- match(paste(ans[["draw"]],
-                              ans[[agevar]],
-                              ans[[timevar]]),
-                        paste(time_effect[["draw"]],
-                              time_effect[[agevar]],
-                              time_effect[[timevar]]))
+        i_time <- seq_len(nrow(ans))
     else
         i_time <- match(paste(ans[["draw"]],
                               ans[[timevar]]),
