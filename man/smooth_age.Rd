@@ -9,6 +9,8 @@ smooth_age(
   py_df,
   agevar = "age",
   byvar = character(),
+  age_width_df = NULL,
+  age_min = NULL,
   spec_age = Spline()
 )
 }
@@ -29,6 +31,13 @@ Defaults to \code{"age"}.}
 and \code{py_df}, other than age (eg \code{"sex"} or \code{"region"}).
 Optional.}
 
+\item{age_width_df}{A data frame with columns \code{"age"}
+and \code{"width"}, giving the widths of each age group.
+Required if the age group labels are not integers.}
+
+\item{age_min}{The lower limit of the youngest age group.
+Required if the age group labels are not integers.}
+
 \item{spec_age}{The prior model for the age effect.
 Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}. Defaults to
 \code{Spline()}.}
@@ -37,5 +46,15 @@ Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}. 
 An object of class \code{"BayesRates_results"}.
 }
 \description{
-Smooth rates over age
+If the original data (arguments \code{nevent_df} and \code{py_df}
+supplied to \code{\link[=smooth_age]{smooth_age()}} or \code{\link[=smooth_agetime]{smooth_agetime()}}) used
+character or factor age labels that could not
+be interpreted as integers, then \code{total_rate()}
+needs help interpreting the labels. This help is
+provided through the \code{age_width_df} argument.
+\code{age_width_df} is a data frame showing the
+the width to be used for each age group. If the
+final age group is open (ie has no upper limit)
+then the width should approximately equal the expected
+number of years lived in that age group.
 }

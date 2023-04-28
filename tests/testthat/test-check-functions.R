@@ -1,4 +1,28 @@
 
+## 'check_age_min_supplied' ---------------------------------------------------
+
+test_that("'check_age_min_supplied' works with character/factor age variable", {
+    expect_true(check_age_min_supplied(has_age_min = TRUE,
+                                       agevar_val = "a"))
+    expect_true(check_age_min_supplied(has_age_min = TRUE,
+                                       agevar_val = factor("a")))
+    expect_error(check_age_min_supplied(has_age_min = FALSE,
+                                        agevar_val = "a"),
+                 "'nevent_df' uses non-integer age labels, but no value supplied for 'age_min'")
+    expect_error(check_age_min_supplied(has_age_min = FALSE,
+                                        agevar_val = factor("a")),
+                 "'nevent_df' uses non-integer age labels, but no value supplied for 'age_min'")
+})
+
+test_that("'check_age_min_supplied' works with integer age variable", {
+    expect_error(check_age_min_supplied(has_age_min = TRUE,
+                                        agevar_val = 1L),
+                 "'nevent_df' uses integer age labels, but value supplied for 'age_min'")
+    expect_true(check_age_min_supplied(has_age_min = FALSE,
+                                            agevar_val = 1L))
+})
+
+
 ## 'check_age_width_df' -------------------------------------------------------
 
 test_that("'check_age_width_df' returns TRUE with valid value", {
@@ -29,6 +53,29 @@ test_that("'check_age_width_df' raises correct error with invalid age column", {
                                                         width = c(1, 1, Inf)),
                                  agevar_val = 2:4),
                  "problem with variable 'width' in 'age_width_df' :")
+})
+
+
+## 'check_age_width_df_supplied' ----------------------------------------------
+
+test_that("'check_age_width_df_supplied' works with character/factor age variable", {
+    expect_true(check_age_width_df_supplied(has_age_width_df = TRUE,
+                                            agevar_val = "a"))
+    expect_true(check_age_width_df_supplied(has_age_width_df = TRUE,
+                                            agevar_val = factor("a")))
+    expect_error(check_age_width_df_supplied(has_age_width_df = FALSE,
+                                             agevar_val = "a"),
+                 "'nevent_df' uses non-integer age labels, but no value supplied for 'age_width_df'")
+    expect_error(check_age_width_df_supplied(has_age_width_df = FALSE,
+                                             agevar_val = factor("a")),
+                 "'nevent_df' uses non-integer age labels, but no value supplied for 'age_width_df'")
+})
+
+test_that("'check_age_width_df_supplied' works with integer age variable", {
+    expect_true(check_age_width_df_supplied(has_age_width_df = TRUE,
+                                            agevar_val = 1L))
+    expect_true(check_age_width_df_supplied(has_age_width_df = FALSE,
+                                            agevar_val = 1L))
 })
 
 

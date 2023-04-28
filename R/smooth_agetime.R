@@ -1,6 +1,19 @@
 
 #' Smooth rates over age
 #'
+#'
+#' If the original data (arguments `nevent_df` and `py_df`
+#' supplied to [smooth_age()] or [smooth_agetime()]) used
+#' character or factor age labels that could not
+#' be interpreted as integers, then `total_rate()`
+#' needs help interpreting the labels. This help is
+#' provided through the `age_width_df` argument.
+#' `age_width_df` is a data frame showing the
+#' the width to be used for each age group. If the
+#' final age group is open (ie has no upper limit)
+#' then the width should approximately equal the expected
+#' number of years lived in that age group.
+#' 
 #' @param nevent_df A data frame with a column
 #' called `"nevent"` containing the number of events,
 #' plus additional classification variables.
@@ -13,6 +26,11 @@
 #' @param byvar The names of classification variables in `nevent_df`
 #' and `py_df`, other than age (eg `"sex"` or `"region"`).
 #' Optional.
+#' @param age_width_df A data frame with columns `"age"`
+#' and `"width"`, giving the widths of each age group.
+#' Required if the age group labels are not integers.
+#' @param age_min The lower limit of the youngest age group.
+#' Required if the age group labels are not integers.
 #' @param spec_age The prior model for the age effect.
 #' Current choices: [Spline()] and [RW2()]. Defaults to
 #' `Spline()`.
@@ -24,6 +42,8 @@ smooth_age <- function(nevent_df,
                        py_df,
                        agevar = "age",
                        byvar = character(),
+                       age_width_df = NULL,
+                       age_min = NULL,
                        spec_age = Spline()) {
     ## check variable names
     checkmate::assert_string(agevar, min.chars = 1L)
@@ -53,6 +73,22 @@ smooth_age <- function(nevent_df,
     ## tidy age variables
     nevent_df[[agevar]] <- tidy_agevar(nevent_df[[agevar]])
     py_df[[agevar]] <- tidy_agevar(py_df[[agevar]])
+    ## check age_width_df (using tidied age variable)
+    has_age_width_df <- !is.null(age_width_df)
+    agevar_val <- nevent_df[[agevar]]
+    check_age_width_df_supplied(has_age_width_df = has_age_width_df,
+                                agevar_val = agevar_val)
+    if (has_age_width_df)
+        check_age_width_df(age_width_df = age_width_df,
+                           agevar_val = agevar_val)
+    else
+        age_width_df <- make_age_width_df(agevar_val)
+    ## check age_min
+    has_age_min <- !is.null(age_min)
+    check_age_min_supplied(has_age_min = has_age_min,
+                           agevar_val = agevar_val)
+    if (!has_age_min)
+        age_min <- min(agevar_val)
     ## construct datasets required for fitting
     nevent_ag <- stats::aggregate(nevent_df["nevent"],
                                   nevent_df[nms_classif_vars],
@@ -90,6 +126,8 @@ smooth_age <- function(nevent_df,
                            agevar = agevar,
                            timevar = NULL,
                            byvar = byvar,
+                           age_width_df = age_width_df,
+                           age_min = age_min,
                            spec_age = spec_age,
                            spec_time = spec_time,
                            fitted = fitted,
@@ -115,6 +153,11 @@ smooth_age <- function(nevent_df,
 #' @param byvar The names of classification variables in `nevent_df`
 #' and `py_df`, other than age and time (eg `"sex"` or `"region"`).
 #' Optional.
+#' @param age_width_df A data frame with columns `"age"`
+#' and `"width"`, giving the widths of each age group.
+#' Required if the age group labels are not integers.
+#' @param age_min The lower limit of the youngest age group.
+#' Required if the age group labels are not integers.
 #' @param spec_age The prior model for the age effect.
 #' Current choices: [Spline()] and [RW2()]. Defaults to
 #' `Spline()`.
@@ -130,6 +173,8 @@ smooth_agetime <- function(nevent_df,
                            agevar = "age",
                            timevar = "time",
                            byvar = character(),
+                           age_width_df = NULL,
+                           age_min = NULL,
                            spec_age = Spline(),
                            spec_time = TimeVarying()) {
     ## check variable names
@@ -174,6 +219,22 @@ smooth_agetime <- function(nevent_df,
     py_df[[agevar]] <- tidy_agevar(py_df[[agevar]])
     nevent_df[[timevar]] <- tidy_timevar(nevent_df[[timevar]])
     py_df[[timevar]] <- tidy_timevar(py_df[[timevar]])
+    ## check age_width_df (using tidied age variable)
+    has_age_width_df <- !is.null(age_width_df)
+    agevar_val <- nevent_df[[agevar]]
+    check_age_width_df_supplied(has_age_width_df = has_age_width_df,
+                                agevar_val = agevar_val)
+    if (has_age_width_df)
+        check_age_width_df(age_width_df = age_width_df,
+                           agevar_val = agevar_val)
+    else
+        age_width_df <- make_age_width_df(agevar_val)
+    ## check age_min
+    has_age_min <- !is.null(age_min)
+    check_age_min_supplied(has_age_min = has_age_min,
+                           agevar_val = agevar_val)
+    if (!has_age_min)
+        age_min <- min(agevar_val)
     ## construct datasets required for fitting
     nevent_ag <- stats::aggregate(nevent_df["nevent"],
                                   nevent_df[nms_classif_vars],
@@ -213,6 +274,8 @@ smooth_agetime <- function(nevent_df,
                            agevar = agevar,
                            timevar = timevar,
                            byvar = byvar,
+                           age_width_df = age_width_df,
+                           age_min = age_min,
                            spec_age = spec_age,
                            spec_time = spec_time,
                            fitted = fitted,

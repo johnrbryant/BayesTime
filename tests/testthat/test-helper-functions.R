@@ -1,5 +1,58 @@
 
 
+## 'add_age_mid' ------------------------------------------------------------------
+
+test_that("'add_age_mid' works with valid input - age only col", {
+    df <- data.frame(AGE = c("15-19", "30-39", "20-24"))
+    agevar <- "AGE"
+    age_width_df <- data.frame(age = c("10-14", "15-19", "20-24", "25-29", "30-39", "40+"),
+                               width = c(5, 5, 5, 5, 10, 20))
+    age_min <- 10
+    ans_obtained <- add_age_mid(df = df,
+                                agevar = agevar,
+                                age_width_df = age_width_df,
+                                age_min = age_min)
+    ans_expected <-  data.frame(AGE = c("15-19", "30-39", "20-24"),
+                                AGE.mid = c(17.5, 35, 22.5))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'add_age_mid' works with valid input - age last col", {
+    df <- data.frame(val = 1:3,
+                     AGE = c("15-19", "30-39", "20-24"))
+    agevar <- "AGE"
+    age_width_df <- data.frame(age = c("10-14", "15-19", "20-24", "25-29", "30-39", "40+"),
+                               width = c(5, 5, 5, 5, 10, 20))
+    age_min <- 10
+    ans_obtained <- add_age_mid(df = df,
+                                agevar = agevar,
+                                age_width_df = age_width_df,
+                                age_min = age_min)
+    ans_expected <-  data.frame(val = 1:3,
+                                AGE = c("15-19", "30-39", "20-24"),
+                                AGE.mid = c(17.5, 35, 22.5))
+    expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'add_age_mid' works with valid input - age first col", {
+    df <- data.frame(AGE = c("15-19", "30-39", "20-24"),
+                     val = 1:3)
+    agevar <- "AGE"
+    age_width_df <- data.frame(age = c("10-14", "15-19", "20-24", "25-29", "30-39", "40+"),
+                               width = c(5, 5, 5, 5, 10, 20))
+    age_min <- 10
+    ans_obtained <- add_age_mid(df = df,
+                                agevar = agevar,
+                                age_width_df = age_width_df,
+                                age_min = age_min)
+    ans_expected <-  data.frame(AGE = c("15-19", "30-39", "20-24"),
+                                AGE.mid = c(17.5, 35, 22.5),
+                                val = 1:3)
+    expect_identical(ans_obtained, ans_expected)
+})
+
+
+
 ## 'combine_draws_effects_notime' ---------------------------------------------
 
 test_that("'combine_draws_effects_notime' works with valid input", {

@@ -30,7 +30,8 @@ test_that("'components' works with valid inputs - rates", {
                           py_df = py_df)
     ans <- components(results, "rates", n_draw = 5)
     expect_setequal(names(ans),
-                    c("age", ".fitted", ".lower", ".upper", ".probability"))
+                    c("age", "age.mid",
+                      ".fitted", ".lower", ".upper", ".probability"))
 })
 
 test_that("'components' works with valid inputs - age effect, age hyper", {
@@ -44,7 +45,8 @@ test_that("'components' works with valid inputs - age effect, age hyper", {
     ans <- components(results, what = c("age_effect", "age_hyper"), n_draw = 5)
     expect_identical(names(ans), c("age_effect", "age_hyper"))
     expect_setequal(names(ans$age_effect),
-                    c("age", ".fitted", ".lower", ".upper", ".probability"))
+                    c("age", "age.mid",
+                      ".fitted", ".lower", ".upper", ".probability"))
     expect_setequal(names(ans$age_hyper),
                     c("hyper", ".fitted", ".lower", ".upper", ".probability"))
 })
@@ -112,11 +114,13 @@ test_that("'total_rate' works with valid inputs - character age groups", {
                         nevent = rpois(n = 3, lambda = 11:13))
     py_df <- tibble(age = c("0-4", "5-9", "10+"),
                     py = 100)
-    results <- smooth_age(nevent_df = nevent_df,
-                          py_df = py_df)
     age_width_df <- data.frame(age = c("0-4", "5-9", "10+"),
                                width = c(5, 5, 10))
-    ans <- total_rate(results, age_width_df = age_width_df)
+    results <- smooth_age(nevent_df = nevent_df,
+                          py_df = py_df,
+                          age_width_df = age_width_df,
+                          age_min = 0)
+    ans <- total_rate(results)
     expect_setequal(names(ans),
                     c(".fitted", ".lower", ".upper", ".probability", ".observed"))
     rates <- components(results)

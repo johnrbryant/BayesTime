@@ -1,5 +1,34 @@
 
 ## HAS_TESTS
+#' Add a column called '<agevar>.mid' to df
+#'
+#' Column '<agevar>.mid' gives the midpoint of
+#' each age group.
+#'
+#' @param df Data frame containing an age variable
+#' @param agevar Name of the age variable
+#' @param age_width_df Data frame with columns "age" and "width"
+#' @param age_min The lower limit of the youngest age group
+#'
+#' @returns 'df' with an extra column called 'age.mid'
+add_age_mid <- function(df, agevar, age_width_df, age_min) {
+    ncol_df <- length(df)
+    i_age <- match(df[[agevar]], age_width_df[["age"]])
+    width <- age_width_df[["width"]]
+    age_start <- age_min + c(0, cumsum(width[-length(width)]))
+    age_mid <- age_start + 0.5 * width
+    nm_mid <- paste(agevar, "mid", sep = ".")
+    df[[nm_mid]] <- age_mid[i_age]
+    col_age <- match(agevar, names(df))
+    if (col_age < ncol_df)
+        df <- df[c(seq_len(col_age),
+                   ncol_df + 1L,
+                   seq.int(from = col_age + 1L, to = ncol_df))]
+    df
+}
+
+
+## HAS_TESTS
 #' Combine posterior samples for intercept and age effect,
 #' and then exponentiate,
 #' to obtain a posterior sample for rates

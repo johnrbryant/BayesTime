@@ -36,15 +36,24 @@ generics::augment
 #' from the posterior distribution.
 #' - `.observed` Direct estimates of rates.
 #'
+#' The age variable comes in versions: the original
+#' version and one with a `.mid` suffix. The `.mid`
+#' version is useful for plotting.
+#' 
 #' @seealso
+#' - [smooth_age()] smooths rates over age
+#' - [smooth_agetime()] smooths rates over age and time
 #' - [components()] extracts rates, age effects,
 #' time effects, and hyper-parameters
 #' - [n_draw<-()] sets the default number
 #' of draws from the posterior distribution
+#' - [total_rate()] provides a summary indicator
 #'
 #' @examples
 #' results <- smooth_agetime(nevent_df = nz_divorces,
-#'                           py_df = nz_population)
+#'                           py_df = nz_population,
+#'                           age_width_df = nz_age_width_df,
+#'                           age_min = 15)
 #' augment(results)
 #' @export
 augment.BayesRates_results <- function(x,
@@ -112,25 +121,25 @@ generics::components
 #' credible intervals.
 #' - `.probability`. A list column with all draws
 #' from the posterior distribution.
+#' 
+#' The age variable comes in versions: the original
+#' version and one with a `.mid` suffix. The `.mid`
+#' version is useful for plotting.
 #'
 #' @seealso
-#' - [augment()] combines data and results for rates
+#' - [smooth_age()] smooths rates over age
+#' - [smooth_agetime()] smooths rates over age and time
+#' - [augment()] combines data and estimates for rates
 #' - [n_draw<-()] sets the default number
 #' of draws from the posterior distribution
-#' 
+#' - [total_rate()] provides a summary indicator
 #'
 #' @examples
-#' ## extract data for 2020 
-#' nz_divorces_2020 <- subset(nz_divorces,
-#'                            time == 2020,
-#'                            select = c(age, sex, nevent))
-#' nz_popn_2020 <- subset(nz_population,
-#'                        time == 2020,
-#'                        select = c(age, sex, py))
-#'
-#' ## run age-only model
+#' ## run model
 #' results <- smooth_age(nevent_df = nz_divorces_2020,
-#'                       py_df = nz_popn_2020)
+#'                       py_df = nz_population_2020,
+#'                       age_width_df = nz_age_width_df,
+#'                       age_min = 15)
 #'
 #' ## extract components
 #' components(results, what = "age_effect")
@@ -149,6 +158,9 @@ components.BayesRates_results <- function(object,
                              lower = 0,
                              upper = 1)
     n_draw <- object$n_draw
+    agevar <- object$agevar
+    age_width_df <- object$age_width_df
+    age_min <- object$age_min
     draws_post <- make_draws_post(object = object,
                                   n_draw = n_draw)
     nms <- names(draws_post)
@@ -165,6 +177,12 @@ components.BayesRates_results <- function(object,
                   make_credible_intervals,
                   measurevar = ".value",
                   interval = interval)
+    has_age <- vapply(ans, function(x) agevar %in% names(x), TRUE)
+    ans[has_age] <- lapply(ans[has_age],
+                           add_age_mid,
+                           agevar = agevar,
+                           age_width_df = age_width_df,
+                           age_min = age_min)
     if (length(what) == 1L)
         ans <- ans[[1L]]
     ans
@@ -186,9 +204,19 @@ components.BayesRates_results <- function(object,
 #'
 #' @returns A modified version of `x`.
 #'
+#' @seealso
+#' - [smooth_age()] smooths rates over age
+#' - [smooth_agetime()] smooths rates over age and time
+#' - [augment()] combines data and estimates for rates
+#' - [components()] sets the default number
+#' of draws from the posterior distribution
+#' - [total_rate()] provides a summary indicator
+#'
 #' @examples
 #' res <- smooth_age(nevent_df = nz_divorces_2020,
-#'                   py_df = nz_population_2020)
+#'                   py_df = nz_population_2020,
+#'                   age_width_df = nz_age_width_df,
+#'                   age_min = 15)
 #' res
 #' n_draw(res) <- 20
 #' res
@@ -268,26 +296,9 @@ print.BayesRates_results <- function(x, ...) {
 #' age group. The calculations are equivalent to those
 #' used to construct the total fertility rate (TFR).
 #'
-#' If the original data (arguments `nevent_df` and `py_df`
-#' supplied to [smooth_age()] or [smooth_agetime()]) used
-#' character or factor age labels that could not
-#' be interpreted as integers, then `total_rate()`
-#' needs help interpreting the labels. This help is
-#' provided through the `age_width_df` argument.
-#' `age_width_df` is a data frame showing the
-#' the width to be used for each age group. If the
-#' final age group is open (ie has no upper limit)
-#' then the width should approximately equal the expected
-#' number of years lived in that age group.
-#'
 #' @param x An object of class `"BayesRates_results"`,
 #' constructed via a call to [smooth_age()] or
 #' [smooth_agetime()].
-#' @param age_width_df A data frame with columns `"age"`
-#' and `"width"`, giving the widths of each age group.
-#' Required if the age group labels used in
-#' [smooth_age()] and [smooth_agetime()] were
-#' non-integer.
 #' @param interval Width of credible intervals.
 #' A number between 0 and 1. Default is `0.95`.
 #'
@@ -308,53 +319,37 @@ print.BayesRates_results <- function(x, ...) {
 #' with no smoothing.
 #'
 #' @seealso
-#' - [smooth_age()] and [smooth_agetime()] to estimate rates
-#' - [components()] and [augment()] to extract rates
+#' - [smooth_age()] smooths rates over age
+#' - [smooth_agetime()] smooths rates over age and time
+#' - [augment()] combines data and estimates for rates
+#' - [components()] extracts rates, age effects,
+#' time effects, and hyper-parameters
+#' - [n_draw<-()] sets the default number
+#' of draws from the posterior distribution
 #'
 #' @examples
-#' ## example where age groups are integers
-#' res_cn <- smooth_agetime(nevent_df = BayesRates::cn_divorces,
-#'                          py_df = BayesRates::cn_population,
-#'                          byvar = "sex",
-#'                          spec_time = TimeFixed())
-#' total_rate(res_cn)
-#'
-#' ## example where age groups are character
-#' res_nz <- smooth_age(nevent_df = BayesRates::nz_divorces_2020,
-#'                      py_df = BayesRates::nz_population_2020)
-#' total_rate(res_nz, age_width_df = BayesRates::nz_age_width_df)
+#' res <- smooth_agetime(nevent_df = cn_divorces,
+#'                       py_df = cn_population,
+#'                       spec_time = TimeFixed())
+#' total_rate(res)
 #' @export
-total_rate <- function(x, age_width_df = NULL, interval = 0.95) {
+total_rate <- function(x, interval = 0.95) {
   UseMethod("total_rate")
 }
 
 ## HAS_TESTS
 #' @export
-total_rate.BayesRates_results <- function(x,
-                                           age_width_df = NULL,
-                                           interval = 0.95) {
+total_rate.BayesRates_results <- function(x, interval = 0.95) {
     ## extract values
     agevar <- x$agevar
     timevar <- x$timevar
     byvar <- x$byvar
     nevent_df <- x$nevent_df
     py_df <- x$py_df
+    age_width_df <- x$age_width_df
     agevar_val <- nevent_df$age
     n_draw <- x$n_draw
     ## check and tidy inputs
-    has_age_width_df <- !is.null(age_width_df)
-    has_char_age_labels <- is.character(agevar_val) || is.factor(agevar_val)
-    if (has_char_age_labels && !has_age_width_df)
-        stop(gettextf("'%s' uses non-integer age labels, but no '%s' argument supplied to function '%s'",
-                      "nevent_df",
-                      "age_width_df",
-                      "total_rate"),
-             call. = FALSE)
-    if (has_age_width_df)
-        check_age_width_df(age_width_df = age_width_df,
-                           agevar_val = agevar_val)
-    else
-        age_width_df <- make_age_width_df(agevar_val)
     n_draw <- checkmate::assert_int(n_draw,
                                     lower = 1L,
                                     coerce = TRUE)

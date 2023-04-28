@@ -35,6 +35,10 @@ credible intervals.
 \item \code{.probability}. A list column with all draws
 from the posterior distribution.
 }
+
+The age variable comes in versions: the original
+version and one with a \code{.mid} suffix. The \code{.mid}
+version is useful for plotting.
 }
 \description{
 Extract components from an object
@@ -64,17 +68,11 @@ age-time interaction.
 }
 }
 \examples{
-## extract data for 2020 
-nz_divorces_2020 <- subset(nz_divorces,
-                           time == 2020,
-                           select = c(age, sex, nevent))
-nz_popn_2020 <- subset(nz_population,
-                       time == 2020,
-                       select = c(age, sex, py))
-
-## run age-only model
+## run model
 results <- smooth_age(nevent_df = nz_divorces_2020,
-                      py_df = nz_popn_2020)
+                      py_df = nz_population_2020,
+                      age_width_df = nz_age_width_df,
+                      age_min = 15)
 
 ## extract components
 components(results, what = "age_effect")
@@ -82,8 +80,11 @@ components(results, what = c("rates", "age_effect"))
 }
 \seealso{
 \itemize{
-\item \code{\link[=augment]{augment()}} combines data and results for rates
+\item \code{\link[=smooth_age]{smooth_age()}} smooths rates over age
+\item \code{\link[=smooth_agetime]{smooth_agetime()}} smooths rates over age and time
+\item \code{\link[=augment]{augment()}} combines data and estimates for rates
 \item \code{\link[=n_draw<-]{n_draw<-()}} sets the default number
 of draws from the posterior distribution
+\item \code{\link[=total_rate]{total_rate()}} provides a summary indicator
 }
 }

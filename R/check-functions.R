@@ -1,6 +1,32 @@
 
 ## HAS_TESTS
-#' Check that the 'age_width_df' argument to function 'total_rate'
+#' Check that the 'age_min' argument
+#' is supplied iff it is needed
+#'
+#' @param has_age_min Logical
+#' @param agevar_val A vector with age labels
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_age_min_supplied <- function(has_age_min, agevar_val) {
+    has_char_age_labels <- is.character(agevar_val) || is.factor(agevar_val)
+    if (has_char_age_labels && !has_age_min)
+        stop(gettextf("'%s' uses non-integer age labels, but no value supplied for '%s' argument",
+                      "nevent_df",
+                      "age_min"),
+             call. = FALSE)
+    if (!has_char_age_labels && has_age_min)
+        stop(gettextf("'%s' uses integer age labels, but value supplied for '%s' argument",
+                      "nevent_df",
+                      "age_min"),
+             call. = FALSE)
+    invisible(TRUE)
+}
+
+
+## HAS_TESTS
+#' Check that the 'age_width_df' argument 
 #' is valid
 #'
 #' @param age_width_df A data frame with two columns
@@ -39,6 +65,25 @@ check_age_width_df <- function(age_width_df, agevar_val) {
                       "width",
                       "age_width_df",
                       val),
+             call. = FALSE)
+    invisible(TRUE)
+}
+
+
+#' Check whether 'age_width_df' supplied when it is compulsory
+#'
+#' @param has_age_width_df Whether value supplied of age_width_df
+#' @param agevar_val Values for the age variable
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_age_width_df_supplied <- function(has_age_width_df, agevar_val) {
+    has_char_age_labels <- is.character(agevar_val) || is.factor(agevar_val)
+    if (has_char_age_labels && !has_age_width_df)
+        stop(gettextf("'%s' uses non-integer age labels, but no value supplied for '%s' argument",
+                      "nevent_df",
+                      "age_width_df"),
              call. = FALSE)
     invisible(TRUE)
 }
