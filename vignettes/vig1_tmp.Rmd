@@ -24,15 +24,10 @@ library(ggplot2)
 ## Smoothing by across age
 
 ```{r}
-divorce_2020 <- nz_divorces %>%
-  filter(time == 2020) %>%
-  select(-time)
-popn_2020 <- nz_population %>%
-  filter(time == 2020) %>%
-  select(-time)
-
-res_age <- smooth_age(nevent_df = divorce_2020,
-                      py_df = popn_2020)
+res_age <- smooth_age(nevent_df = nz_divorces_2020,
+                      py_df = nz_population_2020,
+		      age_width_df = nz_age_width_df,
+		      age_min = 15)
 res_age
 ```
 
@@ -51,9 +46,11 @@ head(rates_age_df)
 ```
 
 ```{r}
-ggplot(rates_age_df, aes(x = age)) +
+ggplot(rates_age_df,
+       aes(x = age.mid, ymin = .lower, y = .fitted, ymax = .upper)) +
   facet_wrap(vars(sex)) +
-  geom_pointrange(aes(ymin = .lower, y = .fitted, ymax = .upper)) +
+  geom_ribbon(fill = "salmon") +
+  geom_line() +
   geom_point(aes(y = .observed), col = "blue")
 ```
 
@@ -63,7 +60,9 @@ ggplot(rates_age_df, aes(x = age)) +
 ```{r}
 res_agetime <- smooth_agetime(nevent_df = nz_divorces,
                               py_df = nz_population,
-                              byvar = "sex")
+                              byvar = "sex",
+     		              age_width_df = nz_age_width_df,
+		              age_min = 15)
 res_agetime
 ```
 
@@ -86,9 +85,14 @@ ggplot(rates_agetime_df, aes(x = time)) +
 
 ```{r}
 age_effect <- components(res_agetime, what = "age_effect")
-ggplot(age_effect, aes(x = age)) +
+ggplot(age_effect,
+       aes(x = age.mid,
+           y = .fitted,
+           ymin = .lower,
+           ymax = .upper)) +
   facet_wrap(vars(sex)) +
-  geom_pointrange(aes(ymin = .lower, y = .fitted, ymax = .upper))
+  geom_ribbon(color = "salmon") +
+  geom_line()
 ```
 
 ```{r}
@@ -141,20 +145,3 @@ res_cn5 <- smooth_agetime(nevent_df = cn_divorces_5,
 res_cn5
 ```
 
-```{r}
-rates_cn5 <- augment(res_cn5)
-head(rates_cn5)
-```
-
-
-```{r, fig.height = 7}
-rates_cn5_selected <- rates_cn5 %>%
-  filter(age %in% seq(20, 50, 5),
-         sex == "Female")
-ggplot(rates_cn5_selected, 
-       aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
-  facet_wrap(vars(age)) +
-  geom_ribbon(fill = "salmon") +
-  geom_line() +
-  geom_point(aes(y = .observed), col = "blue")
-```

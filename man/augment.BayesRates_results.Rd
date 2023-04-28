@@ -29,6 +29,10 @@ credible intervals specified by \code{interval}
 from the posterior distribution.
 \item \code{.observed} Direct estimates of rates.
 }
+
+The age variable comes in versions: the original
+version and one with a \code{.mid} suffix. The \code{.mid}
+version is useful for plotting.
 }
 \description{
 Extract estimates rates from an object
@@ -38,14 +42,19 @@ with the original data.
 }
 \examples{
 results <- smooth_agetime(nevent_df = nz_divorces,
-                          py_df = nz_population)
+                          py_df = nz_population,
+                          age_width_df = nz_age_width_df,
+                          age_min = 15)
 augment(results)
 }
 \seealso{
 \itemize{
+\item \code{\link[=smooth_age]{smooth_age()}} smooths rates over age
+\item \code{\link[=smooth_agetime]{smooth_agetime()}} smooths rates over age and time
 \item \code{\link[=components]{components()}} extracts rates, age effects,
 time effects, and hyper-parameters
 \item \code{\link[=n_draw<-]{n_draw<-()}} sets the default number
 of draws from the posterior distribution
+\item \code{\link[=total_rate]{total_rate()}} provides a summary indicator
 }
 }

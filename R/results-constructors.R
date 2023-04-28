@@ -15,6 +15,9 @@
 #' @param timevar Name of time variable, or NULL.
 #' @param byvar Names of classification variables,
 #' other than age and time.
+#' @param age_width_df Data frame holding widths
+#' of age groups.
+#' @param age_min Lower limit of youngest age group
 #' @param spec_age Specification of prior model for
 #' age effect.
 #' @param spec_time Specification of prior model for
@@ -32,6 +35,8 @@ new_BayesRates_results <- function(nevent_df,
                                    agevar,
                                    timevar,
                                    byvar,
+                                   age_width_df,
+                                   age_min,
                                    spec_age,
                                    spec_time,
                                    fitted,
@@ -42,6 +47,8 @@ new_BayesRates_results <- function(nevent_df,
                 agevar = agevar,
                 timevar = timevar,
                 byvar = byvar,
+                age_width_df = age_width_df,
+                age_min = age_min,
                 spec_age = spec_age,
                 spec_time = spec_time,
                 fitted = fitted,

@@ -10,6 +10,8 @@ smooth_agetime(
   agevar = "age",
   timevar = "time",
   byvar = character(),
+  age_width_df = NULL,
+  age_min = NULL,
   spec_age = Spline(),
   spec_time = TimeVarying()
 )
@@ -34,6 +36,13 @@ Defaults to \code{"time"}.}
 \item{byvar}{The names of classification variables in \code{nevent_df}
 and \code{py_df}, other than age and time (eg \code{"sex"} or \code{"region"}).
 Optional.}
+
+\item{age_width_df}{A data frame with columns \code{"age"}
+and \code{"width"}, giving the widths of each age group.
+Required if the age group labels are not integers.}
+
+\item{age_min}{The lower limit of the youngest age group.
+Required if the age group labels are not integers.}
 
 \item{spec_age}{The prior model for the age effect.
 Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}. Defaults to
