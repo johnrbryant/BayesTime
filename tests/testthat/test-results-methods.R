@@ -127,3 +127,26 @@ test_that("'total_rate' works with valid inputs - character age groups", {
     expect_equal(sum(rates$.fitted * age_width_df$width), ans$.fitted, tolerance = 0.02)
 })
 
+test_that("'total_rate' interpolates correctly", {
+    set.seed(0)
+    nevent_df <- expand.grid(age = 0:9, time = c(2011, 2013),
+                             KEEP.OUT.ATTRS = FALSE)
+    nevent_df$nevent <- rpois(n = nrow(nevent_df), lambda = outer(11:20, c(5, 7)))
+    py_df <- expand.grid(age = 0:9, time = c(2011, 2013),
+                         KEEP.OUT.ATTRS = FALSE)
+    py_df$py <- 100
+    results <- smooth_agetime(nevent_df = nevent_df,
+                              py_df = py_df,
+                              spec_age = Spline(df = 4, scale =2),
+                              spec_time = TimeVarying(scale = 2))
+    n_draw(results) <- 20
+    ans <- total_rate(results)
+    expect_setequal(names(ans),
+                    c("time", ".fitted", ".lower", ".upper",
+                      ".probability", ".observed"))
+    expect_true(2012 %in% ans$time)
+    rates <- components(results)
+    expect_equal(sum(rates$.fitted), sum(ans$.fitted), tolerance = 0.02)
+})
+
+
