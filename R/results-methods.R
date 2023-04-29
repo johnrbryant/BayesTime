@@ -11,12 +11,18 @@
 generics::augment
 
 ## HAS_TESTS
-#' Data and rates estimates from a results object
+#' Obtain estimates of rates, combined with original data
 #'
-#' Extract estimates rates from an object
+#' Extract estimated rates from an object
 #' created by a call to [smooth_age()]
 #' or [smooth_agetime()], and combine these
 #' with the original data.
+#'
+#' In addition to the modelled rates,
+#' `augment()` also displayed 'direct'
+#' estimates of rates. Direct estimates are
+#' estimates obtained by dividing events
+#' by populations at risk, with no smoothing.
 #' 
 #' @param x A `"BayesRates_results"` object created
 #' by calling function [smooth_age()]
@@ -26,28 +32,26 @@ generics::augment
 #' @param ... Not currently used.
 #'
 #' @returns A [tibble][tibble::tibble-package],
-#' constructed by merging the original `nevent_df` and
-#' `py_df` arguments to [smooth_agetime()],
-#' plus four new columns:
-#' - `.fitted` Point estimates (posterior medians) of rates.
-#' - `.lower`, `.upper` Lower and upper bounds of
-#' credible intervals specified by `interval`
-#' - `.probability`. A list column with all draws
+#' constructed by merging `nevent_df` and
+#' `py_df`, and the creating five new columns:
+#' - `<agevar>.mid`: Midpoints of age groups
+#' (which is useful for plotting.)
+#' - `.fitted`: Point estimates (posterior medians) of rates.
+#' - `.lower`, `.upper`: Lower and upper bounds of
+#' credible intervals specified by `interval`.
+#' - `.probability`: A list column with all draws
 #' from the posterior distribution.
-#' - `.observed` Direct estimates of rates.
+#' - `.observed`: Direct estimates of rates.
 #'
-#' The age variable comes in versions: the original
-#' version and one with a `.mid` suffix. The `.mid`
-#' version is useful for plotting.
-#' 
 #' @seealso
-#' - [smooth_age()] smooths rates over age
-#' - [smooth_agetime()] smooths rates over age and time
-#' - [components()] extracts rates, age effects,
-#' time effects, and hyper-parameters
-#' - [n_draw<-()] sets the default number
-#' of draws from the posterior distribution
-#' - [total_rate()] provides a summary indicator
+#' - [smooth_age()] smooths rates over age.
+#' - [smooth_agetime()] smooths rates over age and time.
+#' - \code{\link[=components.BayesRates_results]{components()}}
+#' extracts rates, age effects,
+#' time effects, and hyper-parameters.
+#' - \code{\link[=n_draw<-]{n_draw()}} sets the default number
+#' of draws from the posterior distribution.
+#' - [total_rate()] calculates a summary indicator.
 #'
 #' @examples
 #' results <- smooth_agetime(nevent_df = nz_divorces,
@@ -127,12 +131,13 @@ generics::components
 #' version is useful for plotting.
 #'
 #' @seealso
-#' - [smooth_age()] smooths rates over age
-#' - [smooth_agetime()] smooths rates over age and time
-#' - [augment()] combines data and estimates for rates
-#' - [n_draw<-()] sets the default number
-#' of draws from the posterior distribution
-#' - [total_rate()] provides a summary indicator
+#' - [smooth_age()] smooths rates over age.
+#' - [smooth_agetime()] smooths rates over age and time.
+#' - \code{\link[=augment.BayesRates_results]{augment()}}
+#' combines data and estimates for rates.
+#' - \code{\link[=n_draw<-]{n_draw()}} sets the default number
+#' of draws from the posterior distribution.
+#' - [total_rate()] calculates a summary indicator
 #'
 #' @examples
 #' ## run model
@@ -205,12 +210,14 @@ components.BayesRates_results <- function(object,
 #' @returns A modified version of `x`.
 #'
 #' @seealso
-#' - [smooth_age()] smooths rates over age
-#' - [smooth_agetime()] smooths rates over age and time
-#' - [augment()] combines data and estimates for rates
-#' - [components()] sets the default number
-#' of draws from the posterior distribution
-#' - [total_rate()] provides a summary indicator
+#' - [smooth_age()] smooths rates over age.
+#' - [smooth_agetime()] smooths rates over age and time.
+#' - \code{\link[=augment.BayesRates_results]{augment()}}
+#' combines data and estimates for rates.
+#' - \code{\link[=components.BayesRates_results]{components()}}
+#' extracts rates, age effects,
+#' time effects, and hyper-parameters.
+#' - [total_rate()] calculates a summary indicator
 #'
 #' @examples
 #' res <- smooth_age(nevent_df = nz_divorces_2020,
@@ -321,11 +328,13 @@ print.BayesRates_results <- function(x, ...) {
 #' @seealso
 #' - [smooth_age()] smooths rates over age
 #' - [smooth_agetime()] smooths rates over age and time
-#' - [augment()] combines data and estimates for rates
-#' - [components()] extracts rates, age effects,
-#' time effects, and hyper-parameters
-#' - [n_draw<-()] sets the default number
-#' of draws from the posterior distribution
+#' - \code{\link[=augment.BayesRates_results]{augment()}}
+#' combines data and estimates for rates.
+#' - \code{\link[=components.BayesRates_results]{components()}}
+#' extracts rates, age effects,
+#' time effects, and hyper-parameters.
+#' - \code{\link[=n_draw<-]{n_draw()}} sets the default number
+#' of draws from the posterior distribution.
 #'
 #' @examples
 #' res <- smooth_agetime(nevent_df = cn_divorces,

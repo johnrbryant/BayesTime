@@ -132,7 +132,7 @@ ggplot(total_divorce_rate,
 
 
 
-## Interpolation
+## Interpolation with total rates
 
 
 ```{r}

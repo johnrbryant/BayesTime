@@ -7,8 +7,8 @@
 \format{
 A data frame with the following variables:
 \itemize{
-\item \code{age}: Age, in 5-year age groups, 15-19 to 65+
-\item \code{sex}: \code{"Female"} or \code{"Male"}
+\item \code{age}: Age, in 5-year age groups, \code{"15-19"} to \code{"65+"}.
+\item \code{sex}: \code{"Female"} or \code{"Male"}.
 \item \code{nevent}: Numbers of divorces during year.
 }
 }
@@ -24,7 +24,7 @@ nz_divorces_2020
 }
 \description{
 Counts of divorces by age and sex,
-in New Zealand, 2020
+in New Zealand, 2020.
 }
 \seealso{
 \itemize{

@@ -8,14 +8,14 @@ Spline(df = NULL, scale = 1)
 }
 \arguments{
 \item{df}{Degrees of freedom for spline.
-Defaults to 0.7 times the number of age groups,
+The default is 0.7 times the number of age groups,
 or 4, whichever is higher.}
 
 \item{scale}{Scale for error term.
-Defaults to 1.}
+The default is 1.}
 }
 \value{
-An object of class \code{BayesRates_spec_spline}.
+An object of class \code{"BayesRates_spec_spline"}.
 }
 \description{
 Specify a P-spline (penalised spline)
@@ -32,11 +32,11 @@ The model for the age effect, on the log scale, is
 
 where
 \itemize{
-\item \eqn{\beta} is a vector of age effects
+\item \eqn{\beta} is a vector of age effects,
 \item \eqn{X} is a matrix holding the basis functions
-for the spline, with \code{df} columns
+for the spline, with \code{df} columns, and
 \item \eqn{\gamma} is a vector of coefficients,
-with \code{df} elements
+with \code{df} elements.
 }
 
 The elements of \eqn{\gamma} are assumed to follow
@@ -58,14 +58,13 @@ Spline(df = 10)
 }
 \seealso{
 \itemize{
+\item \code{\link[=RW2]{RW2()}} is an alternative approach to
+modelling age effects, based on a random walk.
 \item \code{\link[=TimeFixed]{TimeFixed()}} specifies time trends where the
-age pattern is fixed
+age pattern is fixed over time.
 \item \code{\link[=TimeVarying]{TimeVarying()}} specifies time trends where the
-age pattern varies
-\item \code{\link[=RW2]{RW2()}} creates a random walk specification for
-age effects
+age pattern varies over time
 }
 
-\code{Spline()} uses function \code{\link[splines:bs]{splines::bs()}} to
-generate matrix \eqn{X}.
+\code{Spline()} uses function \code{\link[splines:bs]{splines::bs()}} internally.
 }

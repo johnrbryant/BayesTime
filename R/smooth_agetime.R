@@ -1,18 +1,38 @@
 
 #' Smooth rates over age
 #'
+#' Use data on numbers of events and population
+#' at risk to produce estimates of rates that
+#' are smoothed over age. The amount of smoothing
+#' depends on the model used to represent age effects.
+#' Current choices are [Spline()] (the default) and
+#' [RW2()]. See the documentation for `Spline()` and
+#' `RW2()` for a description of the mathematical models
+#' underlying the smoothing.
 #'
-#' If the original data (arguments `nevent_df` and `py_df`
-#' supplied to [smooth_age()] or [smooth_agetime()]) used
-#' character or factor age labels that could not
-#' be interpreted as integers, then `total_rate()`
-#' needs help interpreting the labels. This help is
-#' provided through the `age_width_df` argument.
-#' `age_width_df` is a data frame showing the
-#' the width to be used for each age group. If the
-#' final age group is open (ie has no upper limit)
-#' then the width should approximately equal the expected
-#' number of years lived in that age group.
+#' Dataset `nevent_df` must contain a
+#' variable called `nevent` giving counts of events,
+#' and dataset `py_df` must contain a variable called
+#' `py` giving the population at risk.
+#'
+#' `nevent_df` and `py_df` must also contain
+#' an age variable. If the age variable users multi-year
+#' age groups (eg `"15-19"` or `"65+"`), then
+#' `smooth_age()` needs help interpreting these age groups.
+#' A data frame `age_width_df` must be supplied giving
+#' the width of each age group, as well as a
+#' value `age_min` giving the lower limit of the
+#' youngest age group. (Future versions of `BayesRates`
+#' will try to parse age group labels automatically.)
+#'
+#' `nevent_df` and `py_df` must *not* contain a time variable.
+#' To analyse data with age and time dimensions, use
+#' function [smooth_agetime()].
+#'
+#' `nevent_df` and `py_df` can contain additional
+#' classifying variables, such as sex and region.
+#' Independent models are fitted for each combination
+#' of the levels of these additional variables.
 #' 
 #' @param nevent_df A data frame with a column
 #' called `"nevent"` containing the number of events,
@@ -37,6 +57,25 @@
 #'
 #' @returns An object of class `"BayesRates_results"`.
 #'
+#' @seealso
+#' - [smooth_agetime()] models rates that vary
+#' over age and time.
+#' - [Spline()] and [RW2()] specify age effects
+#' - \code{\link[=augment.BayesRates_results]{augment()}}
+#' combines data and estimates for rates.
+#' - \code{\link[=components.BayesRates_results]{components()}}
+#' extracts rates, age effects,
+#' time effects, and hyper-parameters.
+#' - \code{\link[=n_draw<-]{n_draw()}} sets the default number
+#' of draws from the posterior distribution.
+#' - [total_rate()] calculates a summary indicator.
+#'
+#' @examples
+#' res <- smooth_age(nevent_df = nz_divorces_2020,
+#'                   py_df = nz_population_2020,
+#'                   age_width_df = nz_age_width_df,
+#'                   age_min = 15)
+#' res
 #' @export
 smooth_age <- function(nevent_df,
                        py_df,
@@ -138,6 +177,47 @@ smooth_age <- function(nevent_df,
 
 #' Smooth rates over age and time
 #'
+#' Use data on numbers of events and population
+#' at risk to produce estimates of rates that
+#' are smoothed over age and time. The amount of smoothing
+#' depends on the model used to represent age
+#' and time effects. Current choices for
+#' age effects are [Spline()] (the default) and
+#' [RW2()]. Current choices for time effects are
+#' [TimeVarying()] (the default) and [TimeFixed()].
+#' See the documentation for `Spline()`, `RW2()`,
+#' `TimeVarying()`, and `TimeFixed()` for a
+#' description of the mathematical models
+#' underlying the smoothing.
+#'
+#' Dataset `nevent_df` must contain a
+#' variable called `nevent` giving counts of events,
+#' and dataset `py_df` must contain a variable called
+#' `py` giving the population at risk.
+#'
+#' `nevent_df` and `py_df` must also contain
+#' an age variable. If the age variable users multi-year
+#' age groups (eg `"15-19"` or `"65+"`), then
+#' `smooth_age()` needs help interpreting these age groups.
+#' A data frame `age_width_df` must be supplied giving
+#' the width of each age group, as well as a
+#' value `age_min` giving the lower limit of the
+#' youngest age group. (Future versions of `BayesRates`
+#' will try to parse age group labels automatically.)
+#' 
+#' `nevent_df` and `py_df` must contain a time variable.
+#' To analyse data without a time dimension, use
+#' function [smooth_age()]. Times must be single
+#' years, eg `2015`, `2016`, `2017`. There may be gaps,
+#' eg `2010`, `2015`, `2020`: `smooth_agetime()`
+#' automatically estimates values for the
+#' missing periods.
+#'
+#' `nevent_df` and `py_df` can contain additional
+#' classifying variables, such as sex and region.
+#' Independent models are fitted for each combination
+#' of the levels of these additional variables.
+#'
 #' @param nevent_df A data frame with a column
 #' called `"nevent"` containing the number of events,
 #' plus additional classification variables.
@@ -167,6 +247,26 @@ smooth_age <- function(nevent_df,
 #'
 #' @returns An object of class `"BayesRates_results"`.
 #'
+#' @seealso
+#' - [smooth_age()] models rates that do not have
+#' a time dimension.
+#' - [Spline()] and [RW2()] specify age effects
+#' - [TimeVarying()] and [TimeFixed()] specify time effects
+#' - \code{\link[=augment.BayesRates_results]{augment()}}
+#' combines data and estimates for rates.
+#' - \code{\link[=components.BayesRates_results]{components()}}
+#' extracts rates, age effects,
+#' time effects, and hyper-parameters.
+#' - \code{\link[=n_draw<-]{n_draw()}} sets the default number
+#' of draws from the posterior distribution.
+#' - [total_rate()] calculates a summary indicator.
+#'
+#' @examples
+#' results <- smooth_agetime(nevent_df = nz_divorces,
+#'                           py_df = nz_population,
+#'                           age_width_df = nz_age_width_df,
+#'                           age_min = 15)
+#' results
 #' @export
 smooth_agetime <- function(nevent_df,
                            py_df,

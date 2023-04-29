@@ -8,7 +8,7 @@ TimeVarying(scale = 1)
 }
 \arguments{
 \item{scale}{Scale for the standard deviation
-of the error term. Defaults to 1.}
+of the error term. Default is 1.}
 }
 \value{
 An object of class \code{"BayesRates_spec_timevarying"}.
@@ -20,17 +20,16 @@ is allowed to vary smoothly over time.
 \section{Mathematical details}{
 
 
-When the age pattern varies, the
-model for log rates is
+In the model underlying \code{TimeVarying()},
 
 \deqn{\eta_{at} = \alpha_a + \beta_{at}}
 
 where
 \itemize{
-\item \eqn{\eta_{at}} denotes the rates (on a log scale)
-for age group \eqn{a} during period \eqn{t}
-\item \eqn{\alpha_a} is an age effect
-\item \eqn{\beta_{at}} is an age-time interaction
+\item \eqn{\eta_{at}} denotes (log) rates
+for age group \eqn{a} during period \eqn{t},
+\item \eqn{\alpha_a} is an age effect,
+\item \eqn{\beta_{at}} is an age-time interaction,
 }
 
 and the age-time interaction is modelled as
@@ -39,8 +38,8 @@ and the age-time interaction is modelled as
 
 where
 \itemize{
-\item \eqn{\beta_t} is a vector of age-specific terms
-\item \eqn{\epsilon_t} a vector drawn from a multivariate
+\item \eqn{\beta_t} is a vector of age-specific terms, and
+\item \eqn{\epsilon_t} is a vector drawn from a multivariate
 normal with mean 0 and variance \eqn{V}
 }
 
@@ -48,7 +47,7 @@ Element \eqn{v_{ij}} of \eqn{V} has the form
 
 \deqn{v_{ij} = \rho^{|i-j|}\sigma^2}
 
-Correlation coefficiant \eqn{\rho} has a Beta(2,2) prior.
+Correlation coefficient \eqn{\rho} has a Beta(2,2) prior.
 
 Standard deviation \eqn{\sigma} has prior
 
@@ -65,11 +64,10 @@ TimeVarying(scale = 0.1)
 }
 \seealso{
 \itemize{
-\item \code{\link[=TimeFixed]{TimeFixed()}} specifies time trends where the
-age pattern is fixed
-\item \code{\link[=RW2]{RW2()}} creates a random walk specification for
-age effects
-\item \code{\link[=Spline]{Spline()}} creates a spline specification for
-age effects
+\item \code{\link[=TimeFixed]{TimeFixed()}} is an alternative approach to modelling
+time trends. \code{TimeFixed()} assumes that age profiles are
+constant over time.
+\item \code{\link[=RW2]{RW2()}} models age effects using a random walk.
+\item \code{\link[=Spline]{Spline()}} models age effects using splines.
 }
 }

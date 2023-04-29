@@ -11,6 +11,8 @@
 #' @param age_min The lower limit of the youngest age group
 #'
 #' @returns 'df' with an extra column called 'age.mid'
+#'
+#' @noRd
 add_age_mid <- function(df, agevar, age_width_df, age_min) {
     ncol_df <- length(df)
     i_age <- match(df[[agevar]], age_width_df[["age"]])

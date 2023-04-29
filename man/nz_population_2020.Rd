@@ -3,13 +3,13 @@
 \docType{data}
 \name{nz_population_2020}
 \alias{nz_population_2020}
-\title{Adult population of New Zealand}
+\title{Adult population of New Zealand in 2020}
 \format{
 A data frame with the following variables:
 \itemize{
-\item \code{age}: Age, in 5-year age groups, 15-19 to 65+
-\item \code{sex}: \code{"Female"} or \code{"Male"}
-\item \code{py}: Person-years lived
+\item \code{age}: Age, in 5-year age groups, \code{"15-19"} to \code{"65+"}.
+\item \code{sex}: \code{"Female"} or \code{"Male"}.
+\item \code{py}: Person-years lived.
 }
 }
 \source{
@@ -25,7 +25,7 @@ nz_population_2020
 }
 \description{
 Person-years lived by population aged 15+
-by age and sex, in New Zealand, 2020
+by age and sex, in New Zealand, 2020.
 }
 \seealso{
 \itemize{

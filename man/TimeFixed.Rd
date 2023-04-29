@@ -8,37 +8,38 @@ TimeFixed(scale = 1)
 }
 \arguments{
 \item{scale}{Scale for the standard deviation
-of the error term. Defaults to 1.}
+of the error term. Default is 1.}
 }
 \value{
 An object of class \code{"BayesRates_spec_timefixed"}.
 }
 \description{
-Specify time trends where the age pattern is
-assumed to maintain the same shape over time,
-and the time effect follows a random walk.
+Specify time trends where the shape of
+the age profile is assumed to be constant
+over time, even though the level
+may change. The level is assumed to follow
+a random walk.
 }
 \section{Mathematical details}{
 
 
-When the age pattern is fixed, the
-model for log rates is
+In the model underlying \code{TimeFixed()},
 
 \deqn{\eta_{at} = \alpha_a + \beta_t}
 
 where
 \itemize{
-\item \eqn{\eta_{at}} denotes the rates (on a log scale)
-for age group \eqn{a} during period \eqn{t}
-\item \eqn{\alpha_a} is an age effect
-\item \eqn{\beta_t} is a time effect
+\item \eqn{\eta_{at}} denotes (log) rates
+for age group \eqn{a} during period \eqn{t},
+\item \eqn{\alpha_a} is an age effect,
+\item \eqn{\beta_t} is a time effect,
 }
 
 and the time effect is modelled as
 
 \deqn{\beta_t = \beta_{t-1} + \epsilon_t}
 
-where \eqn{\epsilon} is a normally-distributed error term,
+where \eqn{\epsilon} is a normally-distributed error term
 with mean \eqn{0} and standard deviation \eqn{\sigma}.
 
 Standard deviation \eqn{\sigma} has prior
@@ -56,11 +57,10 @@ TimeFixed(scale = 2)
 }
 \seealso{
 \itemize{
-\item \code{\link[=TimeVarying]{TimeVarying()}} specifies time trends
-where the age pattern varies
-\item \code{\link[=RW2]{RW2()}} creates a random walk specification for
-age effects
-\item \code{\link[=Spline]{Spline()}} creates a spline specification for
-age effects
+\item \code{\link[=TimeVarying]{TimeVarying()}} is an alternative approach to modelling
+time trends. \code{TimeVarying()} allows age profiles to
+change over time.
+\item \code{\link[=RW2]{RW2()}} models age effects using a random walk.
+\item \code{\link[=Spline]{Spline()}} models age effects using splines.
 }
 }

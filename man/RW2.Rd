@@ -2,7 +2,7 @@
 % Please edit documentation in R/spec-constructors.R
 \name{RW2}
 \alias{RW2}
-\title{Specify a random walk model for an age effect}
+\title{Specify a random walk model for the age effect}
 \usage{
 RW2(scale = 1)
 }
@@ -15,11 +15,12 @@ An object of class \code{BayesRates_spec_rw2}.
 }
 \description{
 Specify a second-order random walk model
-for an age effect. In a second-order random
-walk the change in increments, rather than the
-increments themselves, are random. A second-order
+for the age effect. A second-order
 random walk tends to be smoother than an
-ordinary (first-order) random walk.
+ordinary (first-order) random walk,
+while still being flexible enough to
+capture distinctive features of the age profile
+being modelled.
 }
 \section{Mathematical details}{
 
@@ -42,11 +43,11 @@ RW2(scale = 0.1)
 }
 \seealso{
 \itemize{
-\item \code{\link[=TimeFixed]{TimeFixed()}} specifies time trends where the
-age pattern is fixed
-\item \code{\link[=TimeVarying]{TimeVarying()}} specifies time trends where the
-age pattern varies
-\item \code{\link[=Spline]{Spline()}} creates a spline specification for
-age effects
+\item \code{\link[=Spline]{Spline()}} is an alternative approach to
+modelling age effects, based on splines.
+\item \code{\link[=TimeFixed]{TimeFixed()}} is used to model time trends where the
+age pattern is fixed over time.
+\item \code{\link[=TimeVarying]{TimeVarying()}} is used to model time trends where the
+age pattern varies over time.
 }
 }

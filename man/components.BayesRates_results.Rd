@@ -80,11 +80,12 @@ components(results, what = c("rates", "age_effect"))
 }
 \seealso{
 \itemize{
-\item \code{\link[=smooth_age]{smooth_age()}} smooths rates over age
-\item \code{\link[=smooth_agetime]{smooth_agetime()}} smooths rates over age and time
-\item \code{\link[=augment]{augment()}} combines data and estimates for rates
-\item \code{\link[=n_draw<-]{n_draw<-()}} sets the default number
-of draws from the posterior distribution
-\item \code{\link[=total_rate]{total_rate()}} provides a summary indicator
+\item \code{\link[=smooth_age]{smooth_age()}} smooths rates over age.
+\item \code{\link[=smooth_agetime]{smooth_agetime()}} smooths rates over age and time.
+\item \code{\link[=augment.BayesRates_results]{augment()}}
+combines data and estimates for rates.
+\item \code{\link[=n_draw<-]{n_draw()}} sets the default number
+of draws from the posterior distribution.
+\item \code{\link[=total_rate]{total_rate()}} calculates a summary indicator
 }
 }

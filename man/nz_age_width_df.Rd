@@ -8,8 +8,8 @@ for New Zealand}
 \format{
 A data frame with the following variables:
 \itemize{
-\item \code{age}: Age, in 5-year age groups, 15-19 to 65+
-\item \code{width}: Width of the age group
+\item \code{age}: Age, in 5-year age groups, \code{"15-19"} to \code{"65+"}.
+\item \code{width}: Width of the age group.
 }
 }
 \usage{
@@ -23,6 +23,7 @@ and \code{\link{nz_population_2020}}.
 }
 \seealso{
 Data frames like \code{nz_age_width_df} are
-used by function \code{\link[=total_rate]{total_rate()}}.
+used by functions \code{\link[=smooth_age]{smooth_age()}} and \code{\link[=smooth_agetime]{smooth_agetime()}}
+when dealing with multi-year age groups.
 }
 \keyword{datasets}

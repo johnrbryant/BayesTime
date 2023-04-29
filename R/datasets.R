@@ -5,9 +5,9 @@
 #' in China Family Panel Studies survey, 1980-2018
 #'
 #' @format A data frame with the following variables:
-#' - `age`: Age, in single-year age groups
-#' - `sex`: `"Female"` or `"Male"`
-#' - `time`: Calendar year
+#' - `age`: Age, in single-year age groups.
+#' - `sex`: `"Female"` or `"Male"`.
+#' - `time`: Calendar year.
 #' - `nevent`: Numbers of divorces during year.
 #'
 #' @seealso
@@ -22,13 +22,13 @@
 #' Adult population in China
 #'
 #' Person-years lived by respondents in
-#' China Family Panel Studies survey, 1980-2018
+#' China Family Panel Studies survey, 1980-2018.
 #'
 #' @format A data frame with the following variables:
-#' - `age`: Age, in single-year age groups
-#' - `sex`: `"Female"` or `"Male"`
-#' - `time`: Calendar year
-#' - `py`: Person-years lived
+#' - `age`: Age, in single-year age groups.
+#' - `sex`: `"Female"` or `"Male"`.
+#' - `time`: Calendar year.
+#' - `py`: Person-years lived.
 #'
 #' @seealso
 #' - \code{\link{cn_divorces}} numbers of divorces
@@ -42,12 +42,12 @@
 #' Divorces in New Zealand
 #'
 #' Counts of divorces by age, sex,
-#' and calendar year, in New Zealand, 1992-2021
+#' and calendar year, in New Zealand, 1992-2021.
 #'
 #' @format A data frame with the following variables:
-#' - `age`: Age, in 5-year age groups, 15-19 to 65+
-#' - `sex`: `"Female"` or `"Male"`
-#' - `time`: Calendar year
+#' - `age`: Age, in 5-year age groups, `"15-19"` to `"65+"`.
+#' - `sex`: `"Female"` or `"Male"`.
+#' - `time`: Calendar year.
 #' - `nevent`: Numbers of divorces during year.
 #'
 #' @seealso
@@ -69,10 +69,10 @@
 #' and calendar year, in New Zealand, 1992-2021
 #'
 #' @format A data frame with the following variables:
-#' - `age`: Age, in 5-year age groups, 15-19 to 65+
-#' - `sex`: `"Female"` or `"Male"`
-#' - `time`: Calendar year
-#' - `py`: Person-years lived
+#' - `age`: Age, in 5-year age groups, `"15-19"` to `"65+"`.
+#' - `sex`: `"Female"` or `"Male"`.
+#' - `time`: Calendar year.
+#' - `py`: Person-years lived.
 #'
 #' @seealso
 #' - \code{\link{nz_population_2020}} data for 2020 only
@@ -91,11 +91,11 @@
 #' Divorces in New Zealand in 2020
 #'
 #' Counts of divorces by age and sex,
-#' in New Zealand, 2020
+#' in New Zealand, 2020.
 #'
 #' @format A data frame with the following variables:
-#' - `age`: Age, in 5-year age groups, 15-19 to 65+
-#' - `sex`: `"Female"` or `"Male"`
+#' - `age`: Age, in 5-year age groups, `"15-19"` to `"65+"`.
+#' - `sex`: `"Female"` or `"Male"`.
 #' - `nevent`: Numbers of divorces during year.
 #'
 #' @seealso
@@ -110,15 +110,15 @@
 "nz_divorces_2020"
 
 
-#' Adult population of New Zealand
+#' Adult population of New Zealand in 2020
 #'
 #' Person-years lived by population aged 15+
-#' by age and sex, in New Zealand, 2020
+#' by age and sex, in New Zealand, 2020.
 #'
 #' @format A data frame with the following variables:
-#' - `age`: Age, in 5-year age groups, 15-19 to 65+
-#' - `sex`: `"Female"` or `"Male"`
-#' - `py`: Person-years lived
+#' - `age`: Age, in 5-year age groups, `"15-19"` to `"65+"`.
+#' - `sex`: `"Female"` or `"Male"`.
+#' - `py`: Person-years lived.
 #'
 #' @seealso
 #' - \code{\link{nz_population}} data 1992-2021
@@ -142,9 +142,10 @@
 #' and \code{\link{nz_population_2020}}.
 #'
 #' @format A data frame with the following variables:
-#' - `age`: Age, in 5-year age groups, 15-19 to 65+
-#' - `width`: Width of the age group
+#' - `age`: Age, in 5-year age groups, `"15-19"` to `"65+"`.
+#' - `width`: Width of the age group.
 #'
 #' @seealso Data frames like `nz_age_width_df` are
-#' used by function [total_rate()].
+#' used by functions [smooth_age()] and [smooth_agetime()]
+#' when dealing with multi-year age groups.
 "nz_age_width_df"

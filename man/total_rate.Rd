@@ -49,10 +49,12 @@ total_rate(res)
 \itemize{
 \item \code{\link[=smooth_age]{smooth_age()}} smooths rates over age
 \item \code{\link[=smooth_agetime]{smooth_agetime()}} smooths rates over age and time
-\item \code{\link[=augment]{augment()}} combines data and estimates for rates
-\item \code{\link[=components]{components()}} extracts rates, age effects,
-time effects, and hyper-parameters
-\item \code{\link[=n_draw<-]{n_draw<-()}} sets the default number
-of draws from the posterior distribution
+\item \code{\link[=augment.BayesRates_results]{augment()}}
+combines data and estimates for rates.
+\item \code{\link[=components.BayesRates_results]{components()}}
+extracts rates, age effects,
+time effects, and hyper-parameters.
+\item \code{\link[=n_draw<-]{n_draw()}} sets the default number
+of draws from the posterior distribution.
 }
 }

@@ -7,9 +7,9 @@
 \format{
 A data frame with the following variables:
 \itemize{
-\item \code{age}: Age, in single-year age groups
-\item \code{sex}: \code{"Female"} or \code{"Male"}
-\item \code{time}: Calendar year
+\item \code{age}: Age, in single-year age groups.
+\item \code{sex}: \code{"Female"} or \code{"Male"}.
+\item \code{time}: Calendar year.
 \item \code{nevent}: Numbers of divorces during year.
 }
 }

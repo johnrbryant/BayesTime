@@ -46,15 +46,59 @@ Current choices: \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}}. 
 An object of class \code{"BayesRates_results"}.
 }
 \description{
-If the original data (arguments \code{nevent_df} and \code{py_df}
-supplied to \code{\link[=smooth_age]{smooth_age()}} or \code{\link[=smooth_agetime]{smooth_agetime()}}) used
-character or factor age labels that could not
-be interpreted as integers, then \code{total_rate()}
-needs help interpreting the labels. This help is
-provided through the \code{age_width_df} argument.
-\code{age_width_df} is a data frame showing the
-the width to be used for each age group. If the
-final age group is open (ie has no upper limit)
-then the width should approximately equal the expected
-number of years lived in that age group.
+Use data on numbers of events and population
+at risk to produce estimates of rates that
+are smoothed over age. The amount of smoothing
+depends on the model used to represent age effects.
+Current choices are \code{\link[=Spline]{Spline()}} (the default) and
+\code{\link[=RW2]{RW2()}}. See the documentation for \code{Spline()} and
+\code{RW2()} for a description of the mathematical models
+underlying the smoothing.
+}
+\details{
+Dataset \code{nevent_df} must contain a
+variable called \code{nevent} giving counts of events,
+and dataset \code{py_df} must contain a variable called
+\code{py} giving the population at risk.
+
+\code{nevent_df} and \code{py_df} must also contain
+an age variable. If the age variable users multi-year
+age groups (eg \code{"15-19"} or \code{"65+"}), then
+\code{smooth_age()} needs help interpreting these age groups.
+A data frame \code{age_width_df} must be supplied giving
+the width of each age group, as well as a
+value \code{age_min} giving the lower limit of the
+youngest age group. (Future versions of \code{BayesRates}
+will try to parse age group labels automatically.)
+
+\code{nevent_df} and \code{py_df} must \emph{not} contain a time variable.
+To analyse data with age and time dimensions, use
+function \code{\link[=smooth_agetime]{smooth_agetime()}}.
+
+\code{nevent_df} and \code{py_df} can contain additional
+classifying variables, such as sex and region.
+Independent models are fitted for each combination
+of the levels of these additional variables.
+}
+\examples{
+res <- smooth_age(nevent_df = nz_divorces_2020,
+                  py_df = nz_population_2020,
+                  age_width_df = nz_age_width_df,
+                  age_min = 15)
+res
+}
+\seealso{
+\itemize{
+\item \code{\link[=smooth_agetime]{smooth_agetime()}} models rates that vary
+over age and time.
+\item \code{\link[=Spline]{Spline()}} and \code{\link[=RW2]{RW2()}} specify age effects
+\item \code{\link[=augment.BayesRates_results]{augment()}}
+combines data and estimates for rates.
+\item \code{\link[=components.BayesRates_results]{components()}}
+extracts rates, age effects,
+time effects, and hyper-parameters.
+\item \code{\link[=n_draw<-]{n_draw()}} sets the default number
+of draws from the posterior distribution.
+\item \code{\link[=total_rate]{total_rate()}} calculates a summary indicator.
+}
 }

@@ -7,10 +7,10 @@
 \format{
 A data frame with the following variables:
 \itemize{
-\item \code{age}: Age, in single-year age groups
-\item \code{sex}: \code{"Female"} or \code{"Male"}
-\item \code{time}: Calendar year
-\item \code{py}: Person-years lived
+\item \code{age}: Age, in single-year age groups.
+\item \code{sex}: \code{"Female"} or \code{"Male"}.
+\item \code{time}: Calendar year.
+\item \code{py}: Person-years lived.
 }
 }
 \source{
@@ -22,7 +22,7 @@ cn_population
 }
 \description{
 Person-years lived by respondents in
-China Family Panel Studies survey, 1980-2018
+China Family Panel Studies survey, 1980-2018.
 }
 \seealso{
 \itemize{

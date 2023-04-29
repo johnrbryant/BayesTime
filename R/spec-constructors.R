@@ -4,28 +4,29 @@
 ## HAS_TESTS
 #' Specify time trends: age pattern fixed
 #'
-#' Specify time trends where the age pattern is
-#' assumed to maintain the same shape over time,
-#' and the time effect follows a random walk.
+#' Specify time trends where the shape of
+#' the age profile is assumed to be constant
+#' over time, even though the level
+#' may change. The level is assumed to follow
+#' a random walk.
 #'
 #' @section Mathematical details:
 #'
-#' When the age pattern is fixed, the
-#' model for log rates is
+#' In the model underlying `TimeFixed()`,
 #'
 #' \deqn{\eta_{at} = \alpha_a + \beta_t}
 #'
 #' where
-#' - \eqn{\eta_{at}} denotes the rates (on a log scale)
-#' for age group \eqn{a} during period \eqn{t}
-#' - \eqn{\alpha_a} is an age effect
-#' - \eqn{\beta_t} is a time effect
+#' - \eqn{\eta_{at}} denotes (log) rates
+#' for age group \eqn{a} during period \eqn{t},
+#' - \eqn{\alpha_a} is an age effect,
+#' - \eqn{\beta_t} is a time effect,
 #'
 #' and the time effect is modelled as
 #' 
 #' \deqn{\beta_t = \beta_{t-1} + \epsilon_t}
 #'
-#' where \eqn{\epsilon} is a normally-distributed error term,
+#' where \eqn{\epsilon} is a normally-distributed error term
 #' with mean \eqn{0} and standard deviation \eqn{\sigma}.
 #'
 #' Standard deviation \eqn{\sigma} has prior
@@ -37,18 +38,17 @@
 #' is supplied by the user.
 #'
 #' @param scale Scale for the standard deviation
-#' of the error term. Defaults to 1.
+#' of the error term. Default is 1.
 #'
 #' @returns An object of class `"BayesRates_spec_timefixed"`.
 #'
 #' @seealso
-#' - [TimeVarying()] specifies time trends
-#' where the age pattern varies
-#' - [RW2()] creates a random walk specification for
-#' age effects
-#' - [Spline()] creates a spline specification for
-#' age effects
-#'
+#' - [TimeVarying()] is an alternative approach to modelling
+#' time trends. `TimeVarying()` allows age profiles to
+#' change over time.
+#' - [RW2()] models age effects using a random walk.
+#' - [Spline()] models age effects using splines.
+#' 
 #' @examples
 #' TimeFixed()
 #' TimeFixed(scale = 2)
@@ -68,31 +68,30 @@ TimeFixed <- function(scale = 1) {
 #'
 #' @section Mathematical details:
 #'
-#' When the age pattern varies, the
-#' model for log rates is
+#' In the model underlying `TimeVarying()`,
 #'
 #' \deqn{\eta_{at} = \alpha_a + \beta_{at}}
 #'
 #' where
-#' - \eqn{\eta_{at}} denotes the rates (on a log scale)
-#' for age group \eqn{a} during period \eqn{t}
-#' - \eqn{\alpha_a} is an age effect
-#' - \eqn{\beta_{at}} is an age-time interaction
+#' - \eqn{\eta_{at}} denotes (log) rates
+#' for age group \eqn{a} during period \eqn{t},
+#' - \eqn{\alpha_a} is an age effect,
+#' - \eqn{\beta_{at}} is an age-time interaction,
 #'
 #' and the age-time interaction is modelled as
 #' 
 #' \deqn{\beta_t = \beta_{t-1} + \epsilon_t}
 #'
 #' where
-#' - \eqn{\beta_t} is a vector of age-specific terms
-#' - \eqn{\epsilon_t} a vector drawn from a multivariate
+#' - \eqn{\beta_t} is a vector of age-specific terms, and
+#' - \eqn{\epsilon_t} is a vector drawn from a multivariate
 #' normal with mean 0 and variance \eqn{V}
 #'
 #' Element \eqn{v_{ij}} of \eqn{V} has the form
 #'
 #' \deqn{v_{ij} = \rho^{|i-j|}\sigma^2}
 #' 
-#' Correlation coefficiant \eqn{\rho} has a Beta(2,2) prior.
+#' Correlation coefficient \eqn{\rho} has a Beta(2,2) prior.
 #'
 #' Standard deviation \eqn{\sigma} has prior
 #'
@@ -103,17 +102,16 @@ TimeFixed <- function(scale = 1) {
 #' is supplied by the user.
 #'
 #' @param scale Scale for the standard deviation
-#' of the error term. Defaults to 1.
+#' of the error term. Default is 1.
 #' 
 #' @returns An object of class `"BayesRates_spec_timevarying"`.
 #'
 #' @seealso
-#' - [TimeFixed()] specifies time trends where the
-#' age pattern is fixed
-#' - [RW2()] creates a random walk specification for
-#' age effects
-#' - [Spline()] creates a spline specification for
-#' age effects
+#' - [TimeFixed()] is an alternative approach to modelling
+#' time trends. `TimeFixed()` assumes that age profiles are
+#' constant over time.
+#' - [RW2()] models age effects using a random walk.
+#' - [Spline()] models age effects using splines.
 #'
 #' @examples
 #' TimeVarying()
@@ -127,14 +125,15 @@ TimeVarying <- function(scale = 1) {
 
 
 ## HAS_TESTS
-#' Specify a random walk model for an age effect
+#' Specify a random walk model for the age effect
 #'
 #' Specify a second-order random walk model
-#' for an age effect. In a second-order random
-#' walk the change in increments, rather than the
-#' increments themselves, are random. A second-order
+#' for the age effect. A second-order
 #' random walk tends to be smoother than an
-#' ordinary (first-order) random walk.
+#' ordinary (first-order) random walk,
+#' while still being flexible enough to
+#' capture distinctive features of the age profile
+#' being modelled.
 #'
 #' @section Mathematical details:
 #'
@@ -155,12 +154,12 @@ TimeVarying <- function(scale = 1) {
 #' @returns An object of class `BayesRates_spec_rw2`.
 #'
 #' @seealso
-#' - [TimeFixed()] specifies time trends where the
-#' age pattern is fixed
-#' - [TimeVarying()] specifies time trends where the
-#' age pattern varies
-#' - [Spline()] creates a spline specification for
-#' age effects
+#' - [Spline()] is an alternative approach to
+#' modelling age effects, based on splines.
+#' - [TimeFixed()] is used to model time trends where the
+#' age pattern is fixed over time.
+#' - [TimeVarying()] is used to model time trends where the
+#' age pattern varies over time.
 #'
 #' @examples
 #' RW2()
@@ -188,11 +187,11 @@ RW2 <- function(scale = 1) {
 #' \deqn{\beta = X \gamma}
 #'
 #' where
-#' - \eqn{\beta} is a vector of age effects
+#' - \eqn{\beta} is a vector of age effects,
 #' - \eqn{X} is a matrix holding the basis functions
-#' for the spline, with `df` columns
+#' for the spline, with `df` columns, and
 #' - \eqn{\gamma} is a vector of coefficients,
-#' with `df` elements
+#' with `df` elements.
 #'
 #' The elements of \eqn{\gamma} are assumed to follow
 #' a second order random walk,
@@ -207,23 +206,22 @@ RW2 <- function(scale = 1) {
 #' and a value for \eqn{a} is supplied by the user.
 #'
 #' @param df Degrees of freedom for spline.
-#' Defaults to 0.7 times the number of age groups,
+#' The default is 0.7 times the number of age groups,
 #' or 4, whichever is higher.
 #' @param scale Scale for error term.
-#' Defaults to 1.
+#' The default is 1.
 #'
-#' @returns An object of class `BayesRates_spec_spline`.
+#' @returns An object of class `"BayesRates_spec_spline"`.
 #'
 #' @seealso
+#' - [RW2()] is an alternative approach to
+#' modelling age effects, based on a random walk.
 #' - [TimeFixed()] specifies time trends where the
-#' age pattern is fixed
+#' age pattern is fixed over time.
 #' - [TimeVarying()] specifies time trends where the
-#' age pattern varies
-#' - [RW2()] creates a random walk specification for
-#' age effects
+#' age pattern varies over time
 #'
-#' `Spline()` uses function [splines::bs()] to
-#' generate matrix \eqn{X}.
+#' `Spline()` uses function [splines::bs()] internally.
 #'
 #' @examples
 #' Spline()
