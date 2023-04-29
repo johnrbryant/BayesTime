@@ -145,3 +145,15 @@ res_cn5 <- smooth_agetime(nevent_df = cn_divorces_5,
 res_cn5
 ```
 
+
+```{r}
+total_divorce_rate_5 <- total_rate(res_cn5)  
+ggplot(total_divorce_rate_5, 
+       aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
+  facet_wrap(vars(sex)) +
+  geom_ribbon(fill = "salmon") +
+  geom_line() +
+  geom_point(aes(y = .observed), col = "blue")
+```
+
+

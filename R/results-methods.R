@@ -380,7 +380,7 @@ total_rate.BayesRates_results <- function(x, interval = 0.95) {
     obs <- stats::aggregate(rate_width_obs, obs[by_obs], sum)
     names(obs)[[length(obs)]] <- ".observed"
     ## merge and return
-    ans <- merge(ans, obs)
+    ans <- merge(ans, obs, all.x = TRUE)
     ans <- tibble::tibble(ans)
     ans
 }
