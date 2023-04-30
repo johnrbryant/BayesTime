@@ -1,0 +1,181 @@
+---
+title: "vig2_cn"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vig2_cn}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7
+)
+```
+
+In this example, we have the number of divorces and person-years of exposure for China by single year of age (15, ..., 64), sex, and year (1980, ..., 2018).  The values of the person-years of exposure are small and thus sampling error is quite large.  We use the *BayesRates* package to obtain smoothed estimates of the divorce rates.
+
+```{r setup}
+library(BayesRates)
+library(dplyr)
+library(ggplot2)
+```
+
+'cn_divorces' is an existing data frame in the *BayesRates* package with four columns:  
+(1) 'age': an integer variable with levels being 15,...,64;  
+(2) 'sex': a character variable with possible values being "Female" and "Male";  
+(3) 'time': an integer variable with possible values being 1980,...,2018;  
+(4) 'nevent': a numeric variable recording the number of divorce events.
+```{r}
+head(cn_divorces)
+```
+
+'cn_population' is an existing data frame in the *BayesRates* package with four columns:  
+(1) 'age': an integer variable with levels being 15,...,64;  
+(2) 'sex': a character variable with possible values being "Female", "Male";  
+(3) 'time': an integer variable with possible values being 1980,...,2018;  
+(4) 'py': a numeric variable recording person-years of exposure.
+```{r}
+head(cn_population)
+```
+
+The person-years of exposure are quite small, and hence the numbers of divorces are very sparse, with a lot of values being zero.
+```{r}
+summary(cn_population["py"])
+table(cn_divorces["nevent"])
+```
+
+We use  the *smooth_agetime* function to smooth the observed rates across age and time, separately for each sex.  The parameter *nevent_df* specifies the data frame for numbers of events, and the parameter *py_df* specifies the data frame for person years of exposure.  For the age effects on log rates, we use the default model: a spline model with degrees of freedom equal to max(ceiling(0.7 * n), 4), where n is the number of age groups.  Here we have n=50, hence the degrees of freedom is 35.  Because the data is very sparse, we cannot use a too complicated model.  Therefore we assume that the time effects on log rates are the same for different age groups, and use a first-order random walk to model the common time effects.  To indicate this, we set the *spec_time* parameter to be *TimeFixed()*.
+```{r}
+res_agetime_bysex <- smooth_agetime(nevent_df = cn_divorces,
+                         py_df = cn_population,
+                         spec_time = TimeFixed(),
+                         byvar = "sex")
+```
+
+We print the model specification as follows.
+```{r}
+res_agetime_bysex
+```
+The number of events is modeled by a Poisson distribution with mean equal to an underlying rate multiplied by person-years of exposure.  The logarithm of the underlying rate equals the age effect plus the time effect. The model for the age effect is *Spline()*, and the model for the time effect is *TimeFixed()*.  The value of 'agevar' is 'age', indicating that the name of the variable that records age is 'age'.  The value of 'timevar' is 'time', indicating that the name of the variable that records time is 'time'.  The value of 'byvar' is 'sex', indicating that a model is fitted separately for each sex.  The value of 'ndraw' is 1000, indicating that the number of posterior draws is 1000 (default value).
+
+We use the *augment* function to combine the observed data and the model-based estimates of rates.
+```{r}
+rates_agetime_bysex_df <- augment(res_agetime_bysex)
+head(rates_agetime_bysex_df)
+```
+In the returned data frame, the variable 'age.mid' gives the middle point for each single year of age, the variable '.fitted' gives the point estimate of the rate, the variables '.lower' and '.upper' give the lower and upper bounds of the credible interval of the rate (95% credible interval by default), and the variable '.probability' gives a list containing the posterior draws of the rate.  
+
+For both sexes, we plot the model-based estimates of rates (including point estimates and credible intervals) and the observed rates.
+```{r, fig.height = 7}
+ggplot(rates_agetime_bysex_df, aes(x = age.mid)) +
+  facet_wrap(vars(time)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted, color = sex)) +
+  geom_point(aes(y = .observed, color = sex),
+             size = 0.5)
+```
+
+We can plot the model-based estimates of rates and the observed rates only for Females.
+```{r, fig.height = 7}
+ggplot(rates_agetime_bysex_df[which(rates_agetime_bysex_df$sex=="Female"),], aes(x = age.mid)) +
+  facet_wrap(vars(time)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted, color = sex)) +
+  geom_point(aes(y = .observed, color = sex),
+             size = 0.5)
+```
+
+We can also plot the model-based estimates of rates and the observed rates only for Males.
+```{r, fig.height = 7}
+ggplot(rates_agetime_bysex_df[which(rates_agetime_bysex_df$sex=="Male"),], aes(x = age.mid)) +
+  facet_wrap(vars(time)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted, color = sex)) +
+  geom_point(aes(y = .observed, color = sex),
+             size = 0.5)
+```
+
+We obtain estimates of the total rates.
+```{r}
+total_rate <- total_rate(res_agetime_bysex)  
+head(total_rate)
+```
+
+We plot the model-based estimates of total rates and the observed rates.
+```{r}
+ggplot(total_rate, 
+       aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
+  facet_wrap(vars(sex)) +
+  geom_ribbon(fill = "salmon") +
+  geom_line() +
+  geom_point(aes(y = .observed), col = "blue")
+```
+
+Sometimes in practice, there are gaps in time in the available dataset. To illustrate how to estimate the rates in such cases, we use only the subset of the Chinese data for every fifth year.  To do this, we use the '%>%' operator from the 'dplyr' package that turns 'x %>% f(y)' into 'f(x,y)' so that the result from one step is piped into the next step.
+```{r}
+cn_divorces_5 <- cn_divorces %>%
+  filter(time %in% seq(1980, 2018, 5))
+cn_population_5 <- cn_population %>%
+  filter(time %in% seq(1980, 2018, 5))
+```
+
+We use  the *smooth_agetime* function to smooth the observed rates across age and time, separately for each sex.
+```{r}
+res_agetime_bysex_5 <- smooth_agetime(nevent_df = cn_divorces_5,
+                          py_df = cn_population_5,
+                          spec_time = TimeFixed(),
+                          byvar = "sex")
+res_agetime_bysex_5
+```
+
+When we use the *augment* function to combine data and model-based estimates of rates, we only obtain estimates for the observed years.
+```{r}
+rates_agetime_bysex_df_5 <- augment(res_agetime_bysex_5)
+head(rates_agetime_bysex_df_5)
+```
+
+```{r, fig.height = 7}
+ggplot(rates_agetime_bysex_df_5, aes(x = age.mid)) +
+  facet_wrap(vars(time)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted, color = sex)) +
+  geom_point(aes(y = .observed, color = sex),
+             size = 0.5)
+```
+
+However, when we use the *components* function to extract model-based estimates of rates, we can also obtain estimates for the gap years.
+```{r}
+rates_agetime_bysex_df_5_com <- components(res_agetime_bysex_5, what = "rates")
+head(rates_agetime_bysex_df_5_com)
+```
+
+```{r, fig.height = 7}
+ggplot(rates_agetime_bysex_df_5_com, aes(x = age.mid)) +
+  facet_wrap(vars(time)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted, color = sex))
+```
+
+When we use the *total_rate* function, estimates of total rates are obtained for both the observed years and the gap years. 
+```{r}
+total_rate5 <- total_rate(res_agetime_bysex_5)  
+head(total_rate5)
+```
+
+```{r}
+ggplot(total_rate5, 
+       aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
+  facet_wrap(vars(sex)) +
+  geom_ribbon(fill = "salmon") +
+  geom_line() +
+  geom_point(aes(y = .observed), col = "blue")
+```
+The credible intervals for the gap years are wider, because there are no observed data for these years.
