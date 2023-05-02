@@ -124,7 +124,66 @@ check_all_combn_classif_vars <- function(df, nm_df, nms_classif_vars) {
     }
     invisible(TRUE)
 }    
-    
+
+
+#' Check that, after aggregating, 'nevent_df' and 'py_df'
+#' have same levels for classification variables
+#'
+#' @param nevent_df A data frame
+#' @param py_df A data frame
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_df_same_levels <- function(nevent_df, py_df) {
+    nms_nevent <- names(nevent_df)
+    nms_py <- names(py_df)
+    nms_classif_vars <- setdiff(nms_nevent, "nevent")
+    for (nm in nms_classif_vars) {
+        if (!setequal(nevent_df[[nm]], py_df[[nm]]))
+            stop(gettextf("variable '%s' in '%s' uses different categories from variable '%s' in '%s'",
+                          nm,
+                          "nevent_df",
+                          nm,
+                          "py_df"),
+                 call. = FALSE)
+    }
+    invisible(TRUE)
+}
+
+
+#' Check that if 'py' is 0 or NA, then 'nevent' is also 0 or NA
+#'
+#' @param df A data frame formed my merging
+#' nevent_df and py_df
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_df_zero_na <- function(df) {
+    is_zero_na_nevent <- is.na(df$nevent) | (df$nevent == 0)
+    is_zero_na_py <- is.na(df$py) | (df$py == 0)
+    is_inconsistent <- !is_zero_na_nevent & is_zero_na_py
+    i_inconsistent <- match(TRUE, is_inconsistent, nomatch = 0L)
+    if (i_inconsistent > 0L) {
+        vals <- df[i_inconsistent, , drop = FALSE]
+        vals <- paste(names(vals), vapply(vals, as.character, " "), sep = " = ")
+        vals <- paste0("  ", vals)
+        vals <- paste(vals, collapse = "\n")
+        stop(gettextf("invalid combination of values for '%s' and '%s' :\n%s",
+                      "nevent",
+                      "py",
+                      vals),
+             call. = FALSE)
+    }
+    invisible(TRUE)
+}
+
+            
+            
+
+
+
 
 ## HAS_TESTS
 #' Check that a scalar is greater than 0

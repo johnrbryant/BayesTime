@@ -109,6 +109,58 @@ test_that("'check_all_combn_classif_vars' returns expected error with two rows m
 })
 
 
+## 'check_df_same_levels' -----------------------------------------------------
+
+test_that("'check_df_same_levels' returns TRUE with valid inputs", {
+    classif_vars <- expand.grid(age = c(0, 1), sex = c("f", "m"), time = 2001:2002,
+                                KEEP.OUT.ATTRS = FALSE)
+    nevent_df <- classif_vars
+    py_df <- classif_vars[8:1,]
+    nevent_df$nevent <- 10
+    py_df$py <- 20
+    expect_true(check_df_same_levels(nevent_df = nevent_df, py_df = py_df))
+})
+
+test_that("'check_df_same_levels' returns correct error with invalid inputs", {
+    classif_vars <- expand.grid(age = c(0, 1), sex = c("f", "m"), time = 2001:2002,
+                                KEEP.OUT.ATTRS = FALSE)
+    nevent_df <- classif_vars
+    py_df <- classif_vars[1:4,]
+    nevent_df$nevent <- 10
+    py_df$py <- 20
+    expect_error(check_df_same_levels(nevent_df = nevent_df, py_df = py_df),
+                 "variable 'time' in 'nevent_df' uses different categories from variable 'time' in 'py_df'")
+})
+
+
+## 'check_df_zero_na' ---------------------------------------------------------
+
+test_that("'check_df_zero_na' returns TRUE with valid inputs", {
+    classif_vars <- expand.grid(age = c(0, 1), sex = c("f", "m"), time = 2001:2002,
+                                KEEP.OUT.ATTRS = FALSE)
+    df <- classif_vars
+    df$nevent <- c(0, NA, 0, NA, rep(1, 4))
+    df$py <- c(0, 0, NA, NA, rep(2, 4))
+    expect_true(check_df_zero_na(df))
+})
+
+
+test_that("'check_df_zero_na' returns correct error with invalid inputs", {
+    classif_vars <- expand.grid(age = c(0, 1), sex = c("f", "m"), time = 2001:2002,
+                                KEEP.OUT.ATTRS = FALSE)
+    df <- classif_vars
+    df <- classif_vars
+    df$nevent <- c(0, NA, 0, 1, rep(1, 4))
+    df$py <- c(0, 0, NA, NA, rep(2, 4))
+    expect_error(check_df_zero_na(df),
+                 paste0("invalid combination of values for 'nevent' and 'py' :\n",
+                        "  age = 1\n",
+                        "  sex = m\n",
+                        "  time = 2001\n",
+                        "  nevent = 1\n",
+                        "  py = NA"))
+})
+
 
 ## 'check_gt_zero' ------------------------------------------------------------
 

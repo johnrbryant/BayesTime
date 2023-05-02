@@ -135,6 +135,7 @@ smooth_age <- function(nevent_df,
     py_ag <- stats::aggregate(py_df["py"],
                               py_df[nms_classif_vars],
                               sum)
+    check_df_same_levels(nevent_df = nevent_ag, py_df = py_ag)
     df <- merge(nevent_ag, py_ag, by = nms_classif_vars)
     has_byvar <- length(byvar) > 0L
     if (has_byvar)

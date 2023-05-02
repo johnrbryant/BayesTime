@@ -705,7 +705,7 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
     n_age <- length(labels_age)
     n_time <- length(labels_time)
     ## assemble data
-    is_in_lik <- 1L * (!is.na(nevent) & !is.na(py))
+    is_in_lik <- 1L * (!is.na(nevent) & !is.na(py) & (py > 0L))
     class_spec_age <- sub("^BayesRates_", "", class(spec_age)[[1L]])
     class_spec_time <- sub("^BayesRates_", "", class(spec_time)[[1L]])
     X_age_parfree <- make_X_age_parfree(spec = spec_age,
