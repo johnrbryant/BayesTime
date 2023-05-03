@@ -152,7 +152,8 @@ check_df_same_levels <- function(nevent_df, py_df) {
 }
 
 
-#' Check that if 'py' is 0 or NA, then 'nevent' is also 0 or NA
+## HAS_TESTS
+#' Check that if 'py' is 0, then 'nevent' is 0 or NA
 #'
 #' @param df A data frame formed my merging
 #' nevent_df and py_df
@@ -161,9 +162,11 @@ check_df_same_levels <- function(nevent_df, py_df) {
 #'
 #' @noRd
 check_df_zero_na <- function(df) {
-    is_zero_na_nevent <- is.na(df$nevent) | (df$nevent == 0)
-    is_zero_na_py <- is.na(df$py) | (df$py == 0)
-    is_inconsistent <- !is_zero_na_nevent & is_zero_na_py
+    py_na <- is.na(df$py)
+    py_0 <- df$py == 0
+    ev_na <- is.na(df$nevent)
+    ev_0 <- df$nevent == 0
+    is_inconsistent <- !py_na & py_0 & !(ev_na | ev_0)
     i_inconsistent <- match(TRUE, is_inconsistent, nomatch = 0L)
     if (i_inconsistent > 0L) {
         vals <- df[i_inconsistent, , drop = FALSE]
@@ -180,11 +183,6 @@ check_df_zero_na <- function(df) {
 }
 
             
-            
-
-
-
-
 ## HAS_TESTS
 #' Check that a scalar is greater than 0
 #'
