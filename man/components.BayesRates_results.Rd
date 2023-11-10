@@ -4,13 +4,14 @@
 \alias{components.BayesRates_results}
 \title{Extract components from a results object}
 \usage{
-\method{components}{BayesRates_results}(object, what = "rates", interval = 0.95, ...)
+\method{components}{BayesRates_results}(object, what = NULL, interval = 0.95, ...)
 }
 \arguments{
 \item{object}{A results object.}
 
 \item{what}{Components to be extracted.
-Default is \code{"rates"}.}
+If no value supplied, all available components
+are extracted.}
 
 \item{interval}{Width of credible intervals.
 A number between 0 and 1. Default is \code{0.95}.}
@@ -18,17 +19,11 @@ A number between 0 and 1. Default is \code{0.95}.}
 \item{...}{Not currently used.}
 }
 \value{
-The return value depends on the value supplied for \code{what}:
+A named list of tibbles, or, if \code{what}
+is a single value, a single tibble.
+Each tibble contains
 \itemize{
-\item If \code{what} is a single name (eg \code{"rates"}), then \code{components()}
-returns a \link[tibble:tibble-package]{tibbles}
-\item If \code{what} is two or more names (eg \code{c("rates", "age_effect")}),
-then \code{components()} returns a named list of tibbles.
-}
-
-Each tibble contains classification variables,
-plus the following columns:
-\itemize{
+\item classification variables, if present
 \item \code{.fitted} Point estimates (posterior medians).
 \item \code{.lower}, \code{.upper} Lower and upper bounds of
 credible intervals.
@@ -49,8 +44,8 @@ or \code{\link[=smooth_agetime]{smooth_agetime()}}.
 If the object was created by a call to
 \code{\link[=smooth_age]{smooth_age()}}, then the components that can be extracted are:
 \itemize{
-\item \code{"rates"} Rates disaggregated by variables specified
-in \code{agevar} and \code{byvar} arguments.
+\item \code{"rates"} Age-specific rates.
+\item \code{"intercept"} Model intercept.
 \item \code{"age_effect"} Age main effect.
 \item \code{"age_hyper"} Hyper-parameters for age main effect.
 }
@@ -58,8 +53,8 @@ in \code{agevar} and \code{byvar} arguments.
 If the object was created by a call to \code{\link[=smooth_agetime]{smooth_agetime()}},
 then the components that can be extracted are
 \itemize{
-\item \code{"rates"} Rates disaggregated by variables specified
-in \code{agevar}, \code{timevar}, and \code{byvar} arguments.
+\item \code{"rates"} Age-time-specific rates
+\item \code{"intercept"} Model intercept.
 \item \code{"age_effect"} Age main effect.
 \item \code{"time_effect"} Time main effect or age-time interaction.
 \item \code{"age_hyper"} Hyper-parametres for age main effect.
@@ -74,9 +69,11 @@ results <- smooth_age(nevent_df = nz_divorces_2020,
                       age_width_df = nz_age_width_df,
                       age_min = 15)
 
-## extract components
+## extract all components
+components(results)
+
+## extract age effect
 components(results, what = "age_effect")
-components(results, what = c("rates", "age_effect"))
 }
 \seealso{
 \itemize{

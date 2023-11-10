@@ -47,8 +47,7 @@ generics::augment
 #' - [smooth_age()] smooths rates over age.
 #' - [smooth_agetime()] smooths rates over age and time.
 #' - \code{\link[=components.BayesRates_results]{components()}}
-#' extracts rates, age effects,
-#' time effects, and hyper-parameters.
+#'   extracts rates, age effects, time effects, and hyper-parameters.
 #' - \code{\link[=n_draw<-]{n_draw()}} sets the default number
 #' of draws from the posterior distribution.
 #' - [total_rate()] calculates a summary indicator.
@@ -63,12 +62,23 @@ generics::augment
 augment.BayesRates_results <- function(x,
                                        interval = 0.95,
                                        ...) {
-    rates <- components(x,
-                        what = "rates",
-                        interval = interval)
+    n_draw <- x$n_draw
     nevent_df <- x$nevent_df
     py_df <- x$py_df
-    ans <- Reduce(merge, list(nevent_df, py_df, rates))
+    agevar <- x$agevar
+    age_width_df <- x$age_width_df
+    age_min <- x$age_min
+    ans <- make_draws_post(x, n_draw = n_draw)
+    ans <- ans[["rates"]]
+    ans <- make_credible_intervals(ans, 
+                                   measurevar = ".value",
+                                   interval = interval)
+    ans <- add_age_mid(ans,
+                       agevar = agevar,
+                       age_width_df = age_width_df,
+                       age_min = age_min)
+    f <- function(x, y) merge(x, y, sort = FALSE)
+    ans <- Reduce(f, list(nevent_df, py_df, ans))
     ans$.observed <- with(ans, nevent / py)
     ans <- tibble::tibble(ans)
     ans
@@ -90,15 +100,15 @@ generics::components
 #'
 #' If the object was created by a call to
 #' [smooth_age()], then the components that can be extracted are:
-#' - `"rates"` Rates disaggregated by variables specified
-#' in `agevar` and `byvar` arguments.
+#' - `"rates"` Age-specific rates.
+#' - `"intercept"` Model intercept.
 #' - `"age_effect"` Age main effect.
 #' - `"age_hyper"` Hyper-parameters for age main effect.
 #'
 #' If the object was created by a call to [smooth_agetime()],
 #' then the components that can be extracted are
-#' - `"rates"` Rates disaggregated by variables specified
-#' in `agevar`, `timevar`, and `byvar` arguments.
+#' - `"rates"` Age-time-specific rates
+#' - `"intercept"` Model intercept.
 #' - `"age_effect"` Age main effect.
 #' - `"time_effect"` Time main effect or age-time interaction.
 #' - `"age_hyper"` Hyper-parametres for age main effect.
@@ -107,19 +117,17 @@ generics::components
 #' 
 #' @param object A results object.
 #' @param what Components to be extracted.
-#' Default is `"rates"`.
+#' If no value supplied, all available components
+#' are extracted.
 #' @param interval Width of credible intervals.
 #' A number between 0 and 1. Default is `0.95`.
 #' @param ... Not currently used.
 #'
-#' @returns The return value depends on the value supplied for `what`:
-#' - If `what` is a single name (eg `"rates"`), then `components()`
-#' returns a [tibbles][tibble::tibble-package]
-#' - If `what` is two or more names (eg `c("rates", "age_effect")`),
-#' then `components()` returns a named list of tibbles.
+#' @returns A named list of tibbles, or, if `what`
+#' is a single value, a single tibble.
+#' Each tibble contains
 #'
-#' Each tibble contains classification variables,
-#' plus the following columns:
+#' - classification variables, if present
 #' - `.fitted` Point estimates (posterior medians).
 #' - `.lower`, `.upper` Lower and upper bounds of
 #' credible intervals.
@@ -146,19 +154,16 @@ generics::components
 #'                       age_width_df = nz_age_width_df,
 #'                       age_min = 15)
 #'
-#' ## extract components
+#' ## extract all components
+#' components(results)
+#'
+#' ## extract age effect
 #' components(results, what = "age_effect")
-#' components(results, what = c("rates", "age_effect"))
 #' @export
 components.BayesRates_results <- function(object,
-                                          what = "rates",
+                                          what = NULL,
                                           interval = 0.95,
                                           ...) {
-    checkmate::assert_character(what,
-                                any.missing = FALSE,
-                                min.chars = 1L,
-                                min.len = 1L,
-                                unique = TRUE)
     checkmate::assert_number(interval,
                              lower = 0,
                              upper = 1)
@@ -168,17 +173,17 @@ components.BayesRates_results <- function(object,
     age_min <- object$age_min
     draws_post <- make_draws_post(object = object,
                                   n_draw = n_draw)
-    nms <- names(draws_post)
-    is_what_in_nms <- what %in% nms
-    i_not_found <- match(FALSE, is_what_in_nms, nomatch = 0L)
-    if (i_not_found > 0L) {
-        stop(gettextf("\"%s\" is not a valid choice of component : valid choices are %s",
-                      what[[i_not_found]],
-                      paste(sprintf("\"%s\"", nms), collapse = ", ")),
-             call. = FALSE)
+    if (!is.null(what)) {
+        nms <- names(draws_post)
+        if (!all(what %in% nms)) {
+            stop(gettextf("Invalid value for '%s' : valid choices are %s",
+                          "what",
+                          paste(sprintf("'%s'", nms), collapse = ", ")),
+                 call. = FALSE)
+        }
+        draws_post <- draws_post[what]
     }
-    ans <- draws_post[what]
-    ans <- lapply(ans,
+    ans <- lapply(draws_post,
                   make_credible_intervals,
                   measurevar = ".value",
                   interval = interval)
@@ -188,7 +193,7 @@ components.BayesRates_results <- function(object,
                            agevar = agevar,
                            age_width_df = age_width_df,
                            age_min = age_min)
-    if (length(what) == 1L)
+    if (length(ans) == 1L)
         ans <- ans[[1L]]
     ans
 }

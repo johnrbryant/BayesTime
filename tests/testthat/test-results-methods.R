@@ -20,7 +20,7 @@ test_that("'augment' works", {
 
 ## 'components' ---------------------------------------------------------------
 
-test_that("'components' works with valid inputs - rates", {
+test_that("'components' works with valid inputs - smooth_age, what is NULL", {
     set.seed(0)
     nevent_df <- tibble(age = 0:9,
                         nevent = rpois(n = 10, lambda = 11:20))
@@ -28,10 +28,21 @@ test_that("'components' works with valid inputs - rates", {
                     py = 100)
     results <- smooth_age(nevent_df = nevent_df,
                           py_df = py_df)
-    ans <- components(results, "rates", n_draw = 5)
-    expect_setequal(names(ans),
-                    c("age", "age.mid",
-                      ".fitted", ".lower", ".upper", ".probability"))
+    ans <- components(results)
+    expect_setequal(names(ans), c("rates", "intercept", "age_effect", "age_hyper"))
+    expect_true(all(sapply(ans, tibble::is_tibble)))
+})
+
+test_that("'components' works with valid inputs - smooth_age, what is 'age_effect'", {
+    set.seed(0)
+    nevent_df <- tibble(age = 0:9,
+                        nevent = rpois(n = 10, lambda = 11:20))
+    py_df <- tibble(age = 0:9,
+                    py = 100)
+    results <- smooth_age(nevent_df = nevent_df,
+                          py_df = py_df)
+    ans <- components(results, what = "age_effect")
+    expect_true(tibble::is_tibble(ans))
 })
 
 test_that("'components' works with valid inputs - age effect, age hyper", {
@@ -83,7 +94,7 @@ test_that("'total_rate' works with valid inputs - smooth_age", {
     ans <- total_rate(results)
     expect_setequal(names(ans),
                     c(".fitted", ".lower", ".upper", ".probability", ".observed"))
-    rates <- components(results)
+    rates <- augment(results)
     expect_equal(sum(rates$.fitted), ans$.fitted, tolerance = 0.01)
 })
 
@@ -104,7 +115,7 @@ test_that("'total_rate' works with valid inputs - smooth_agetime", {
     expect_setequal(names(ans),
                     c("time", ".fitted", ".lower", ".upper",
                       ".probability", ".observed"))
-    rates <- components(results)
+    rates <- augment(results)
     expect_equal(sum(rates$.fitted), sum(ans$.fitted), tolerance = 0.01)
 })
 
@@ -123,7 +134,7 @@ test_that("'total_rate' works with valid inputs - character age groups", {
     ans <- total_rate(results)
     expect_setequal(names(ans),
                     c(".fitted", ".lower", ".upper", ".probability", ".observed"))
-    rates <- components(results)
+    rates <- augment(results)
     expect_equal(sum(rates$.fitted * age_width_df$width), ans$.fitted, tolerance = 0.02)
 })
 
@@ -145,7 +156,7 @@ test_that("'total_rate' interpolates correctly", {
                     c("time", ".fitted", ".lower", ".upper",
                       ".probability", ".observed"))
     expect_true(2012 %in% ans$time)
-    rates <- components(results)
+    rates <- components(results, what = "rates")
     expect_equal(sum(rates$.fitted), sum(ans$.fitted), tolerance = 0.02)
 })
 

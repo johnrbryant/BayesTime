@@ -56,8 +56,7 @@ augment(results)
 \item \code{\link[=smooth_age]{smooth_age()}} smooths rates over age.
 \item \code{\link[=smooth_agetime]{smooth_agetime()}} smooths rates over age and time.
 \item \code{\link[=components.BayesRates_results]{components()}}
-extracts rates, age effects,
-time effects, and hyper-parameters.
+extracts rates, age effects, time effects, and hyper-parameters.
 \item \code{\link[=n_draw<-]{n_draw()}} sets the default number
 of draws from the posterior distribution.
 \item \code{\link[=total_rate]{total_rate()}} calculates a summary indicator.
