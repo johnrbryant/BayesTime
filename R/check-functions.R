@@ -286,7 +286,7 @@ check_input_notime_df <- function(df,
     ## check measure var
     measurevar_val <- df[[measurevar]]
     check_measure <- checkmate::check_numeric(measurevar_val,
-                                              any.missing = FALSE,
+                                              any.missing = TRUE,
                                               lower = 0,
                                               finite = TRUE)
     if (!isTRUE(check_measure))
