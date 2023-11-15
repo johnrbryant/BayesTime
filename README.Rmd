@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/junnizhang/BayesRates/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/junnizhang/BayesRates/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/junnizhang/BayesRates/branch/main/graph/badge.svg)](https://app.codecov.io/gh/junnizhang/BayesRates?branch=main)
 <!-- badges: end -->
 
 Using Bayesian methods, smooth demographic rates over age and time. Internally, calculations are done using [TMB](https://CRAN.R-project.org/package=TMB).

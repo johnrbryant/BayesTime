@@ -8,6 +8,8 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/junnizhang/BayesRates/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/junnizhang/BayesRates/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/junnizhang/BayesRates/branch/main/graph/badge.svg)](https://app.codecov.io/gh/junnizhang/BayesRates?branch=main)
 <!-- badges: end -->
 
 Using Bayesian methods, smooth demographic rates over age and time.
@@ -58,15 +60,16 @@ Extract rates
 ``` r
 rates <- augment(results)
 head(rates)
-#> # A tibble: 6 × 10
-#>     age sex     time nevent    py .fitted  .lower  .upper .probability .observed
-#>   <int> <chr>  <int>  <int> <dbl>   <dbl>   <dbl>   <dbl> <list>           <dbl>
-#> 1    15 Female  1980      0  489. 9.36e-6 2.90e-6 3.47e-5 <dbl>                0
-#> 2    15 Female  1981      0  494. 9.50e-6 3.31e-6 3.28e-5 <dbl>                0
-#> 3    15 Female  1982      0  462. 1.00e-5 3.30e-6 3.64e-5 <dbl>                0
-#> 4    15 Female  1983      0  496. 1.17e-5 4.03e-6 4.00e-5 <dbl>                0
-#> 5    15 Female  1984      0  496. 1.18e-5 3.95e-6 4.12e-5 <dbl>                0
-#> 6    15 Female  1985      0  514. 1.27e-5 4.32e-6 4.27e-5 <dbl>                0
+#> # A tibble: 6 × 11
+#>     age sex     time nevent    py age.mid   .fitted  .lower  .upper .probability
+#>   <int> <chr>  <int>  <int> <dbl>   <dbl>     <dbl>   <dbl>   <dbl> <list>      
+#> 1    15 Female  1980      0  489.    15.5   9.34e-6 2.81e-6 3.31e-5 <dbl>       
+#> 2    15 Female  1981      0  494.    15.5   9.39e-6 3.00e-6 3.11e-5 <dbl>       
+#> 3    15 Female  1982      0  462.    15.5   9.86e-6 3.20e-6 3.29e-5 <dbl>       
+#> 4    15 Female  1983      0  496.    15.5   1.18e-5 3.74e-6 3.75e-5 <dbl>       
+#> 5    15 Female  1984      0  496.    15.5   1.18e-5 3.64e-6 3.71e-5 <dbl>       
+#> 6    15 Female  1985      0  514.    15.5   1.28e-5 3.90e-6 4.01e-5 <dbl>       
+#> # ℹ 1 more variable: .observed <dbl>
 ```
 
 Calculate ‘total divorce rate’, and plot it
