@@ -278,6 +278,19 @@ test_that("'make_credible_intervals' works - 'x' does not have classif vars", {
     expect_equal(ans_obtained, ans_expected)
 })
 
+test_that("'make_credible_intervals' throws correct error when 'x' has duplicates", {
+    x <- data.frame(reg = c("a", "a", "b", "b"),
+                    draw = c(1, 1, 2, 2),
+                    .value = 1:4)
+    expect_error(make_credible_intervals(x,
+                                         measurevar = ".value",
+                                         interval = 0.9),
+                 "duplicate combinations of variables 'reg', 'draw'")
+})
+
+
+
+
 
 ## 'make_df_spline' -----------------------------------------------------------
 
