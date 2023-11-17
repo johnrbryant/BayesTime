@@ -33,7 +33,7 @@ library(BayesRates)
 library(ggplot2)
 ```
 
-Smooth Chinese data on divorce rates
+Smooth  Chinese data on divorce rates
 
 ``` r
 library(BayesRates)
