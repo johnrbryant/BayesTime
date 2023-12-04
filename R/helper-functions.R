@@ -770,6 +770,7 @@ make_fitted <- function(nevent, py, spec_age, spec_time) {
 }
 
 
+## HAS_TESTS
 #' Given a credible interval width,
 #' make the 'probs' argument
 #' to be supplied to quantiles function

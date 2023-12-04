@@ -33,7 +33,7 @@ generics::augment
 #'
 #' @returns A [tibble][tibble::tibble-package],
 #' constructed by merging `nevent_df` and
-#' `py_df`, and the creating five new columns:
+#' `py_df`, and the creating six new columns:
 #' - `<agevar>.mid`: Midpoints of age groups
 #' (which is useful for plotting.)
 #' - `.fitted`: Point estimates (posterior medians) of rates.
