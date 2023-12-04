@@ -39,10 +39,12 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Install latest Matrix package
+        run: install.packages('Matrix')
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
-	  upgrade: 'TRUE'
 
       - uses: r-lib/actions/check-r-package@v2
         with:
