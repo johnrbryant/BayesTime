@@ -40,7 +40,7 @@ jobs:
           use-public-rspm: true
 
       - name: Install latest Matrix package
-        run: install.packages('Matrix')
+        run: Rscript -e "install.packages('Matrix')"
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
