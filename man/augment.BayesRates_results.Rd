@@ -19,7 +19,7 @@ A number between 0 and 1. Default is \code{0.95}.}
 \value{
 A \link[tibble:tibble-package]{tibble},
 constructed by merging \code{nevent_df} and
-\code{py_df}, and the creating five new columns:
+\code{py_df}, and the creating six new columns:
 \itemize{
 \item \verb{<agevar>.mid}: Midpoints of age groups
 (which is useful for plotting.)
