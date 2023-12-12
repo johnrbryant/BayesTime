@@ -13,7 +13,6 @@ test_that("'smooth_age' works with valid data - no 'by' variables", {
     expect_s3_class(ans, "BayesRates_results")
 })
 
-
 test_that("'smooth_age' works with valid data - exposure and count both zero", {
     set.seed(0)
     nevent_df <- tibble(age = 0:9,
@@ -25,6 +24,44 @@ test_that("'smooth_age' works with valid data - exposure and count both zero", {
     ans <- smooth_age(nevent_df = nevent_df,
                       py_df = py_df)
     expect_s3_class(ans, "BayesRates_results")
+})
+
+test_that("'smooth_age' throws correct error when 'agevar' starts with a .", {
+    set.seed(0)
+    nevent_df <- tibble(age = 0:9,
+                        nevent = rpois(n = 10, lambda = 11:20))
+    py_df <- tibble(.age = 0:9,
+                    py = 100)
+    expect_error(smooth_age(nevent_df = nevent_df,
+                            py_df = py_df,
+                            agevar = ".age"),
+                 "'agevar' starts with a '\\.'")
+})
+
+test_that("'smooth_age' throws correct error when 'byvar' starts with a .", {
+    set.seed(0)
+    nevent_df <- tibble(age = rep(0:9, 2),
+                        .sex = rep(c("f", "m"), each = 10),
+                        nevent = rpois(n = 20, lambda = 11:30))
+    py_df <- tibble(age = 0:9,
+                    py = 100)
+    expect_error(smooth_age(nevent_df = nevent_df,
+                            py_df = py_df,
+                            byvar = ".sex"),
+                 "'byvar' includes a name that starts with a '\\.'")
+})
+
+test_that("'smooth_age' throws correct error when 'byvar' and 'agevar' overlap", {
+    set.seed(0)
+    nevent_df <- tibble(age = rep(0:9, 2),
+                        sex = rep(c("f", "m"), each = 10),
+                        nevent = rpois(n = 20, lambda = 11:30))
+    py_df <- tibble(age = 0:9,
+                    py = 100)
+    expect_error(smooth_age(nevent_df = nevent_df,
+                            py_df = py_df,
+                            byvar = c("age", "sex")),
+                 "'byvar' contains variable called \"age\"")
 })
 
 
@@ -58,6 +95,50 @@ test_that("'smooth_agetime' works with valid data - missing some years", {
                           py_df = py_df,
                           spec_time = TimeFixed())
     expect_s3_class(ans, "BayesRates_results")
+})
+
+test_that("'smooth_agetime' throws correct error when 'agevar' starts with a .", {
+  set.seed(0)
+  nevent_df <- tibble(age = rep(0:9, 2),
+                      time = rep(1:2, each = 10),
+                      nevent = rpois(n = 20, lambda = 11:20))
+  py_df <- tibble(.age = rep(0:9, 2),
+                  time = rep(1:2, each = 10),
+                  py = 100)
+  expect_error(smooth_agetime(nevent_df = nevent_df,
+                              py_df = py_df,
+                              agevar = ".age"),
+               "'agevar' starts with a '\\.'")
+})
+
+test_that("'smooth_agetime' throws correct error when 'timevar' starts with a .", {
+  set.seed(0)
+  nevent_df <- tibble(age = rep(0:9, 2),
+                      .time = rep(1:2, each = 10),
+                      nevent = rpois(n = 20, lambda = 11:20))
+  py_df <- tibble(age = rep(0:9, 2),
+                  .time = rep(1:2, each = 10),
+                  py = 100)
+  expect_error(smooth_agetime(nevent_df = nevent_df,
+                              py_df = py_df,
+                              timevar = ".time"),
+               "'timevar' starts with a '\\.'")
+})
+
+test_that("'smooth_agetime' throws correct error when 'byvar' starts with a .", {
+  set.seed(0)
+  nevent_df <- tibble(age = rep(0:9, 2),
+                      time = rep(1:2, each = 10),
+                      nevent = rpois(n = 20, lambda = 11:20),
+                      .sex = rep("f", 20))
+  py_df <- tibble(age = rep(0:9, 2),
+                  .time = rep(1:2, each = 10),
+                  py = 100,
+                  .sex = rep("f", 20))
+  expect_error(smooth_agetime(nevent_df = nevent_df,
+                              py_df = py_df,
+                              byvar = ".sex"),
+               "'byvar' includes a name that starts with a '\\.'")
 })
 
 
