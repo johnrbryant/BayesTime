@@ -42,3 +42,4 @@ LinkingTo:
     RcppEigen
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
+URL: https://junnizhang.github.io/BayesRates/
