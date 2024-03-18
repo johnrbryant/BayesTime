@@ -17,6 +17,21 @@ test_that("'augment' works", {
                       ".observed") %in% names(ans)))
 })
 
+test_that("'augment' gives the same answer when run twice", {
+    set.seed(0)
+    nevent_df <- expand.grid(age = 0:9, time = 2011:2020,
+                             KEEP.OUT.ATTRS = FALSE)
+    nevent_df$nevent <- rpois(n = nrow(nevent_df), lambda = outer(11:20, 5:14))
+    py_df <- expand.grid(age = 0:9, time = 2011:2020,
+                         KEEP.OUT.ATTRS = FALSE)
+    py_df$py <- 100
+    results <- smooth_agetime(nevent_df = nevent_df,
+                              py_df = py_df)
+    ans0 <- augment(results, n_draw = 5)
+    ans1 <- augment(results, n_draw = 5)
+    expect_identical(ans0, ans1)
+})
+
 
 ## 'components' ---------------------------------------------------------------
 
@@ -60,6 +75,21 @@ test_that("'components' works with valid inputs - age effect, age hyper", {
                       ".fitted", ".lower", ".upper", ".probability"))
     expect_setequal(names(ans$age_hyper),
                     c("hyper", ".fitted", ".lower", ".upper", ".probability"))
+})
+
+test_that("'components' gives the same answer when run twice", {
+    set.seed(0)
+    nevent_df <- expand.grid(age = 0:9, time = 2011:2020,
+                             KEEP.OUT.ATTRS = FALSE)
+    nevent_df$nevent <- rpois(n = nrow(nevent_df), lambda = outer(11:20, 5:14))
+    py_df <- expand.grid(age = 0:9, time = 2011:2020,
+                         KEEP.OUT.ATTRS = FALSE)
+    py_df$py <- 100
+    results <- smooth_agetime(nevent_df = nevent_df,
+                              py_df = py_df)
+    ans0 <- components(results, n_draw = 5)
+    ans1 <- components(results, n_draw = 5)
+    expect_identical(ans0, ans1)
 })
 
 
