@@ -95,7 +95,7 @@ test_that("'components' gives the same answer when run twice", {
 
 ## 'n_draw' -------------------------------------------------------------------
 
-test_that("'n_draw' works", {
+test_that("'n_draw' works - replacement", {
     set.seed(0)
     nevent_df <- expand.grid(age = 0:9, time = 2011:2020,
                              KEEP.OUT.ATTRS = FALSE)
@@ -105,9 +105,9 @@ test_that("'n_draw' works", {
     py_df$py <- 100
     results <- smooth_agetime(nevent_df = nevent_df,
                               py_df = py_df)
-    expect_identical(results$n_draw, 1000L)
+    expect_identical(n_draw(results), 1000L)
     n_draw(results) <- 1L
-    expect_identical(results$n_draw, 1L)
+    expect_identical(n_draw(results), 1L)
 })
 
 
