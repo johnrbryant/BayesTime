@@ -238,6 +238,7 @@ n_draw <- function(x) {
   UseMethod("n_draw")
 }
 
+## HAS_TESTS
 #' @export
 n_draw.BayesRates_results <- function(x) {
   x$n_draw

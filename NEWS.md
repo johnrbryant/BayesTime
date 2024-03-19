@@ -3,4 +3,4 @@
 
 ## Interface
 
-- Store seed in results object, and set this seed each time 'augment' or 'components' is called, so that they give the same results each time.
+-  `augment()` and `components()` now give the same result every time they are called, rather than generating new results at random. This is implemented by storing a random seed in the results object.

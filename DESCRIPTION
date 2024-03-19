@@ -1,7 +1,7 @@
 Package: BayesRates
 Type: Package
 Title: Bayesian Smoothing of Demographic Rates
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(person(given = "John",
              family = "Bryant",
