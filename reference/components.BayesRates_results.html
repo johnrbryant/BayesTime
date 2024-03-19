@@ -14,7 +14,7 @@ or smooth_agetime()."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     
     <a class="navbar-brand me-2" href="../index.html">BayesRates</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,9 @@ or smooth_agetime()."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     <a class="dropdown-item" href="../articles/vig2_cn.html">vig2_cn</a>
     <a class="dropdown-item" href="../articles/vig3_math.html">vig3_math</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -124,7 +127,7 @@ age-time interaction.</p></li>
 <li><p><code><a href="smooth_agetime.html">smooth_agetime()</a></code> smooths rates over age and time.</p></li>
 <li><p><code><a href="augment.BayesRates_results.html">augment()</a></code>
 combines data and estimates for rates.</p></li>
-<li><p><code><a href="n_draw-set.html">n_draw()</a></code> sets the default number
+<li><p><code><a href="n_draw.html">n_draw()</a></code> sets the default number
 of draws from the posterior distribution.</p></li>
 <li><p><code><a href="total_rate.html">total_rate()</a></code> calculates a summary indicator</p></li>
 </ul></div>
@@ -144,46 +147,46 @@ of draws from the posterior distribution.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    age   age.mid   .fitted    .lower    .upper .probability </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 15-19    17.5 0.000<span style="text-decoration: underline;">020</span>2 0.000<span style="text-decoration: underline;">010</span>7 0.000<span style="text-decoration: underline;">040</span>0 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 20-24    22.5 0.000<span style="text-decoration: underline;">493</span>  0.000<span style="text-decoration: underline;">435</span>  0.000<span style="text-decoration: underline;">566</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 25-29    27.5 0.002<span style="text-decoration: underline;">66</span>   0.002<span style="text-decoration: underline;">53</span>   0.002<span style="text-decoration: underline;">79</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 30-34    32.5 0.005<span style="text-decoration: underline;">23</span>   0.005<span style="text-decoration: underline;">03</span>   0.005<span style="text-decoration: underline;">43</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 35-39    37.5 0.006<span style="text-decoration: underline;">30</span>   0.006<span style="text-decoration: underline;">08</span>   0.006<span style="text-decoration: underline;">51</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 40-44    42.5 0.007<span style="text-decoration: underline;">02</span>   0.006<span style="text-decoration: underline;">83</span>   0.007<span style="text-decoration: underline;">22</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 45-49    47.5 0.007<span style="text-decoration: underline;">24</span>   0.007<span style="text-decoration: underline;">01</span>   0.007<span style="text-decoration: underline;">47</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 50-54    52.5 0.006<span style="text-decoration: underline;">38</span>   0.006<span style="text-decoration: underline;">17</span>   0.006<span style="text-decoration: underline;">58</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 55-59    57.5 0.004<span style="text-decoration: underline;">95</span>   0.004<span style="text-decoration: underline;">77</span>   0.005<span style="text-decoration: underline;">15</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 60-64    62.5 0.003<span style="text-decoration: underline;">26</span>   0.003<span style="text-decoration: underline;">07</span>   0.003<span style="text-decoration: underline;">46</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 65+      72.5 0.001<span style="text-decoration: underline;">22</span>   0.001<span style="text-decoration: underline;">14</span>   0.001<span style="text-decoration: underline;">29</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 15-19    17.5 0.000<span style="text-decoration: underline;">020</span>0 0.000<span style="text-decoration: underline;">010</span>6 0.000<span style="text-decoration: underline;">038</span>1 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 20-24    22.5 0.000<span style="text-decoration: underline;">493</span>  0.000<span style="text-decoration: underline;">435</span>  0.000<span style="text-decoration: underline;">560</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 25-29    27.5 0.002<span style="text-decoration: underline;">65</span>   0.002<span style="text-decoration: underline;">54</span>   0.002<span style="text-decoration: underline;">79</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 30-34    32.5 0.005<span style="text-decoration: underline;">22</span>   0.005<span style="text-decoration: underline;">03</span>   0.005<span style="text-decoration: underline;">42</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 35-39    37.5 0.006<span style="text-decoration: underline;">29</span>   0.006<span style="text-decoration: underline;">06</span>   0.006<span style="text-decoration: underline;">52</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 40-44    42.5 0.007<span style="text-decoration: underline;">02</span>   0.006<span style="text-decoration: underline;">82</span>   0.007<span style="text-decoration: underline;">24</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 45-49    47.5 0.007<span style="text-decoration: underline;">24</span>   0.007<span style="text-decoration: underline;">02</span>   0.007<span style="text-decoration: underline;">50</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 50-54    52.5 0.006<span style="text-decoration: underline;">38</span>   0.006<span style="text-decoration: underline;">18</span>   0.006<span style="text-decoration: underline;">57</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 55-59    57.5 0.004<span style="text-decoration: underline;">96</span>   0.004<span style="text-decoration: underline;">76</span>   0.005<span style="text-decoration: underline;">14</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 60-64    62.5 0.003<span style="text-decoration: underline;">27</span>   0.003<span style="text-decoration: underline;">08</span>   0.003<span style="text-decoration: underline;">48</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 65+      72.5 0.001<span style="text-decoration: underline;">21</span>   0.001<span style="text-decoration: underline;">14</span>   0.001<span style="text-decoration: underline;">30</span>   <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $intercept</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .fitted .lower .upper .probability </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>   -<span style="color: #BB0000;">6.12</span>  -<span style="color: #BB0000;">6.19</span>  -<span style="color: #BB0000;">6.05</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>   -<span style="color: #BB0000;">6.12</span>  -<span style="color: #BB0000;">6.19</span>  -<span style="color: #BB0000;">6.06</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $age_effect</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    age   age.mid .fitted .lower .upper .probability </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 15-19    17.5  -<span style="color: #BB0000;">4.69</span>  -<span style="color: #BB0000;">5.27</span>  -<span style="color: #BB0000;">4.08</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 20-24    22.5  -<span style="color: #BB0000;">1.49</span>  -<span style="color: #BB0000;">1.60</span>  -<span style="color: #BB0000;">1.38</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 25-29    27.5   0.194  0.107  0.280 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 30-34    32.5   0.871  0.795  0.942 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 35-39    37.5   1.06   0.982  1.13  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 40-44    42.5   1.17   1.09   1.23  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 15-19    17.5  -<span style="color: #BB0000;">4.70</span>  -<span style="color: #BB0000;">5.26</span>  -<span style="color: #BB0000;">4.11</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 20-24    22.5  -<span style="color: #BB0000;">1.49</span>  -<span style="color: #BB0000;">1.61</span>  -<span style="color: #BB0000;">1.39</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 25-29    27.5   0.193  0.115  0.278 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 30-34    32.5   0.870  0.799  0.939 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 35-39    37.5   1.06   0.986  1.13  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 40-44    42.5   1.17   1.10   1.24  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 45-49    47.5   1.20   1.12   1.27  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 50-54    52.5   1.07   0.998  1.14  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 55-59    57.5   0.817  0.741  0.889 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 60-64    62.5   0.398  0.305  0.485 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 65+      72.5  -<span style="color: #BB0000;">0.590</span> -<span style="color: #BB0000;">0.676</span> -<span style="color: #BB0000;">0.502</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 50-54    52.5   1.07   1.00   1.13  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 55-59    57.5   0.819  0.748  0.884 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 60-64    62.5   0.401  0.313  0.490 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 65+      72.5  -<span style="color: #BB0000;">0.585</span> -<span style="color: #BB0000;">0.674</span> -<span style="color: #BB0000;">0.504</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $age_hyper</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   hyper .fitted .lower .upper .probability </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> sd       2.82  1.88    4.24 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> slope    1.10  0.701   1.49 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> sd       2.84  1.90    4.18 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> slope    1.10  0.728   1.48 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## extract age effect</span></span></span>
@@ -191,17 +194,17 @@ of draws from the posterior distribution.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11 × 6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    age   age.mid .fitted .lower .upper .probability </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 15-19    17.5  -<span style="color: #BB0000;">4.69</span>  -<span style="color: #BB0000;">5.28</span>  -<span style="color: #BB0000;">4.05</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 15-19    17.5  -<span style="color: #BB0000;">4.70</span>  -<span style="color: #BB0000;">5.26</span>  -<span style="color: #BB0000;">4.11</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 20-24    22.5  -<span style="color: #BB0000;">1.49</span>  -<span style="color: #BB0000;">1.61</span>  -<span style="color: #BB0000;">1.39</span>  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 25-29    27.5   0.192  0.109  0.277 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 30-34    32.5   0.872  0.800  0.939 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 35-39    37.5   1.06   0.985  1.13  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 40-44    42.5   1.16   1.10   1.23  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 45-49    47.5   1.20   1.13   1.27  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 50-54    52.5   1.07   1.00   1.14  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 55-59    57.5   0.813  0.743  0.888 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 60-64    62.5   0.396  0.308  0.484 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 65+      72.5  -<span style="color: #BB0000;">0.588</span> -<span style="color: #BB0000;">0.671</span> -<span style="color: #BB0000;">0.505</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 25-29    27.5   0.193  0.115  0.278 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 30-34    32.5   0.870  0.799  0.939 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 35-39    37.5   1.06   0.986  1.13  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 40-44    42.5   1.17   1.10   1.24  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 45-49    47.5   1.20   1.12   1.27  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 50-54    52.5   1.07   1.00   1.13  <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 55-59    57.5   0.819  0.748  0.884 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 60-64    62.5   0.401  0.313  0.490 <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 65+      72.5  -<span style="color: #BB0000;">0.585</span> -<span style="color: #BB0000;">0.674</span> -<span style="color: #BB0000;">0.504</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

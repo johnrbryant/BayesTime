@@ -28,6 +28,9 @@
     <loc>https://junnizhang.github.io/BayesRates/index.html</loc>
   </url>
   <url>
+    <loc>https://junnizhang.github.io/BayesRates/news/index.html</loc>
+  </url>
+  <url>
     <loc>https://junnizhang.github.io/BayesRates/reference/BayesRates-package.html</loc>
   </url>
   <url>
@@ -58,7 +61,7 @@
     <loc>https://junnizhang.github.io/BayesRates/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://junnizhang.github.io/BayesRates/reference/n_draw-set.html</loc>
+    <loc>https://junnizhang.github.io/BayesRates/reference/n_draw.html</loc>
   </url>
   <url>
     <loc>https://junnizhang.github.io/BayesRates/reference/nz_age_width_df.html</loc>
