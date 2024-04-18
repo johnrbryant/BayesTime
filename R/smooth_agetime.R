@@ -164,6 +164,8 @@ smooth_age <- function(nevent_df,
                                     spec_time = spec_time))
   ## extract info on levels of 'by' variables
   vals_by <- make_vals_by(df = df, byvar = byvar)    
+  ## create random seed to be used by 'make_draws_post'
+  seed_draws_post <- sample.int(n = .Machine$integer.max, size = 1L)
   ## make results object
   new_BayesRates_results(nevent_df = nevent_df,
                          py_df = py_df,
@@ -175,7 +177,8 @@ smooth_age <- function(nevent_df,
                          spec_age = spec_age,
                          spec_time = spec_time,
                          fitted = fitted,
-                         vals_by = vals_by)
+                         vals_by = vals_by,
+                         seed_draws_post = seed_draws_post)
 }
 
 
@@ -378,7 +381,9 @@ smooth_agetime <- function(nevent_df,
                     MoreArgs = list(spec_age = spec_age,
                                     spec_time = spec_time))
   ## extract info on levels of 'by' variables
-  vals_by <- make_vals_by(df = df, byvar = byvar)    
+  vals_by <- make_vals_by(df = df, byvar = byvar)
+  ## create random seed to be used by 'make_draws_post'
+  seed_draws_post <- sample.int(n = .Machine$integer.max, size = 1L)
   ## make results object
   new_BayesRates_results(nevent_df = nevent_df,
                          py_df = py_df,
@@ -390,5 +395,6 @@ smooth_agetime <- function(nevent_df,
                          spec_age = spec_age,
                          spec_time = spec_time,
                          fitted = fitted,
-                         vals_by = vals_by)
+                         vals_by = vals_by,
+                         seed_draws_post = seed_draws_post)
 }

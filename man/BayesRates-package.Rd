@@ -18,6 +18,13 @@ The key functions are
 over age and time
 }
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://junnizhang.github.io/BayesRates/}
+}
+
+}
 \author{
 \strong{Maintainer}: John Bryant \email{john@bayesiandemography.com}
 

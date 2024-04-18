@@ -481,6 +481,9 @@ make_draws_post <- function(object, n_draw) {
     fitted <- object$fitted
     vals_by <- object$vals_by
     has_time_var <- has_time_var(spec_time)
+    seed_draws_post <- object$seed_draws_post
+    seed_restore <- sample.int(n = .Machine$integer.max, size = 1L) ## create random seed
+    set.seed(seed_draws_post) ## set pre-determined seed
     if (has_time_var)
         draws <- lapply(fitted,
                         make_draws_post_one_withtime,
@@ -492,6 +495,7 @@ make_draws_post <- function(object, n_draw) {
                         make_draws_post_one_notime,
                         agevar = agevar,
                         n_draw = n_draw)
+    set.seed(seed_restore) ## restore randomness
     ans <- merge_draws_with_vals_by(draws = draws,
                                     vals_by = vals_by)
     ans

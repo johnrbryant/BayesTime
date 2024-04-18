@@ -1,7 +1,7 @@
 Package: BayesRates
 Type: Package
 Title: Bayesian Smoothing of Demographic Rates
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(person(given = "John",
              family = "Bryant",
@@ -36,7 +36,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 LinkingTo: 
     TMB,
     RcppEigen

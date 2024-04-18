@@ -26,6 +26,8 @@
 #' posterior distribution.
 #' @param vals_by List of data frames with
 #' levels of byvar.
+#' @param seed_draws_post Integer used to set
+#' random seed before calling 'draws_post'.
 #'
 #' @returns An object of class "BayesRates_results_notime".
 #'
@@ -40,7 +42,8 @@ new_BayesRates_results <- function(nevent_df,
                                    spec_age,
                                    spec_time,
                                    fitted,
-                                   vals_by) {
+                                   vals_by,
+                                   seed_draws_post) {
     n_draw <- 1000L
     ans <- list(nevent_df = nevent_df,
                 py_df = py_df,
@@ -53,7 +56,8 @@ new_BayesRates_results <- function(nevent_df,
                 spec_time = spec_time,
                 fitted = fitted,
                 vals_by = vals_by,
-                n_draw = n_draw)
+                n_draw = n_draw,
+                seed_draws_post = seed_draws_post)
     class(ans) <- "BayesRates_results"
     ans
 }
