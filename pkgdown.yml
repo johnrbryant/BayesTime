@@ -1,11 +1,11 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.0.8
 pkgdown_sha: ~
 articles:
   vig1_nz: vig1_nz.html
   vig2_cn: vig2_cn.html
   vig3_math: vig3_math.html
-last_built: 2024-03-19T03:05Z
+last_built: 2024-04-18T09:09Z
 urls:
   reference: https://junnizhang.github.io/BayesRates/reference
   article: https://junnizhang.github.io/BayesRates/articles
