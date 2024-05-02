@@ -15,49 +15,83 @@ knitr::opts_chunk$set(
 ```
 
 
-# Introduction
+# Model for single time period
 
-
-# Models for estimating historical age-specific rates
-
-
-# Models for forecasting summary indicators
-
-## Setting
-
-Let $\gamma_{at}$ be a demographic rate for age group $a$ during period $t$. The rate could, for instance, be the first marriage rate, the remarriage rate, or the divorce rate. The rate might refer to the whole population, or to a specific sub-population, such as females in rural areas in a particular province. Each of these sub-populations is, at this stage in the modelling process, modelled independently. We have draws $\gamma_{at}^{(s)}$, $s = 1, \cdots S$, from the posterior distribution for $\gamma_{at}$ for the years $t = 1, \cdots, T$.
-
-Let $\Gamma_t = \sum_{a=1}^A \gamma_{at}$ be a summary indicator for the rates, which we refer to as a "total" rate. Our aim is to draw from the distribution
 \begin{equation}
-  p(\Gamma_{T+1}, \dots, \Gamma_{T+H} \mid \Gamma_{1}, \dots, \Gamma_{T})
+  y_a \sim \text{Poisson}(\gamma_a w_a)
 \end{equation}
 
-We do this by drawing from
 \begin{equation}
-  p(\Gamma_{T+1}^{(s)}, \dots, \Gamma_{T+H}^{(s)} \mid \Gamma_{1}^{(s)}, \dots, \Gamma_{T}^{(s)})
+  \log \gamma_a = \beta_a^{\text{age}}
 \end{equation}
-independently for each posterior draw $s$.
 
-## Model 1: Damped linear trend
+Priors for age effect $\beta_a^{\text{age}}$: 
+
+Case 1: Second-Order Random Walk
+
+\begin{equation}
+  \beta_a^{\text{age}} - \beta_{a-1}^{\text{age}} \sim \text{N}\left(\beta_{a-1}^{\text{age}} - \beta_{a-2}^{\text{age}}, \sigma_{\text{age}}^2\right), \quad a = 2, \cdots, A
+\end{equation}
+
+where
+
+\begin{equation}
+  \sigma_{\text{age}} \sim \text{N}^+(0, s_{\text{age}}^2)
+\end{equation}
+
+Case 2: Spline
 
 \begin{align}
-  \Gamma_t^{(s)} & \sim \text{N}(\Gamma_{t-1}^{(s)} + \delta_{t-1}^{(s)}, \tau_{\Gamma}^{(s)2}) \\
-  \delta_t^{(s)} & \sim \text{N}(\phi^{(s)} \delta_{t-1}^{(s)}, \tau_{\delta}^{(s)2}) \\
-  \phi^{(s)} & = a_0 + (a_1 - a_0) \phi_0^{(s)} \\
-  \phi_0^{(s)} & \sim \text{Beta}(2, 2) \\
-  \tau_{\Gamma}^{(s)} & \sim \text{N}^+(0, A_{\Gamma}^2) \\ 
-  \tau_{\delta}^{(s)} & \sim \text{N}^+(0, A_{\delta}^2) \\ 
+  \pmb{\beta}^{\text{age}} & = \pmb{X} \pmb{\alpha} \\
+  \alpha_a - \alpha_{a-1} & \sim \text{N}\left(\alpha_{a-1} - \alpha_{a-2}, \sigma_{\text{age}}^2\right)
 \end{align}
-By default, $a_0 = 0.8$, $a_1 = 0.98$, $A_{\Gamma} = ??$, and $A_{\delta} = ??$. (We will need to experiment with values.)
 
 
-<!-- ## Model 2: AR1 -->
+where
 
-<!-- \begin{align} -->
-<!--   \Gamma_t^{(s)} & \sim \text{N}(\phi^{(s)} \Gamma_{t-1}^{(s)} + (1 - \phi^{(s)}) \alpha, \tau^{(s)2}) \\ -->
-<!--   \alpha & \sim N(m, b^2) \\ -->
-<!--   \phi^{(s)} & = a_0 + (a_1 - a_0) \phi_0^{(s)} \\ -->
-<!--   \phi_0^{(s)} & \sim \text{Beta}(2, 2) \\ -->
-<!--   \tau^{(s)} & \sim \text{N}^+(0, A^2) \\  -->
-<!-- \end{align} -->
-<!-- By default, $a_0 = 0.8$, $a_1 = 0.98$, $A = 0.1???$. Values for $m$ and $b$ depend on the indicator in question. -->
+\begin{equation}
+  \sigma_{\text{age}} \sim \text{N}^+(0, s_{\text{age}}^2)
+\end{equation}
+
+
+# Model for multiple time periods: Main effects
+
+
+\begin{align}
+  y_{at} & \sim \text{Poisson}(\gamma_{at} w_{at}) \\
+  \log \gamma_{at} & = \beta_a^{\text{age}} + \beta_t^{\text{time}}
+\end{align}
+
+Priors for age effect $\beta_a^{\text{age}}$ same as for single-time-period model
+
+Prior for time effect:
+
+\begin{equation}
+  \beta_t^{\text{time}} \sim \text{N}(0, \sigma_{\text{time}}^2)
+\end{equation}
+
+# Model for multiple time periods: Interaction
+
+\begin{align}
+  y_{at} & \sim \text{Poisson}(\gamma_{at} w_{at}) \\
+  \log \gamma_{at} & = \beta_a^{\text{age}} + \beta_{at}^{\text{age:time}}
+\end{align}
+
+Priors for age effect $\beta_a^{\text{age}}$ same as for single-time-period model
+
+Prior for age-time effect $\beta_{at}^{\text{age:time}}$: 
+
+\begin{equation}
+  \pmb{\beta}_t^{\text{age:time}} \sim \text{N}(\pmb{\beta}_{t-1}^{\text{age:time}}, \sigma^2 \pmb{\Phi})
+\end{equation}
+where
+\begin{equation}
+  \pmb{\Phi} = \begin{bmatrix} 1 & \rho & \rho^2 & \dots & \rho^{T-1} \\
+                                 \rho & 1 & \rho & \dots & \rho^{T-2} \\
+				 \rho^2 & \rho & 1 & \dots & \rho^{T-3} \\
+				 \vdots & \vdots & \vdots & \ddots & \vdots \\
+				 \rho^{T-1} & \rho^{T-2} & \rho^{T-3} & \dots & 1 \end{bmatrix}
+\end{equation}
+
+
+
