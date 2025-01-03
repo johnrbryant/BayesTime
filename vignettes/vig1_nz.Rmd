@@ -80,7 +80,7 @@ nz_popn_2020 <- nz_population |>
 ```
 
 We use the `smooth_age()` function to smooth the observed across age. 
-```
+```{r}
 res_age <- smooth_age(nevent_df = nz_divorce_2020,
                       py_df = nz_popn_2020,
                       age_width_df = nz_age_width_df,
