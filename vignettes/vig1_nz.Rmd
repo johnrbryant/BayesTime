@@ -1,8 +1,9 @@
+
 ---
-title: "vig1_nz"
+title: "Divorces in New Zealand"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{vig1_nz}
+  %\VignetteIndexEntry{Divorces in New Zealand}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +16,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this example, we have the number of divorce events and person-years of exposure for New Zealand by age groups (15-19, 20-24, ..., 65+), sex, and year (1992, ..., 2021).  The values of the person-years of exposure are quite large and thus sampling error is not very large. 
+# Introduction
+
+In this vignette we use **BayesRates** to calculate age-specific rates and turn these age-specific rates into total divorce rates. We use data on divorce in New Zealand in New Zealand. The dataset is large and sampling errors are small.
+
+
+# Preliminaries
+
+## Packages
+
+Besides **BayesRates** we load **dplyr**, for data manipulation, and **ggplot** for plotting.
 
 ```{r setup}
 library(BayesRates)
@@ -23,76 +33,102 @@ library(dplyr)
 library(ggplot2)
 ```
 
-'nz_divorces' is an existing data frame in the *BayesRates* package with four columns:  
-(1) 'age': a factor variable with levels being "15-19","20-24",...,"60-64","65+";  
-(2) 'sex': a character variable with possible values being "Female" and "Male";  
-(3) 'time': an integer variable with possible values being 1992,...,2021;  
-(4) 'nevent': a numeric variable recording the number of divorce events.
+## Data 
+
+The data on divorces is ins `nz_divorces`, a data frame contained in the **BayesRates** package. `nz_divorces has four columns:
+
+- `age`: a factor with levels `"15-19"`,`"20-24"`,...,`"60-64"`,`"65+"`;  
+- `sex`: a character vector with values `"Female"` and `"Male"`;  
+- `time`: an integer vector with values `1992`,...,`2021`;  and
+- `nevent`: a numeric vector with the number of divorces.
 
 ```{r}
-head(nz_divorces)
+nz_divorces
 ```
 
-'nz_population' is an existing data frame in the *BayesRates* package with four columns:  
-(1) 'age': a factor variable with levels being "15-19","20-24",...,"60-64","65+";  
-(2) 'sex': a character variable with possible values being "Female", "Male";  
-(3) 'time': an integer variable with possible values being 1992,...,2021;  
-(4) 'py': a numeric variable recording person-years of exposure.
+The data on population is in `nz_population`, also contained in the **BayesRates** package. `nz_population` has with four columns:
+
+- `age`: a factor with levels `"15-19"`,`"20-24"`,...,`"60-64"`,`"65+"`;  
+- `sex`: a character vector with values `"Female"`, `"Male"`;  
+- `time`: an integer vector with values being `1992`,...,`2021`;  and
+- `py`: a numeric vector with person-years of exposure.
+
 ```{r}
-head(nz_population)
+nz_population
 ```
 
-The person-years of exposure are quite large, and correspondingly the numbers of divorces are not small.
+The person-years of exposure, and hence the number of divorces, are both quite large.
 ```{r}
-summary(nz_population["py"])
-table(nz_divorces["nevent"])
+summary(nz_population$py)
+summary(nz_divorces$nevent)
 ```
 
-We keep the subsets of 'nz_divorces' and 'nz_population' for 2020, and remove the 'time' variable.  To do this, we use the '%>%' operator from the 'dplyr' package that turns 'x %>% f(y)' into 'f(x,y)' so that the result from one step is piped into the next step.
+# Rates in a single period, both sexes combined
+
+We start with the relatively simple where we are estimating age-specific rates in a single period, not distinguishing between females and males.
+
+As a first step, we create two new datasets each only containing data for 2020.
+
 ```{r}
-nz_divorce_2020 <- nz_divorces %>%
-  filter(time == 2020) %>%
+nz_divorce_2020 <- nz_divorces |>
+  filter(time == 2020) |>
   select(-time)
 
-nz_popn_2020 <- nz_population %>%
-  filter(time == 2020) %>%
+nz_popn_2020 <- nz_population |>
+  filter(time == 2020) |>
   select(-time)
 ```
 
-We use the *smooth_age* function to smooth the observed unisex rates across age. The parameter *nevent_df* specifies the data frame for numbers of events, and the parameter *py_df* specifies the data frame for person years of exposure.  When we work with age groups, we also need to specify the parameter *age_width_df* which is a data frame recording the width of each age group, and the parameter *age_min* which is the starting age.  As input to the parameter *age_width_df*, we use 'nz_age_width_df', an existing data frame in the *BayesRates* package that gives the width of each age group.
-```{r}
-head(nz_age_width_df)
-
+We use the `smooth_age()` function to smooth the observed across age. 
+```
 res_age <- smooth_age(nevent_df = nz_divorce_2020,
                       py_df = nz_popn_2020,
                       age_width_df = nz_age_width_df,
                       age_min = 15)
 ```
-Inside the *smooth_age* function, numbers of events and person-years of exposure for females and males are aggregated. The default model for the age effects on log rates is a spline model with degrees of freedom equal to max(ceiling(0.7 * n), 4), where n is the number of age groups.  Here we have n=11, hence the degrees of freedom is 8.
 
-We print the model specification as follows.
+In the call to `smooth_age()`, the parameter `nevent_df` specifies the data frame for numbers of events, and the parameter `py_df` specifies the data frame for person years of exposure. The parameters `age_width_df` and `age_min` provide information about age groups. `nz_age_width_df` is an existing data frame in the **BayesRates** package that gives the width of each age group.
+
+```{r}
+head(nz_age_width_df)
+```
+
+We have not told `smooth_age()` to calculate separate rates for females and males, so, before fitting, it aggregates events and person-years across the sexes.
+
+A summary of the model specification can be obtained by printing the return value from `smooth_age()`.
+
 ```{r}
 res_age
 ```
-The number of events is modeled by a Poisson distribution with mean equal to an underlying rate multiplied by person-years of exposure.  The logarithm of the underlying rate equals the age effect, which is modeled by a spline model.  The model for the age effect is *Spline()*.  The value of 'agevar' is 'age', indicating that the name of the variable that records age is 'age'.  The value of 'byvar' is empty, indicating that we fit a single model (not classified by any variable).  The value of 'ndraw' is 1000, indicating that the number of posterior draws is 1000 (default value).
 
-We use the *components* function to extract model-based estimates of rates disaggregated by age.
+The number of events is modeled by a Poisson distribution with mean equal to an underlying rate multiplied by person-years of exposure.  The logarithm of the underlying rate equals the age effect, which is modeled by a spline model.  The model for the age effect is `Spline()`.  The value for `agevar` is `"age"`, indicating that variable with information on age groups is called `"age"`.  The value of `byvar` is empty, indicating that we fit a single model, within everyone belonging to the same group.  The value of `ndraw` is 1000, indicating that the number of posterior draws is 1000, the default.
+
+We use the `components()` function to extract model-based estimates of rates disaggregated by age.
+
 ```{r}
 components(res_age, what = "rates")
 ```
-In the returned data frame, the variable 'age.mid' gives the middle point for each age group, the variable '.fitted' gives the point estimate of the rate, the variables '.lower' and '.upper' give the lower and upper bounds of the credible interval of the rate (95% credible interval by default), and the variable '.probability' gives a list containing the posterior draws of the rate.  
 
-We also use the *components* function to extract model-based estimates of age effects.
+`components()` returns a data frame. In this data frame,
+
+- `age.mid` gives the middle point for each age group (which is helpful for plotting);
+- `.fitted` gives a point estimate of the rate;
+- `.lower` and `.upper` give lower and upper bounds of the credible interval of the rate (a 95% credible interval by default); and
+- `.probability` gives a list containing the posterior draws of the rate.
+
+
+`components()` can also be used to extract model-based estimates of age effects:
+
 ```{r}
 components(res_age, what = "age_effect")
 ```
 
-We use the *augment* function to combine the observed data with the model-based estimates of rates.
+Function `augment()` returns the original data plus model-based estimates of rates.
 ```{r}
 rates_age_df <- augment(res_age)
-head(rates_age_df)
+rates_age_df
 ```
-Since the model has been constructed for unisex rate, the values of '.fitted', '.lower', '.upper' and '.probability' are the same for males and females at the same age.
+Since the model does not distinguish sexes, the values of '.fitted', '.lower', '.upper' and '.probability' are the same for females and males at the each age.
 
 We plot the model-based estimates of rates (including point estimates and credible intervals) and the observed rates (in blue), separately for each sex.
 ```{r}
@@ -104,101 +140,128 @@ ggplot(rates_age_df,
   geom_point(aes(y = .observed), col = "blue")
 ```
 
-We use the *total_rate* function to obtain estimates of the unisex total rates. 
+Function `total_rate()` sums across ages to give total rates. 
 ```{r}
 total_rate(res_age)
 ```
 
-We next fit a separate model for each sex.  To do this, we set the parameter *byvar* in the *smooth_age* function to "sex".
+# Rates in a single period, separating sexes
+
+We next fit a separate model for each sex.  To do this, we set the argument `byvar` in `smooth_age()` to `"sex"`.
 ```{r}
 res_age_bysex <- smooth_age(nevent_df = nz_divorce_2020,
-                      py_df = nz_popn_2020,
-                      age_width_df = nz_age_width_df,
-                      age_min = 15,
-                      byvar = "sex")
+                            py_df = nz_popn_2020,
+                            age_width_df = nz_age_width_df,
+                            age_min = 15,
+                            byvar = "sex")
 res_age_bysex
 ```
 
-We combine observed data with model-based estimates of rates, plot the results, and obtain estimates of total rates.
+The rates returned by `augment()` now distinguish between sexes
+
 ```{r}
 rates_age_bysex_df <- augment(res_age_bysex)
-head(rates_age_bysex_df)
+rates_age_bysex_df
+```
 
+Graphing the results shows that the model now recognizes the female-male differences in age patterns.
+```{r}
 ggplot(rates_age_bysex_df,
        aes(x = age.mid, ymin = .lower, y = .fitted, ymax = .upper)) +
   facet_wrap(vars(sex)) +
   geom_ribbon(fill = "salmon") +
   geom_line() +
   geom_point(aes(y = .observed), col = "blue")
+```
 
+Function `total_rate()` now produces separate results for females and males.
+
+```{r}
 total_rate(res_age_bysex)
 ```
 
-We can also change the model specification.  For example, we can use a spline model with 9 degrees of freedom to smooth the observed rates across age for each sex.
+# Alternative specifications of age effect
+
+The `spec_age` argument to `smooth_age()` specifies the prior model to be applied to age effects. The default value for `spec_age` is `Spline()`. In this section we experiment with alternative values.
+
+## Modifying the spline model for age effects
+
+When `spec_age` is set to `Spline()`, age effects are modelled using a penalised spline, with degrees of freedom equal to `max(ceiling(0.7 * n), 4)`, where `n` is the number of age groups.  In our data, `n` equals 11, so the degrees of freedom is 8.
+
+Reducing the degrees of freedom used within `Spline()` may lead smoother age effects. Here we set the degrees of freedom to `5`, and graph the results.
+
 ```{r}
-res_age_bysex2 <- smooth_age(nevent_df = nz_divorce_2020,
-                      py_df = nz_popn_2020,
-                      age_width_df = nz_age_width_df,
-                      age_min = 15,
-                      byvar = "sex",
-                      spec_age = Spline(df = 9))
-res_age_bysex2
+res_age_bysex_5df <- smooth_age(nevent_df = nz_divorce_2020,
+                                py_df = nz_popn_2020,
+                                age_width_df = nz_age_width_df,
+                                age_min = 15,
+                                byvar = "sex",
+                                spec_age = Spline(df = 5))
 
-rates_age_bysex2_df <- augment(res_age_bysex2)
-head(rates_age_bysex2_df)
+rates_age_bysex_5df <- augment(res_age_bysex_5df)
 
-ggplot(rates_age_bysex2_df,
-       aes(x = age.mid, ymin = .lower, y = .fitted, ymax = .upper)) +
+ggplot(rates_age_bysex_5df,
+        aes(x = age.mid, ymin = .lower, y = .fitted, ymax = .upper)) +
   facet_wrap(vars(sex)) +
   geom_ribbon(fill = "salmon") +
   geom_line() +
   geom_point(aes(y = .observed), col = "blue")
-
-total_rate(res_age_bysex2)
 ```
+
+The lower degrees of freedom does indeed increase the smoothing, and the modelled estimates are further away from the direct estimates.
+
+
+## Second-order random walk model for age
 
 We can also use a second order random walk model to smooth the observed rates across age for each sex.
+
 ```{r}
-res_age_bysex3 <- smooth_age(nevent_df = nz_divorce_2020,
-                      py_df = nz_popn_2020,
-                      age_width_df = nz_age_width_df,
-                      age_min = 15,
-                      byvar = "sex",
-                      spec_age = RW2())
-res_age_bysex3
+res_age_bysex_rw <- smooth_age(nevent_df = nz_divorce_2020,
+                               py_df = nz_popn_2020,
+                               age_width_df = nz_age_width_df,
+                               age_min = 15,
+                               byvar = "sex",
+                               spec_age = RW2())
 
-rates_age_bysex3_df <- augment(res_age_bysex3)
-head(rates_age_bysex3_df)
+rates_age_bysex_rw <- augment(res_age_bysex_rw)
 
-ggplot(rates_age_bysex3_df,
+ggplot(rates_age_bysex_rw,
        aes(x = age.mid, ymin = .lower, y = .fitted, ymax = .upper)) +
   facet_wrap(vars(sex)) +
   geom_ribbon(fill = "salmon") +
   geom_line() +
   geom_point(aes(y = .observed), col = "blue")
-
-total_rate(res_age_bysex3)
 ```
 
-Next, for each sex, we use data for all years and smooth the observed rates across age and time.  By default, we model the age effects on log rates using a spline model with degrees of freedom equal to max(ceiling(0.7 * n), 4), where n is the number of age groups, and allow the time effects on log rates to vary for different age groups.  A correlated first-order random walk is used to model the time effects, where the correlation is higher for age groups that are closer. 
+
+# Smoothing over age and time
+
+We now return to the full dataset, and apply function `smooth_agetime()`, which simultaneously smooths over age and time.
+
+## Fixed age pattern
+
+In our first model, we asssume that age-patterns are constant over time. We set the parameter `spec_time` to `TimeFixed()`.
+
 ```{r}
-res_agetime_bysex <- smooth_agetime(nevent_df = nz_divorces,
-                              py_df = nz_population,
-                              age_width_df = nz_age_width_df,
-                              age_min = 15,
-                              byvar = "sex")
-res_agetime_bysex
+res_agetime_fix <- smooth_agetime(nevent_df = nz_divorces,
+                                  py_df = nz_population,
+                                  age_width_df = nz_age_width_df,
+                                  age_min = 15,
+                                  byvar = "sex",
+   		                  spec_time = TimeFixed())
+res_agetime_fix
 ```
-In the model specification, the logarithm of the underlying rate equals the age effect plus the time effect.  The model for the time effect is *TimeVarying()*.  The value of 'timevar' is 'time', indicating that the name of the variable that records time is 'time'.  The value of 'byvar' is 'sex', indicating that a model is fitted separately for each sex.
+The model outputs now have a time dimension.
 
-We use the *augment* function to combine data and model-based estimates of rates, and plot the results.
 ```{r}
-rates_agetime_bysex_df <- augment(res_agetime_bysex)
-head(rates_agetime_bysex_df)
+rates_agetime_fix <- augment(res_agetime_fix)
+rates_agetime_fix
 ```
+
+When we graph the results for the period 1992--2021, we see systematic differences between the modelled and direct estimates.
 
 ```{r, fig.height = 7}
-ggplot(rates_agetime_bysex_df, aes(x = age.mid)) +
+ggplot(rates_agetime_fix, aes(x = age.mid)) +
   facet_wrap(vars(time)) +
   geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
               alpha = 0.6) +
@@ -207,10 +270,41 @@ ggplot(rates_agetime_bysex_df, aes(x = age.mid)) +
              size = 0.5)
 ```
 
-We use the *components* function to extract the model-based estimates of age effects, and plot them.
+These results suggest that we may need to allow the age-pattern to vary over time.
+
+## Time-varying age pattern
+
+To allow the age-pattern to vary over time, we set `spec_time` to `TimeVarying()`, which is in fact the default. In the `TimeVarying()` model, each age group follows a different random walk, with the random walks for neighbouring age groups being more highly correlated than random walks for distant age groups.
+
 ```{r}
-age_effect <- components(res_agetime_bysex, what = "age_effect")
-head(age_effect)
+res_agetime_vary <- smooth_agetime(nevent_df = nz_divorces,
+                                   py_df = nz_population,
+                                   age_width_df = nz_age_width_df,
+                                   age_min = 15,
+                                   byvar = "sex")
+res_agetime_vary
+```
+
+In this revised model, the systematic differences between modelled and direct estimates disappear.
+
+```{r, fig.height = 7}
+rates_agetime_vary <- augment(res_agetime_vary)
+
+ggplot(rates_agetime_vary, aes(x = age.mid)) +
+  facet_wrap(vars(time)) +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
+              alpha = 0.6) +
+  geom_line(aes(y = .fitted, color = sex)) +
+  geom_point(aes(y = .observed, color = sex),
+             size = 0.5)
+```
+
+Using the `components()` function, we can extract the age and age-time effects.
+
+The age effect is an average age pattern over the whole period.
+
+```{r}
+age_effect <- components(res_agetime_vary, what = "age_effect")
 
 ggplot(age_effect,
        aes(x = age.mid, ymin = .lower, y = .fitted, ymax = .upper)) +
@@ -219,13 +313,11 @@ ggplot(age_effect,
   geom_line()
 ```
 
-We use the *components* function to extract the model-based estimates of time effects, and plot them.
-```{r}
-time_effect <- components(res_agetime_bysex, what = "time_effect") 
-head(time_effect)
-```
+The age-time effect shows departures from the average effect in each period
 
 ```{r, fig.height = 7}
+time_effect <- components(res_agetime_vary, what = "time_effect") 
+
 ggplot(time_effect, aes(x = age.mid)) +
   facet_wrap(vars(time)) +
   geom_ribbon(aes(ymin = .lower, ymax = .upper, fill = sex),
@@ -233,13 +325,14 @@ ggplot(time_effect, aes(x = age.mid)) +
   geom_line(aes(y = .fitted, color = sex))
 ```
 
-We obtain estimates of the total rates and plot them.
+The age-time effects rotate in an anti-clockwise direction. This implies that the overall shellage-pattern is become more skewed towards older ages over time.
+
+
+Finally, we calculate time-varying total rates.
 ```{r}
-total_rate = total_rate(res_agetime_bysex)
+total_varying <- total_rate(res_agetime_vary)
 
-total_rate
-
-ggplot(total_rate, 
+ggplot(total_varying, 
        aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
   facet_wrap(vars(sex)) +
   geom_ribbon(fill = "salmon") +
