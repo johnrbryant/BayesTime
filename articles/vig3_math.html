@@ -5,59 +5,49 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="BayesRates">
 <title>vig3_math • BayesRates</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="vig3_math">
-<meta property="og:description" content="BayesRates">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="vig3_math">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">BayesRates</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/vig1_nz.html">vig1_nz</a>
-    <a class="dropdown-item" href="../articles/vig2_cn.html">vig2_cn</a>
-    <a class="dropdown-item" href="../articles/vig3_math.html">vig3_math</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/vig1_nz.html">Divorces in New Zealand</a></li>
+    <li><a class="dropdown-item" href="../articles/vig2_cn.html">vig2_cn</a></li>
+    <li><a class="dropdown-item" href="../articles/vig3_math.html">vig3_math</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav"></ul>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+      </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -66,99 +56,103 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>vig3_math</h1>
+
+      <h1>vig3_math</h1>
             
       
-      
+
       <div class="d-none name"><code>vig3_math.Rmd</code></div>
     </div>
 
     
     
 <div class="section level2">
-<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+<h2 id="model-for-single-time-period">Model for single time period<a class="anchor" aria-label="anchor" href="#model-for-single-time-period"></a>
 </h2>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>a</mi></msub><mo>∼</mo><mtext mathvariant="normal">Poisson</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>γ</mi><mi>a</mi></msub><msub><mi>w</mi><mi>a</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+  y_a \sim \text{Poisson}(\gamma_a w_a)
+\end{equation}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><msub><mi>γ</mi><mi>a</mi></msub><mo>=</mo><msubsup><mi>β</mi><mi>a</mi><mtext mathvariant="normal">age</mtext></msubsup></mrow><annotation encoding="application/x-tex">\begin{equation}
+  \log \gamma_a = \beta_a^{\text{age}}
+\end{equation}</annotation></semantics></math></p>
+<p>Priors for age effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>β</mi><mi>a</mi><mtext mathvariant="normal">age</mtext></msubsup><annotation encoding="application/x-tex">\beta_a^{\text{age}}</annotation></semantics></math>:</p>
+<p>Case 1: Second-Order Random Walk</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>β</mi><mi>a</mi><mtext mathvariant="normal">age</mtext></msubsup><mo>−</mo><msubsup><mi>β</mi><mrow><mi>a</mi><mo>−</mo><mn>1</mn></mrow><mtext mathvariant="normal">age</mtext></msubsup><mo>∼</mo><mtext mathvariant="normal">N</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>β</mi><mrow><mi>a</mi><mo>−</mo><mn>1</mn></mrow><mtext mathvariant="normal">age</mtext></msubsup><mo>−</mo><msubsup><mi>β</mi><mrow><mi>a</mi><mo>−</mo><mn>2</mn></mrow><mtext mathvariant="normal">age</mtext></msubsup><mo>,</mo><msubsup><mi>σ</mi><mtext mathvariant="normal">age</mtext><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mspace width="1.0em"></mspace><mi>a</mi><mo>=</mo><mn>2</mn><mo>,</mo><mi>⋯</mi><mo>,</mo><mi>A</mi></mrow><annotation encoding="application/x-tex">\begin{equation}
+  \beta_a^{\text{age}} - \beta_{a-1}^{\text{age}} \sim \text{N}\left(\beta_{a-1}^{\text{age}} - \beta_{a-2}^{\text{age}}, \sigma_{\text{age}}^2\right), \quad a = 2, \cdots, A
+\end{equation}</annotation></semantics></math></p>
+<p>where</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mtext mathvariant="normal">age</mtext></msub><mo>∼</mo><msup><mtext mathvariant="normal">N</mtext><mo>+</mo></msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>s</mi><mtext mathvariant="normal">age</mtext><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+  \sigma_{\text{age}} \sim \text{N}^+(0, s_{\text{age}}^2)
+\end{equation}</annotation></semantics></math></p>
+<p>Case 2: Spline</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msup><mi>𝛃</mi><mtext mathvariant="normal">age</mtext></msup></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>𝐗</mi><mi>𝛂</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>α</mi><mi>a</mi></msub><mo>−</mo><msub><mi>α</mi><mrow><mi>a</mi><mo>−</mo><mn>1</mn></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mtext mathvariant="normal">N</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>α</mi><mrow><mi>a</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>α</mi><mrow><mi>a</mi><mo>−</mo><mn>2</mn></mrow></msub><mo>,</mo><msubsup><mi>σ</mi><mtext mathvariant="normal">age</mtext><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+  \pmb{\beta}^{\text{age}} &amp; = \pmb{X} \pmb{\alpha} \\
+  \alpha_a - \alpha_{a-1} &amp; \sim \text{N}\left(\alpha_{a-1} - \alpha_{a-2}, \sigma_{\text{age}}^2\right)
+\end{align}</annotation></semantics></math></p>
+<p>where</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mtext mathvariant="normal">age</mtext></msub><mo>∼</mo><msup><mtext mathvariant="normal">N</mtext><mo>+</mo></msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>s</mi><mtext mathvariant="normal">age</mtext><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+  \sigma_{\text{age}} \sim \text{N}^+(0, s_{\text{age}}^2)
+\end{equation}</annotation></semantics></math></p>
 </div>
 <div class="section level2">
-<h2 id="models-for-estimating-historical-age-specific-rates">Models for estimating historical age-specific rates<a class="anchor" aria-label="anchor" href="#models-for-estimating-historical-age-specific-rates"></a>
+<h2 id="model-for-multiple-time-periods-main-effects">Model for multiple time periods: Main effects<a class="anchor" aria-label="anchor" href="#model-for-multiple-time-periods-main-effects"></a>
 </h2>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mtext mathvariant="normal">Poisson</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>γ</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub><msub><mi>w</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>log</mo><msub><mi>γ</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msubsup><mi>β</mi><mi>a</mi><mtext mathvariant="normal">age</mtext></msubsup><mo>+</mo><msubsup><mi>β</mi><mi>t</mi><mtext mathvariant="normal">time</mtext></msubsup></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+  y_{at} &amp; \sim \text{Poisson}(\gamma_{at} w_{at}) \\
+  \log \gamma_{at} &amp; = \beta_a^{\text{age}} + \beta_t^{\text{time}}
+\end{align}</annotation></semantics></math></p>
+<p>Priors for age effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>β</mi><mi>a</mi><mtext mathvariant="normal">age</mtext></msubsup><annotation encoding="application/x-tex">\beta_a^{\text{age}}</annotation></semantics></math>
+same as for single-time-period model</p>
+<p>Prior for time effect:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>β</mi><mi>t</mi><mtext mathvariant="normal">time</mtext></msubsup><mo>∼</mo><mtext mathvariant="normal">N</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mtext mathvariant="normal">time</mtext><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+  \beta_t^{\text{time}} \sim \text{N}(0, \sigma_{\text{time}}^2)
+\end{equation}</annotation></semantics></math></p>
 </div>
 <div class="section level2">
-<h2 id="models-for-forecasting-summary-indicators">Models for forecasting summary indicators<a class="anchor" aria-label="anchor" href="#models-for-forecasting-summary-indicators"></a>
+<h2 id="model-for-multiple-time-periods-interaction">Model for multiple time periods: Interaction<a class="anchor" aria-label="anchor" href="#model-for-multiple-time-periods-interaction"></a>
 </h2>
-<div class="section level3">
-<h3 id="setting">Setting<a class="anchor" aria-label="anchor" href="#setting"></a>
-</h3>
-<p>Let <span class="math inline">\(\gamma_{at}\)</span> be a demographic
-rate for age group <span class="math inline">\(a\)</span> during period
-<span class="math inline">\(t\)</span>. The rate could, for instance, be
-the first marriage rate, the remarriage rate, or the divorce rate. The
-rate might refer to the whole population, or to a specific
-sub-population, such as females in rural areas in a particular province.
-Each of these sub-populations is, at this stage in the modelling
-process, modelled independently. We have draws <span class="math inline">\(\gamma_{at}^{(s)}\)</span>, <span class="math inline">\(s = 1, \cdots S\)</span>, from the posterior
-distribution for <span class="math inline">\(\gamma_{at}\)</span> for
-the years <span class="math inline">\(t = 1, \cdots, T\)</span>.</p>
-<p>Let <span class="math inline">\(\Gamma_t = \sum_{a=1}^A
-\gamma_{at}\)</span> be a summary indicator for the rates, which we
-refer to as a “total” rate. Our aim is to draw from the distribution
-<span class="math display">\[\begin{equation}
-  p(\Gamma_{T+1}, \dots, \Gamma_{T+H} \mid \Gamma_{1}, \dots,
-\Gamma_{T})
-\end{equation}\]</span></p>
-<p>We do this by drawing from <span class="math display">\[\begin{equation}
-  p(\Gamma_{T+1}^{(s)}, \dots, \Gamma_{T+H}^{(s)} \mid \Gamma_{1}^{(s)},
-\dots, \Gamma_{T}^{(s)})
-\end{equation}\]</span> independently for each posterior draw <span class="math inline">\(s\)</span>.</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mtext mathvariant="normal">Poisson</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>γ</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub><msub><mi>w</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>log</mo><msub><mi>γ</mi><mrow><mi>a</mi><mi>t</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msubsup><mi>β</mi><mi>a</mi><mtext mathvariant="normal">age</mtext></msubsup><mo>+</mo><msubsup><mi>β</mi><mrow><mi>a</mi><mi>t</mi></mrow><mtext mathvariant="normal">age:time</mtext></msubsup></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+  y_{at} &amp; \sim \text{Poisson}(\gamma_{at} w_{at}) \\
+  \log \gamma_{at} &amp; = \beta_a^{\text{age}} + \beta_{at}^{\text{age:time}}
+\end{align}</annotation></semantics></math></p>
+<p>Priors for age effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>β</mi><mi>a</mi><mtext mathvariant="normal">age</mtext></msubsup><annotation encoding="application/x-tex">\beta_a^{\text{age}}</annotation></semantics></math>
+same as for single-time-period model</p>
+<p>Prior for age-time effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>β</mi><mrow><mi>a</mi><mi>t</mi></mrow><mtext mathvariant="normal">age:time</mtext></msubsup><annotation encoding="application/x-tex">\beta_{at}^{\text{age:time}}</annotation></semantics></math>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>𝛃</mi><mi>t</mi><mtext mathvariant="normal">age:time</mtext></msubsup><mo>∼</mo><mtext mathvariant="normal">N</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>𝛃</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow><mtext mathvariant="normal">age:time</mtext></msubsup><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mi>𝚽</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+  \pmb{\beta}_t^{\text{age:time}} \sim \text{N}(\pmb{\beta}_{t-1}^{\text{age:time}}, \sigma^2 \pmb{\Phi})
+\end{equation}</annotation></semantics></math> where
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝚽</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>ρ</mi></mtd><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mn>2</mn></msup></mtd><mtd columnalign="center" style="text-align: center"><mi>…</mi></mtd><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mrow><mi>T</mi><mo>−</mo><mn>1</mn></mrow></msup></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>ρ</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>ρ</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>…</mi></mtd><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mrow><mi>T</mi><mo>−</mo><mn>2</mn></mrow></msup></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mn>2</mn></msup></mtd><mtd columnalign="center" style="text-align: center"><mi>ρ</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>…</mi></mtd><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mrow><mi>T</mi><mo>−</mo><mn>3</mn></mrow></msup></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mo>⋱</mo></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mrow><mi>T</mi><mo>−</mo><mn>1</mn></mrow></msup></mtd><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mrow><mi>T</mi><mo>−</mo><mn>2</mn></mrow></msup></mtd><mtd columnalign="center" style="text-align: center"><msup><mi>ρ</mi><mrow><mi>T</mi><mo>−</mo><mn>3</mn></mrow></msup></mtd><mtd columnalign="center" style="text-align: center"><mi>…</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+  \pmb{\Phi} = \begin{bmatrix} 1 &amp; \rho &amp; \rho^2 &amp; \dots &amp; \rho^{T-1} \\
+                                 \rho &amp; 1 &amp; \rho &amp; \dots &amp; \rho^{T-2} \\
+                 \rho^2 &amp; \rho &amp; 1 &amp; \dots &amp; \rho^{T-3} \\
+                 \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+                 \rho^{T-1} &amp; \rho^{T-2} &amp; \rho^{T-3} &amp; \dots &amp; 1 \end{bmatrix}
+\end{equation}</annotation></semantics></math></p>
 </div>
-<div class="section level3">
-<h3 id="model-1-damped-linear-trend">Model 1: Damped linear trend<a class="anchor" aria-label="anchor" href="#model-1-damped-linear-trend"></a>
-</h3>
-<p><span class="math display">\[\begin{align}
-  \Gamma_t^{(s)} &amp; \sim \text{N}(\Gamma_{t-1}^{(s)} +
-\delta_{t-1}^{(s)}, \tau_{\Gamma}^{(s)2}) \\
-  \delta_t^{(s)} &amp; \sim \text{N}(\phi^{(s)} \delta_{t-1}^{(s)},
-\tau_{\delta}^{(s)2}) \\
-  \phi^{(s)} &amp; = a_0 + (a_1 - a_0) \phi_0^{(s)} \\
-  \phi_0^{(s)} &amp; \sim \text{Beta}(2, 2) \\
-  \tau_{\Gamma}^{(s)} &amp; \sim \text{N}^+(0, A_{\Gamma}^2) \\
-  \tau_{\delta}^{(s)} &amp; \sim \text{N}^+(0, A_{\delta}^2) \\
-\end{align}\]</span> By default, <span class="math inline">\(a_0 =
-0.8\)</span>, <span class="math inline">\(a_1 = 0.98\)</span>, <span class="math inline">\(A_{\Gamma} = ??\)</span>, and <span class="math inline">\(A_{\delta} = ??\)</span>. (We will need to
-experiment with values.)</p>
-<!-- ## Model 2: AR1 -->
-<!-- \begin{align} -->
-<!--   \Gamma_t^{(s)} & \sim \text{N}(\phi^{(s)} \Gamma_{t-1}^{(s)} + (1 - \phi^{(s)}) \alpha, \tau^{(s)2}) \\ -->
-<!--   \alpha & \sim N(m, b^2) \\ -->
-<!--   \phi^{(s)} & = a_0 + (a_1 - a_0) \phi_0^{(s)} \\ -->
-<!--   \phi_0^{(s)} & \sim \text{Beta}(2, 2) \\ -->
-<!--   \tau^{(s)} & \sim \text{N}^+(0, A^2) \\  -->
-<!-- \end{align} -->
-<!-- By default, $a_0 = 0.8$, $a_1 = 0.98$, $A = 0.1???$. Values for $m$ and $b$ depend on the indicator in question. -->
-</div>
-</div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by John Bryant, Junni Zhang.</p>
+  <p>Developed by John Bryant, Junni Zhang.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
