@@ -334,7 +334,7 @@ divorce rate in China.</p>
 <p><img src="vig2_cn_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
 </div>
 <div class="section level2">
-<h2 id="imputing-values-for-years-without-data">Imputing values for years without data<a class="anchor" aria-label="anchor" href="#imputing-values-for-years-without-data"></a>
+<h2 id="imputing-missing-values">Imputing missing values<a class="anchor" aria-label="anchor" href="#imputing-missing-values"></a>
 </h2>
 <p>It is common, in demographic data, to have missing values for some
 years. <strong>BayesRates</strong> automatically imputes values for
@@ -418,9 +418,10 @@ estimates of rates, we also obtain estimates for the gap years.</p>
 <p><code><a href="../reference/total_rate.html">total_rate()</a></code> also produces estimates for all years,
 including ones without data.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">total_rate_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/total_rate.html">total_rate</a></span><span class="op">(</span><span class="va">res_5</span><span class="op">)</span>  </span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">total_rate_5</span>, </span>
+<code class="sourceCode R"><span><span class="va">total_rate_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/total_rate.html">total_rate</a></span><span class="op">(</span><span class="va">res_5</span><span class="op">)</span></span></code></pre></div>
+<p>Credible intervals are wider in years without data.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">total_rate_5</span>, </span>
 <span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">.fitted</span>, ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"salmon"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -429,7 +430,7 @@ including ones without data.</p>
 <span>             col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Removed 56 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_point()`).</span></span></code></pre></div>
-<p><img src="vig2_cn_files/figure-html/unnamed-chunk-16-1.png" width="672"></p>
+<p><img src="vig2_cn_files/figure-html/unnamed-chunk-17-1.png" width="672"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
