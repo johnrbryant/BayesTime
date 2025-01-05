@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-In this vignette we use **BayesRates** to calculate age-specific rates and turn these age-specific rates into total divorce rates. We use data on divorce in New Zealand in New Zealand. The dataset is large and sampling errors are small.
+In this vignette we use **BayesRates** to calculate age-specific rates and turn these age-specific rates into total divorce rates. We use administrative data on divorce in New Zealand in New Zealand. The counts of divorce and population in the dataset are large, so sampling errors are small.
 
 
 # Preliminaries
