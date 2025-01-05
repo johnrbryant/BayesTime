@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>vig2_cn • BayesRates</title>
+<title>Divorces in China • BayesRates</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="vig2_cn">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Divorces in China">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -34,7 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/vig1_nz.html">Divorces in New Zealand</a></li>
-    <li><a class="dropdown-item" href="../articles/vig2_cn.html">vig2_cn</a></li>
+    <li><a class="dropdown-item" href="../articles/vig2_cn.html">Divorces in China</a></li>
     <li><a class="dropdown-item" href="../articles/vig3_math.html">vig3_math</a></li>
   </ul>
 </li>
@@ -57,7 +57,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>vig2_cn</h1>
+      <h1>Divorces in China</h1>
             
       
 
@@ -66,11 +66,21 @@
 
     
     
-<p>In this example, we have the number of divorces and person-years of
-exposure for China by single year of age (15, …, 64), sex, and year
-(1980, …, 2018). The values of the person-years of exposure are small
-and thus sampling error is quite large. We use the <em>BayesRates</em>
-package to obtain smoothed estimates of the divorce rates.</p>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>In this vignette, we use <strong>BayesRates</strong> to calculate
+smoothed age-specific divorce rates in China. The input data come from
+household surveys, and sample sizes are small.</p>
+<div class="section level3">
+<h3 id="preliminaries">Preliminaries<a class="anchor" aria-label="anchor" href="#preliminaries"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="packages">Packages<a class="anchor" aria-label="anchor" href="#packages"></a>
+</h3>
+<p>We load <strong>BayesRates</strong> and the two tidyverse packages
+<strong>dplyr</strong> and <strong>ggplot</strong>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://junnizhang.github.io/BayesRates/">BayesRates</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error in get(paste0(generic, ".", class), envir = get_method_env()) : </span></span>
@@ -85,80 +95,120 @@ package to obtain smoothed estimates of the divorce rates.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
-<p>‘cn_divorces’ is an existing data frame in the <em>BayesRates</em>
-package with four columns:<br>
-(1) ‘age’: an integer variable with levels being 15,…,64;<br>
-(2) ‘sex’: a character variable with possible values being “Female” and
+</div>
+<div class="section level3">
+<h3 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
+</h3>
+<p>Our data on divorces is <code>cn_divorces</code>, a data frame that
+is part of the <strong>BayesRates</strong> package. `cn_divorces has
+four columns:</p>
+<ul>
+<li>
+<code>age</code>: an integer vector with values 15,…,64;<br>
+</li>
+<li>
+<code>sex</code>: a character vector with values “Female” and
 “Male”;<br>
-(3) ‘time’: an integer variable with possible values being
-1980,…,2018;<br>
-(4) ‘nevent’: a numeric variable recording the number of divorce
-events.</p>
+</li>
+<li>
+<code>time</code>: an integer vector with values 1980,…,2018;
+and</li>
+<li>
+<code>nevent</code>: a numeric vector with the number of
+divorces.</li>
+</ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cn_divorces</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
-<span><span class="co">#&gt;     age sex     time nevent</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    15 Female  <span style="text-decoration: underline;">1</span>980      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>    15 Female  <span style="text-decoration: underline;">1</span>981      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    15 Female  <span style="text-decoration: underline;">1</span>982      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    15 Female  <span style="text-decoration: underline;">1</span>983      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>    15 Female  <span style="text-decoration: underline;">1</span>984      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>    15 Female  <span style="text-decoration: underline;">1</span>985      0</span></span></code></pre></div>
-<p>‘cn_population’ is an existing data frame in the <em>BayesRates</em>
-package with four columns:<br>
-(1) ‘age’: an integer variable with levels being 15,…,64;<br>
-(2) ‘sex’: a character variable with possible values being “Female”,
+<code class="sourceCode R"><span><span class="va">cn_divorces</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,900 × 4</span></span></span>
+<span><span class="co">#&gt;      age sex     time nevent</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>    15 Female  <span style="text-decoration: underline;">1</span>980      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>    15 Female  <span style="text-decoration: underline;">1</span>981      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>    15 Female  <span style="text-decoration: underline;">1</span>982      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>    15 Female  <span style="text-decoration: underline;">1</span>983      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>    15 Female  <span style="text-decoration: underline;">1</span>984      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>    15 Female  <span style="text-decoration: underline;">1</span>985      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>    15 Female  <span style="text-decoration: underline;">1</span>986      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>    15 Female  <span style="text-decoration: underline;">1</span>987      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>    15 Female  <span style="text-decoration: underline;">1</span>988      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    15 Female  <span style="text-decoration: underline;">1</span>989      0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,890 more rows</span></span></span></code></pre></div>
+<p><code>cn_population</code> contains data on population, and is also
+part of the <strong>BayesRates</strong>. Its columsn are:</p>
+<ul>
+<li>
+<code>age</code>: an integer vector with values 15,…,64;<br>
+</li>
+<li>
+<code>sex</code>: a character vector with values “Female” and
 “Male”;<br>
-(3) ‘time’: an integer variable with possible values being
-1980,…,2018;<br>
-(4) ‘py’: a numeric variable recording person-years of exposure.</p>
+</li>
+<li>
+<code>time</code>: an integer vector with values 1980,…,2018;
+and</li>
+<li>
+<code>py</code>: a numeric vector with person-years of
+exposure.</li>
+</ul>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cn_population</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
-<span><span class="co">#&gt;     age sex     time    py</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    15 Female  <span style="text-decoration: underline;">1</span>980  489.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>    15 Female  <span style="text-decoration: underline;">1</span>981  494.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    15 Female  <span style="text-decoration: underline;">1</span>982  462.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    15 Female  <span style="text-decoration: underline;">1</span>983  496.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>    15 Female  <span style="text-decoration: underline;">1</span>984  496.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>    15 Female  <span style="text-decoration: underline;">1</span>985  514.</span></span></code></pre></div>
-<p>The person-years of exposure are quite small, and hence the numbers
-of divorces are very sparse, with a lot of values being zero.</p>
+<code class="sourceCode R"><span><span class="va">cn_population</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,900 × 4</span></span></span>
+<span><span class="co">#&gt;      age sex     time    py</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>    15 Female  <span style="text-decoration: underline;">1</span>980  489.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>    15 Female  <span style="text-decoration: underline;">1</span>981  494.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>    15 Female  <span style="text-decoration: underline;">1</span>982  462.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>    15 Female  <span style="text-decoration: underline;">1</span>983  496.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>    15 Female  <span style="text-decoration: underline;">1</span>984  496.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>    15 Female  <span style="text-decoration: underline;">1</span>985  514.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>    15 Female  <span style="text-decoration: underline;">1</span>986  535.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>    15 Female  <span style="text-decoration: underline;">1</span>987  458.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>    15 Female  <span style="text-decoration: underline;">1</span>988  434.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    15 Female  <span style="text-decoration: underline;">1</span>989  468.</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,890 more rows</span></span></span></code></pre></div>
+<p>The person-years of exposure are quite small, and over 70 percent of
+divorce counts equal zero.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cn_population</span><span class="op">[</span><span class="st">"py"</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        py          </span></span>
-<span><span class="co">#&gt;  Min.   :  0.0833  </span></span>
-<span><span class="co">#&gt;  1st Qu.:215.3333  </span></span>
-<span><span class="co">#&gt;  Median :344.3333  </span></span>
-<span><span class="co">#&gt;  Mean   :325.5283  </span></span>
-<span><span class="co">#&gt;  3rd Qu.:431.1667  </span></span>
-<span><span class="co">#&gt;  Max.   :744.0000</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">cn_divorces</span><span class="op">[</span><span class="st">"nevent"</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; nevent</span></span>
-<span><span class="co">#&gt;    0    1    2    3    4    5    6    7    8 </span></span>
-<span><span class="co">#&gt; 2803  677  248  107   37   16    9    2    1</span></span></code></pre></div>
-<p>We use the <em>smooth_agetime</em> function to smooth the observed
-rates across age and time, separately for each sex. The parameter
-<em>nevent_df</em> specifies the data frame for numbers of events, and
-the parameter <em>py_df</em> specifies the data frame for person years
-of exposure. For the age effects on log rates, we use the default model:
-a spline model with degrees of freedom equal to max(ceiling(0.7 * n),
-4), where n is the number of age groups. Here we have n=50, hence the
-degrees of freedom is 35. Because the data is very sparse, we cannot use
-a too complicated model. Therefore we assume that the time effects on
-log rates are the same for different age groups, and use a first-order
-random walk to model the common time effects. To indicate this, we set
-the <em>spec_time</em> parameter to be <em>TimeFixed()</em>.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cn_population</span><span class="op">$</span><span class="va">py</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span></span>
+<span><span class="co">#&gt;   0.0833 215.3333 344.3333 325.5283 431.1667 744.0000</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cn_divorces</span><span class="op">$</span><span class="va">nevent</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;   0.000   0.000   0.000   0.461   1.000   8.000</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">cn_divorces</span><span class="op">$</span><span class="va">nevent</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.7187179</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="fitting-a-model">Fitting a model<a class="anchor" aria-label="anchor" href="#fitting-a-model"></a>
+</h2>
+<p>We use function <code><a href="../reference/smooth_agetime.html">smooth_agetime()</a></code> to smooth the observed
+rates across age and time, separately for each sex.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res_agetime_bysex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_agetime.html">smooth_agetime</a></span><span class="op">(</span>nevent_df <span class="op">=</span> <span class="va">cn_divorces</span>,</span>
-<span>                         py_df <span class="op">=</span> <span class="va">cn_population</span>,</span>
-<span>                         spec_time <span class="op">=</span> <span class="fu"><a href="../reference/TimeFixed.html">TimeFixed</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                         byvar <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span></span></code></pre></div>
-<p>We print the model specification as follows.</p>
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_agetime.html">smooth_agetime</a></span><span class="op">(</span>nevent_df <span class="op">=</span> <span class="va">cn_divorces</span>,</span>
+<span>                      py_df <span class="op">=</span> <span class="va">cn_population</span>,</span>
+<span>                      spec_time <span class="op">=</span> <span class="fu"><a href="../reference/TimeFixed.html">TimeFixed</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                      byvar <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>
+<code>nevent_df</code> is the data frame for numbers of events</li>
+<li>
+<code>py_df</code> is the data frame for person years of
+exposure</li>
+<li>
+<code>spec_time</code> is the model used for age-time interactions.
+Given the limited data, we use a simple model in which the overall level
+changes with time but the age-pattern remains constant.</li>
+</ul>
+<p>By default, <code><a href="../reference/smooth_agetime.html">smooth_agetime()</a></code> models age effects (as
+opposed to age-time interactions) using function <code><a href="../reference/Spline.html">Spline()</a></code>,
+which uses penalised splines to smooth over age groups. The degree of
+smoothness in <code><a href="../reference/Spline.html">Spline()</a></code> can be controlled via function
+<code>df</code>.</p>
+<p>A summary of the model can be obtained by printing the model
+object.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res_agetime_bysex</span></span>
+<code class="sourceCode R"><span><span class="va">res</span></span>
 <span><span class="co">#&gt; --- Object of class "BayesRates_results" ---</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;      nevent ~ Poisson(rate * py)</span></span>
@@ -170,113 +220,140 @@ the <em>spec_time</em> parameter to be <em>TimeFixed()</em>.</p>
 <span><span class="co">#&gt;   timevar: time</span></span>
 <span><span class="co">#&gt;     byvar: sex</span></span>
 <span><span class="co">#&gt;    n_draw: 1000</span></span></code></pre></div>
-<p>The number of events is modeled by a Poisson distribution with mean
-equal to an underlying rate multiplied by person-years of exposure. The
-logarithm of the underlying rate equals the age effect plus the time
-effect. The model for the age effect is <em>Spline()</em>, and the model
-for the time effect is <em>TimeFixed()</em>. The value of ‘agevar’ is
-‘age’, indicating that the name of the variable that records age is
-‘age’. The value of ‘timevar’ is ‘time’, indicating that the name of the
-variable that records time is ‘time’. The value of ‘byvar’ is ‘sex’,
-indicating that a model is fitted separately for each sex. The value of
-‘ndraw’ is 1000, indicating that the number of posterior draws is 1000
-(default value).</p>
-<p>We use the <em>augment</em> function to combine the observed data and
-the model-based estimates of rates.</p>
+<ul>
+<li>The number of events is modeled by a Poisson distribution with mean
+equal to an underlying rate multiplied by person-years of exposure</li>
+<li>The logarithm of the underlying rate equals the age effect plus the
+time effect</li>
+<li>The model for the age effect is <em>Spline()</em>
+</li>
+<li>The model for the time effect is <em>TimeFixed()</em>
+</li>
+<li>
+<code>agevar</code> is <code>"age"</code>.
+<strong>BayesRates</strong> is assuming that the variable called
+<code>"age"</code> identifies age groups</li>
+<li>
+<code>timevar</code> is <code>"time"</code>.
+<strong>BayesRates</strong> is assuming that the variable called
+<code>"time"</code> identifies time periods</li>
+<li>
+<code>byvar</code> is <code>"sex"</code> The model is fitted
+separately for each sex</li>
+<li>
+<code>ndraw</code> is 1000. By default functions such as
+<code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> and <code><a href="https://generics.r-lib.org/reference/components.html" class="external-link">components()</a></code> (see below) produce
+1000 draws from the posterior distribution.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="extracting-results">Extracting results<a class="anchor" aria-label="anchor" href="#extracting-results"></a>
+</h2>
+<p>Function <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> returns a data frame the combines the
+input data model-based estimates of rates.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rates_agetime_bysex_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">res_agetime_bysex</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
-<span><span class="co">#&gt;     age sex     time nevent    py age.mid   .fitted  .lower  .upper .probability</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    15 Female  <span style="text-decoration: underline;">1</span>980      0  489.    15.5   9.16<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.53<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.91<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>    15 Female  <span style="text-decoration: underline;">1</span>981      0  494.    15.5   9.50<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.78<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.88<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    15 Female  <span style="text-decoration: underline;">1</span>982      0  462.    15.5   9.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.23<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.07<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    15 Female  <span style="text-decoration: underline;">1</span>983      0  496.    15.5   1.15<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.55<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.43<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>    15 Female  <span style="text-decoration: underline;">1</span>984      0  496.    15.5   1.14<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.73<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.37<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>    15 Female  <span style="text-decoration: underline;">1</span>985      0  514.    15.5   1.22<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.76<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.60<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<code class="sourceCode R"><span><span class="va">rates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="va">rates</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,900 × 11</span></span></span>
+<span><span class="co">#&gt;      age sex     time nevent    py age.mid  .fitted  .lower  .upper .probability</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>    15 Female  <span style="text-decoration: underline;">1</span>980      0  489.    15.5  9.16<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.53<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.91<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>    15 Female  <span style="text-decoration: underline;">1</span>981      0  494.    15.5  9.50<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.78<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.88<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>    15 Female  <span style="text-decoration: underline;">1</span>982      0  462.    15.5  9.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.23<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.07<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>    15 Female  <span style="text-decoration: underline;">1</span>983      0  496.    15.5  1.15<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.55<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.43<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>    15 Female  <span style="text-decoration: underline;">1</span>984      0  496.    15.5  1.14<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.73<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.37<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>    15 Female  <span style="text-decoration: underline;">1</span>985      0  514.    15.5  1.22<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.76<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.60<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>    15 Female  <span style="text-decoration: underline;">1</span>986      0  535.    15.5  1.25<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.86<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.49<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>    15 Female  <span style="text-decoration: underline;">1</span>987      0  458.    15.5  1.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 4.04<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.98<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>    15 Female  <span style="text-decoration: underline;">1</span>988      0  434.    15.5  1.61<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 5.36<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 4.78<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    15 Female  <span style="text-decoration: underline;">1</span>989      0  468.    15.5  1.81<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 5.86<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 5.45<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,890 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: .observed &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>In the returned data frame, the variable ‘age.mid’ gives the middle
-point for each single year of age, the variable ‘.fitted’ gives the
-point estimate of the rate, the variables ‘.lower’ and ‘.upper’ give the
-lower and upper bounds of the credible interval of the rate (95%
-credible interval by default), and the variable ‘.probability’ gives a
-list containing the posterior draws of the rate.</p>
-<p>For both sexes, we plot the model-based estimates of rates (including
-point estimates and credible intervals) and the observed rates.</p>
+<p>In the return value from <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code></p>
+<ul>
+<li>
+<code>age.mid</code> is the middle point for each single year of
+age;</li>
+<li>
+<code>.fitted</code> is the point estimate of the rat</li>
+<li>
+<code>.lower</code>, <code>.upper</code> are the lower and upper
+bounds of 95% credible intervals for the rates; and</li>
+<li>
+<code>.probability</code> is a list containing the posterior draws
+of the rate.</li>
+</ul>
+<p>We extract and graph the rates for females.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age.mid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="va">rates_female</span> <span class="op">&lt;-</span> <span class="va">rates</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"Female"</span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rates_female</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age.mid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span>, fill <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>              alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>             size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span><span class="op">)</span>,</span>
+<span>              fill <span class="op">=</span> <span class="st">"salmon"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span><span class="op">)</span>,</span>
+<span>            color <span class="op">=</span> <span class="st">"darkred"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span><span class="op">)</span>,</span>
+<span>             color <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>         size <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="vig2_cn_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
-<p>We can plot the model-based estimates of rates and the observed rates
-only for Females.</p>
+</div>
+<div class="section level2">
+<h2 id="total-rates">Total rates<a class="anchor" aria-label="anchor" href="#total-rates"></a>
+</h2>
+<p>Function <code><a href="../reference/total_rate.html">total_rate()</a></code> sums across age groups to give the
+total divorce rate.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df</span><span class="op">$</span><span class="va">sex</span><span class="op">==</span><span class="st">"Female"</span><span class="op">)</span>,<span class="op">]</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age.mid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span>, fill <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>              alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>             size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vig2_cn_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
-<p>We can also plot the model-based estimates of rates and the observed
-rates only for Males.</p>
+<code class="sourceCode R"><span><span class="va">total_rate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/total_rate.html">total_rate</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="va">total_rate</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 78 × 7</span></span></span>
+<span><span class="co">#&gt;    sex     time .fitted  .lower .upper .probability  .observed</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Female  <span style="text-decoration: underline;">1</span>980  0.012<span style="text-decoration: underline;">2</span> 0.006<span style="text-decoration: underline;">29</span> 0.022<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.009<span style="text-decoration: underline;">51</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Female  <span style="text-decoration: underline;">1</span>981  0.012<span style="text-decoration: underline;">3</span> 0.006<span style="text-decoration: underline;">96</span> 0.020<span style="text-decoration: underline;">9</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.009<span style="text-decoration: underline;">92</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Female  <span style="text-decoration: underline;">1</span>982  0.013<span style="text-decoration: underline;">0</span> 0.007<span style="text-decoration: underline;">81</span> 0.021<span style="text-decoration: underline;">4</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.004<span style="text-decoration: underline;">97</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Female  <span style="text-decoration: underline;">1</span>983  0.015<span style="text-decoration: underline;">3</span> 0.009<span style="text-decoration: underline;">57</span> 0.024<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.021<span style="text-decoration: underline;">3</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Female  <span style="text-decoration: underline;">1</span>984  0.014<span style="text-decoration: underline;">9</span> 0.009<span style="text-decoration: underline;">55</span> 0.023<span style="text-decoration: underline;">4</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.008<span style="text-decoration: underline;">10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Female  <span style="text-decoration: underline;">1</span>985  0.016<span style="text-decoration: underline;">4</span> 0.010<span style="text-decoration: underline;">4</span>  0.025<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.022<span style="text-decoration: underline;">5</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Female  <span style="text-decoration: underline;">1</span>986  0.016<span style="text-decoration: underline;">2</span> 0.010<span style="text-decoration: underline;">4</span>  0.025<span style="text-decoration: underline;">0</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.010<span style="text-decoration: underline;">8</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Female  <span style="text-decoration: underline;">1</span>987  0.017<span style="text-decoration: underline;">5</span> 0.011<span style="text-decoration: underline;">4</span>  0.026<span style="text-decoration: underline;">2</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.010<span style="text-decoration: underline;">5</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Female  <span style="text-decoration: underline;">1</span>988  0.021<span style="text-decoration: underline;">2</span> 0.014<span style="text-decoration: underline;">4</span>  0.031<span style="text-decoration: underline;">4</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.026<span style="text-decoration: underline;">4</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Female  <span style="text-decoration: underline;">1</span>989  0.023<span style="text-decoration: underline;">5</span> 0.016<span style="text-decoration: underline;">2</span>  0.034<span style="text-decoration: underline;">2</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.012<span style="text-decoration: underline;">1</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 68 more rows</span></span></span></code></pre></div>
+<p>We plot model-based (orange) and direct (blue) estimates of the total
+divorce rate in China.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df</span><span class="op">$</span><span class="va">sex</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span>,<span class="op">]</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age.mid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span>, fill <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>              alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>             size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vig2_cn_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
-<p>We obtain estimates of the total rates.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">total_rate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/total_rate.html">total_rate</a></span><span class="op">(</span><span class="va">res_agetime_bysex</span><span class="op">)</span>  </span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">total_rate</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   sex     time .fitted  .lower .upper .probability  .observed</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Female  <span style="text-decoration: underline;">1</span>980  0.012<span style="text-decoration: underline;">2</span> 0.006<span style="text-decoration: underline;">29</span> 0.022<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.009<span style="text-decoration: underline;">51</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Female  <span style="text-decoration: underline;">1</span>981  0.012<span style="text-decoration: underline;">3</span> 0.006<span style="text-decoration: underline;">96</span> 0.020<span style="text-decoration: underline;">9</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.009<span style="text-decoration: underline;">92</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Female  <span style="text-decoration: underline;">1</span>982  0.013<span style="text-decoration: underline;">0</span> 0.007<span style="text-decoration: underline;">81</span> 0.021<span style="text-decoration: underline;">4</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.004<span style="text-decoration: underline;">97</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Female  <span style="text-decoration: underline;">1</span>983  0.015<span style="text-decoration: underline;">3</span> 0.009<span style="text-decoration: underline;">57</span> 0.024<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.021<span style="text-decoration: underline;">3</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Female  <span style="text-decoration: underline;">1</span>984  0.014<span style="text-decoration: underline;">9</span> 0.009<span style="text-decoration: underline;">55</span> 0.023<span style="text-decoration: underline;">4</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.008<span style="text-decoration: underline;">10</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Female  <span style="text-decoration: underline;">1</span>985  0.016<span style="text-decoration: underline;">4</span> 0.010<span style="text-decoration: underline;">4</span>  0.025<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.022<span style="text-decoration: underline;">5</span></span></span></code></pre></div>
-<p>We plot the model-based estimates of total rates and the observed
-rates.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">total_rate</span>, </span>
 <span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">.fitted</span>, ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"salmon"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vig2_cn_files/figure-html/unnamed-chunk-12-1.png" width="672"></p>
-<p>Sometimes in practice, there are gaps in time in the available
-dataset. To illustrate how to estimate the rates in such cases, we use
-only the subset of the Chinese data for every fifth year. To do this, we
-use the ‘%&gt;%’ operator from the ‘dplyr’ package that turns ‘x %&gt;%
-f(y)’ into ‘f(x,y)’ so that the result from one step is piped into the
-next step.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cn_divorces_5</span> <span class="op">&lt;-</span> <span class="va">cn_divorces</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span><span class="op">)</span>,</span>
+<span>             col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="vig2_cn_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
+</div>
+<div class="section level2">
+<h2 id="imputing-values-for-years-without-data">Imputing values for years without data<a class="anchor" aria-label="anchor" href="#imputing-values-for-years-without-data"></a>
+</h2>
+<p>It is common, in demographic data, to have missing values for some
+years. <strong>BayesRates</strong> automatically imputes values for
+years with missing data.</p>
+<p>To illustrate, we first create datasets where data is only available
+for every fifth year.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cn_divorces_5</span> <span class="op">&lt;-</span> <span class="va">cn_divorces</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1980</span>, <span class="fl">2018</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">cn_population_5</span> <span class="op">&lt;-</span> <span class="va">cn_population</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">cn_population_5</span> <span class="op">&lt;-</span> <span class="va">cn_population</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1980</span>, <span class="fl">2018</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>We use the <em>smooth_agetime</em> function to smooth the observed
-rates across age and time, separately for each sex.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res_agetime_bysex_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_agetime.html">smooth_agetime</a></span><span class="op">(</span>nevent_df <span class="op">=</span> <span class="va">cn_divorces_5</span>,</span>
-<span>                          py_df <span class="op">=</span> <span class="va">cn_population_5</span>,</span>
-<span>                          spec_time <span class="op">=</span> <span class="fu"><a href="../reference/TimeFixed.html">TimeFixed</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          byvar <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span></span>
-<span><span class="va">res_agetime_bysex_5</span></span>
+<p>We use <code><a href="../reference/smooth_agetime.html">smooth_agetime()</a></code> to smooth rates across age and
+time, separately for each sex.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_agetime.html">smooth_agetime</a></span><span class="op">(</span>nevent_df <span class="op">=</span> <span class="va">cn_divorces_5</span>,</span>
+<span>                        py_df <span class="op">=</span> <span class="va">cn_population_5</span>,</span>
+<span>                        spec_time <span class="op">=</span> <span class="fu"><a href="../reference/TimeFixed.html">TimeFixed</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                        byvar <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span></span>
+<span><span class="va">res_5</span></span>
 <span><span class="co">#&gt; --- Object of class "BayesRates_results" ---</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;      nevent ~ Poisson(rate * py)</span></span>
@@ -288,80 +365,74 @@ rates across age and time, separately for each sex.</p>
 <span><span class="co">#&gt;   timevar: time</span></span>
 <span><span class="co">#&gt;     byvar: sex</span></span>
 <span><span class="co">#&gt;    n_draw: 1000</span></span></code></pre></div>
-<p>When we use the <em>augment</em> function to combine data and
-model-based estimates of rates, we only obtain estimates for the
-observed years.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rates_agetime_bysex_df_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">res_agetime_bysex_5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df_5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
-<span><span class="co">#&gt;     age sex     time nevent    py age.mid   .fitted  .lower  .upper .probability</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    15 Female  <span style="text-decoration: underline;">1</span>980      0  489.    15.5 0.000<span style="text-decoration: underline;">014</span>7 2.32<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 1.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>    15 Female  <span style="text-decoration: underline;">1</span>985      0  514.    15.5 0.000<span style="text-decoration: underline;">020</span>8 3.28<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 1.23<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    15 Female  <span style="text-decoration: underline;">1</span>990      0  385.    15.5 0.000<span style="text-decoration: underline;">032</span>8 5.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 1.99<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    15 Female  <span style="text-decoration: underline;">1</span>995      0  345.    15.5 0.000<span style="text-decoration: underline;">041</span>8 7.01<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.43<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>    15 Female  <span style="text-decoration: underline;">2</span>000      0  421.    15.5 0.000<span style="text-decoration: underline;">052</span>7 8.61<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.16<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>    15 Female  <span style="text-decoration: underline;">2</span>005      0  744     15.5 0.000<span style="text-decoration: underline;">067</span>1 1.11<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.71<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<p>When we use <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> function, we only obtain estimates
+for the observed years.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rates_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">res_5</span><span class="op">)</span></span>
+<span><span class="va">rates_5</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 800 × 11</span></span></span>
+<span><span class="co">#&gt;      age sex     time nevent    py age.mid  .fitted  .lower  .upper .probability</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>    15 Female  <span style="text-decoration: underline;">1</span>980      0  489.    15.5  1.47<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 2.32<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 1.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>    15 Female  <span style="text-decoration: underline;">1</span>985      0  514.    15.5  2.08<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.28<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 1.23<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>    15 Female  <span style="text-decoration: underline;">1</span>990      0  385.    15.5  3.28<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 5.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 1.99<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>    15 Female  <span style="text-decoration: underline;">1</span>995      0  345.    15.5  4.18<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 7.01<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.43<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>    15 Female  <span style="text-decoration: underline;">2</span>000      0  421.    15.5  5.27<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 8.61<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 3.16<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>    15 Female  <span style="text-decoration: underline;">2</span>005      0  744     15.5  6.71<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 1.11<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 3.71<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>    15 Female  <span style="text-decoration: underline;">2</span>010      0  421     15.5  9.27<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 1.53<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 5.11<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>    15 Female  <span style="text-decoration: underline;">2</span>015      0  262.    15.5  8.55<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 1.39<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 4.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>    15 Male    <span style="text-decoration: underline;">1</span>980      0  491.    15.5  1.08<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 1.83<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 7.58<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    15 Male    <span style="text-decoration: underline;">1</span>985      0  496.    15.5  2.20<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 4.32<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 1.40<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> <span style="color: #949494;">&lt;dbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 790 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: .observed &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>However, when we use <code><a href="https://generics.r-lib.org/reference/components.html" class="external-link">components()</a></code> to extract model-based
+estimates of rates, we also obtain estimates for the gap years.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rates_5_com</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/components.html" class="external-link">components</a></span><span class="op">(</span><span class="va">res_5</span>, what <span class="op">=</span> <span class="st">"rates"</span><span class="op">)</span></span>
+<span><span class="va">rates_5_com</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,600 × 8</span></span></span>
+<span><span class="co">#&gt;    sex      age age.mid  time   .fitted     .lower   .upper .probability </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>980 0.000<span style="text-decoration: underline;">014</span>7 0.000<span style="text-decoration: underline;">002</span>32 0.000<span style="text-decoration: underline;">110</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>981 0.000<span style="text-decoration: underline;">015</span>4 0.000<span style="text-decoration: underline;">002</span>45 0.000<span style="text-decoration: underline;">115</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>982 0.000<span style="text-decoration: underline;">017</span>4 0.000<span style="text-decoration: underline;">002</span>51 0.000<span style="text-decoration: underline;">112</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>983 0.000<span style="text-decoration: underline;">017</span>7 0.000<span style="text-decoration: underline;">002</span>78 0.000<span style="text-decoration: underline;">112</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>984 0.000<span style="text-decoration: underline;">019</span>5 0.000<span style="text-decoration: underline;">002</span>91 0.000<span style="text-decoration: underline;">123</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>985 0.000<span style="text-decoration: underline;">020</span>8 0.000<span style="text-decoration: underline;">003</span>28 0.000<span style="text-decoration: underline;">123</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>986 0.000<span style="text-decoration: underline;">022</span>5 0.000<span style="text-decoration: underline;">003</span>54 0.000<span style="text-decoration: underline;">146</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>987 0.000<span style="text-decoration: underline;">025</span>0 0.000<span style="text-decoration: underline;">003</span>56 0.000<span style="text-decoration: underline;">151</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>988 0.000<span style="text-decoration: underline;">027</span>2 0.000<span style="text-decoration: underline;">003</span>96 0.000<span style="text-decoration: underline;">164</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>989 0.000<span style="text-decoration: underline;">029</span>9 0.000<span style="text-decoration: underline;">004</span>70 0.000<span style="text-decoration: underline;">183</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,590 more rows</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rates_5_com_female</span> <span class="op">&lt;-</span> <span class="va">rates_5_com</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"Female"</span><span class="op">)</span> </span>
+<span>  </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rates_5_com_female</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age.mid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span><span class="op">)</span>,</span>
+<span>              fill <span class="op">=</span> <span class="st">"salmon"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span><span class="op">)</span>,</span>
+<span>            color <span class="op">=</span> <span class="st">"darkred"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="vig2_cn_files/figure-html/unnamed-chunk-15-1.png" width="672"></p>
+<p><code><a href="../reference/total_rate.html">total_rate()</a></code> also produces estimates for all years,
+including ones without data.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df_5</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age.mid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span>, fill <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>              alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>             size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vig2_cn_files/figure-html/unnamed-chunk-16-1.png" width="672"></p>
-<p>However, when we use the <em>components</em> function to extract
-model-based estimates of rates, we can also obtain estimates for the gap
-years.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rates_agetime_bysex_df_5_com</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/components.html" class="external-link">components</a></span><span class="op">(</span><span class="va">res_agetime_bysex_5</span>, what <span class="op">=</span> <span class="st">"rates"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df_5_com</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt;   sex      age age.mid  time   .fitted     .lower   .upper .probability </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>980 0.000<span style="text-decoration: underline;">014</span>7 0.000<span style="text-decoration: underline;">002</span>32 0.000<span style="text-decoration: underline;">110</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>981 0.000<span style="text-decoration: underline;">015</span>4 0.000<span style="text-decoration: underline;">002</span>45 0.000<span style="text-decoration: underline;">115</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>982 0.000<span style="text-decoration: underline;">017</span>4 0.000<span style="text-decoration: underline;">002</span>51 0.000<span style="text-decoration: underline;">112</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>983 0.000<span style="text-decoration: underline;">017</span>7 0.000<span style="text-decoration: underline;">002</span>78 0.000<span style="text-decoration: underline;">112</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>984 0.000<span style="text-decoration: underline;">019</span>5 0.000<span style="text-decoration: underline;">002</span>91 0.000<span style="text-decoration: underline;">123</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Female    15    15.5  <span style="text-decoration: underline;">1</span>985 0.000<span style="text-decoration: underline;">020</span>8 0.000<span style="text-decoration: underline;">003</span>28 0.000<span style="text-decoration: underline;">123</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rates_agetime_bysex_df_5_com</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age.mid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span>, fill <span class="op">=</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>              alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.fitted</span>, color <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="vig2_cn_files/figure-html/unnamed-chunk-18-1.png" width="672"></p>
-<p>When we use the <em>total_rate</em> function, estimates of total
-rates are obtained for both the observed years and the gap years.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">total_rate5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/total_rate.html">total_rate</a></span><span class="op">(</span><span class="va">res_agetime_bysex_5</span><span class="op">)</span>  </span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">total_rate5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   sex     time .fitted  .lower .upper .probability  .observed</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Female  <span style="text-decoration: underline;">1</span>980  0.017<span style="text-decoration: underline;">6</span> 0.008<span style="text-decoration: underline;">17</span> 0.036<span style="text-decoration: underline;">8</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.009<span style="text-decoration: underline;">51</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Female  <span style="text-decoration: underline;">1</span>981  0.018<span style="text-decoration: underline;">5</span> 0.008<span style="text-decoration: underline;">64</span> 0.039<span style="text-decoration: underline;">9</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>  <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Female  <span style="text-decoration: underline;">1</span>982  0.020<span style="text-decoration: underline;">2</span> 0.009<span style="text-decoration: underline;">81</span> 0.041<span style="text-decoration: underline;">7</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>  <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Female  <span style="text-decoration: underline;">1</span>983  0.021<span style="text-decoration: underline;">4</span> 0.010<span style="text-decoration: underline;">8</span>  0.041<span style="text-decoration: underline;">4</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>  <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Female  <span style="text-decoration: underline;">1</span>984  0.022<span style="text-decoration: underline;">9</span> 0.012<span style="text-decoration: underline;">1</span>  0.041<span style="text-decoration: underline;">5</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>  <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Female  <span style="text-decoration: underline;">1</span>985  0.024<span style="text-decoration: underline;">2</span> 0.014<span style="text-decoration: underline;">2</span>  0.041<span style="text-decoration: underline;">1</span> <span style="color: #949494;">&lt;dbl [1,000]&gt;</span>   0.022<span style="text-decoration: underline;">5</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">total_rate5</span>, </span>
+<code class="sourceCode R"><span><span class="va">total_rate_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/total_rate.html">total_rate</a></span><span class="op">(</span><span class="va">res_5</span><span class="op">)</span>  </span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">total_rate_5</span>, </span>
 <span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">.fitted</span>, ymin <span class="op">=</span> <span class="va">.lower</span>, ymax <span class="op">=</span> <span class="va">.upper</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"salmon"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"darkred"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">.observed</span><span class="op">)</span>,</span>
+<span>             col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Removed 56 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_point()`).</span></span></code></pre></div>
-<p><img src="vig2_cn_files/figure-html/unnamed-chunk-20-1.png" width="672">
-The credible intervals for the gap years are wider, because there are no
-observed data for these years.</p>
-  </main>
+<p><img src="vig2_cn_files/figure-html/unnamed-chunk-16-1.png" width="672"></p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
