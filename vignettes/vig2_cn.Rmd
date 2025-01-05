@@ -151,7 +151,7 @@ ggplot(total_rate,
 ```
 
 
-# Imputing values for years without data
+# Imputing missing values
 
 It is common, in demographic data, to have missing values for some years. **BayesRates** automatically imputes values for years with missing data.
 
@@ -201,8 +201,12 @@ ggplot(rates_5_com_female, aes(x = age.mid)) +
 `total_rate()` also produces estimates for all years, including ones without data.
 
 ```{r}
-total_rate_5 <- total_rate(res_5)  
+total_rate_5 <- total_rate(res_5)
+```
 
+Credible intervals are wider in years without data.
+
+```{r}
 ggplot(total_rate_5, 
        aes(x = time, y = .fitted, ymin = .lower, ymax = .upper)) +
   facet_wrap(vars(sex)) +
