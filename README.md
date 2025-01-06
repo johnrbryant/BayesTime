@@ -14,6 +14,13 @@ Using Bayesian methods, smooth demographic rates over age and time.
 Internally, calculations are done using
 [TMB](https://CRAN.R-project.org/package=TMB).
 
+**BayesRates** is part of a larger project to extend the
+[ProFamy](https://link.springer.com/article/10.1007/s42379-024-00171-6)
+household projection method.
+
+Work on **BayesRates** has been supported by funding from the Chinese
+Ministry of Science and Technology.
+
 ## Installation
 
 Install the development version of BayesRates from
@@ -61,12 +68,12 @@ head(rates)
 #> # A tibble: 6 × 11
 #>     age sex     time nevent    py age.mid   .fitted  .lower  .upper .probability
 #>   <int> <chr>  <int>  <int> <dbl>   <dbl>     <dbl>   <dbl>   <dbl> <list>      
-#> 1    15 Female  1980      0  489.    15.5   9.33e-6 2.55e-6 3.40e-5 <dbl>       
-#> 2    15 Female  1981      0  494.    15.5   9.34e-6 2.69e-6 3.36e-5 <dbl>       
-#> 3    15 Female  1982      0  462.    15.5   1.03e-5 3.04e-6 3.34e-5 <dbl>       
-#> 4    15 Female  1983      0  496.    15.5   1.19e-5 3.58e-6 4.03e-5 <dbl>       
-#> 5    15 Female  1984      0  496.    15.5   1.17e-5 3.41e-6 3.80e-5 <dbl>       
-#> 6    15 Female  1985      0  514.    15.5   1.28e-5 3.65e-6 4.21e-5 <dbl>       
+#> 1    15 Female  1980      0  489.    15.5   9.23e-6 2.53e-6 3.58e-5 <dbl>       
+#> 2    15 Female  1981      0  494.    15.5   9.48e-6 2.66e-6 3.44e-5 <dbl>       
+#> 3    15 Female  1982      0  462.    15.5   1.00e-5 2.86e-6 3.39e-5 <dbl>       
+#> 4    15 Female  1983      0  496.    15.5   1.17e-5 3.35e-6 4.03e-5 <dbl>       
+#> 5    15 Female  1984      0  496.    15.5   1.15e-5 3.31e-6 3.90e-5 <dbl>       
+#> 6    15 Female  1985      0  514.    15.5   1.23e-5 3.92e-6 4.09e-5 <dbl>       
 #> # ℹ 1 more variable: .observed <dbl>
 ```
 
